@@ -358,13 +358,13 @@ public actor LlamaServer {
 			if score >= 0.25 { break }
 			await serverHealth.check()
 			if !process.isRunning {
-				throw LlamaServerError.modelError(modelName: modelName)
+				throw LlamaServerError.modelError
 			}
 			
 			try await Task.sleep(for: .seconds(tick))
 			timeout -= tick
 			if timeout <= 0 {
-				throw LlamaServerError.modelError(modelName: modelName)
+				throw LlamaServerError.modelError
 			}
 		}
 	}
