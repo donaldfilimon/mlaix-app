@@ -10,7 +10,7 @@ import SimilaritySearchKit
 import SimilaritySearchKitDistilbert
 
 public extension SimilarityIndex {
-	
+
 	/// Function to search similarity index
 	func search(
 		query: String,
@@ -32,5 +32,5 @@ public extension SimilarityIndex {
 		}.filter({ $0.sourceUrl != nil })
 		return similarResults
 	}
-	
+
 }
