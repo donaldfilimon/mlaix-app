@@ -8,7 +8,7 @@
 import Foundation
 import SwiftUI
 
-public struct FunctionCallRecord: Codable, Equatable, Hashable {
+public struct FunctionCallRecord: Codable, Equatable, Hashable, Sendable {
     
     /// The function call's ID
     var id: UUID = UUID()
@@ -32,7 +32,7 @@ public struct FunctionCallRecord: Codable, Equatable, Hashable {
         self.result = result
     }
     
-    public enum Status: Codable, CaseIterable {
+    public enum Status: Codable, CaseIterable, Sendable {
         
         case succeeded
         case failed

@@ -48,8 +48,11 @@ enum ContextCompressor {
                 threshold: threshold
             )
             
-            var updatedResult = result
-            updatedResult.result = summary
+            let updatedResult = FunctionCallResult(
+                call: result.call,
+                result: summary,
+                type: result.type
+            )
             compressedResults.append(updatedResult)
         }
         
