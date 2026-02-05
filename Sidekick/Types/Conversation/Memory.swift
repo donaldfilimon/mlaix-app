@@ -7,7 +7,6 @@
 
 import Foundation
 import SimilaritySearchKit
-import SimilaritySearchKitDistilbert
 
 public struct Memory: Identifiable, Equatable, Codable {
     
@@ -21,7 +20,7 @@ public struct Memory: Identifiable, Equatable, Codable {
         self.createdAt = Date.now
         // Get index item
         let similarityIndex: SimilarityIndex = await SimilarityIndex(
-            model: DistilbertEmbeddings(),
+            model: NativeEmbeddings(),
             metric: CosineSimilarity()
         )
         await similarityIndex.addItem(

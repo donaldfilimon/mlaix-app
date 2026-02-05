@@ -16,16 +16,16 @@ public struct Conversation: Identifiable, Codable, Hashable {
 	public var title: String
 	
 	/// Stored property for the selected expert's ID
-	public var expertId: UUID? = ExpertManager.shared.firstExpert?.id
+	public var expertId: UUID? = nil
 	
 	/// Computed property returning the selected expert
-	public var expert: Expert? {
+	@MainActor public var expert: Expert? {
 		guard let expertId else { return nil }
 		return ExpertManager.shared.getExpert(id: expertId)
 	}
 	
 	/// Computed property returning the system prompt used
-	public var systemPrompt: String? {
+	@MainActor public var systemPrompt: String? {
 		return expert?.systemPrompt
 	}
 	

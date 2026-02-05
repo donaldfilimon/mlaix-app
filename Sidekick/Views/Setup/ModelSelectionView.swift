@@ -55,7 +55,7 @@ struct ModelSelectionView: View {
 	}
 	
 	var appIconImage: some View {
-		Image(.appIcon)
+		Image("appIcon")
 			.resizable()
 			.foregroundStyle(.secondary)
 			.frame(width: 100, height: 100)

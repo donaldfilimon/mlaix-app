@@ -13,6 +13,7 @@ import Foundation
 import OSLog
 import SwiftUI
 
+@MainActor
 public class CompletionsController: ObservableObject {
 	
 	/// A `Logger` object for the `Model` object
@@ -72,8 +73,11 @@ public class CompletionsController: ObservableObject {
 	}
 	
 	deinit {
-		// Stop everything
-		self.stop()
+		// Stop server in background - deinit can't call MainActor methods directly
+		let server = self.server
+		Task {
+			await server?.stopServer()
+		}
 	}
 	
 	/// Function to stop completions

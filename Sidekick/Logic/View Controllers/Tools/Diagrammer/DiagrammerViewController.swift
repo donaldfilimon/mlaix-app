@@ -11,6 +11,7 @@ import OSLog
 import SwiftUI
 import WebViewKit
 
+@MainActor
 public class DiagrammerViewController: ObservableObject {
 	
 	/// A `Logger` object for the `DiagrammerViewController` object

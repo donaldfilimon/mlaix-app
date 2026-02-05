@@ -9,7 +9,6 @@ import ExtractKit_macOS
 import Foundation
 import OSLog
 import SimilaritySearchKit
-import SimilaritySearchKitDistilbert
 import SwiftUI
 
 /// An object that manages a single resource
@@ -314,7 +313,7 @@ public struct Resource: Identifiable, Codable, Hashable, Sendable {
         )
         Self.logger.info("Chunked text for resource \"\(url, privacy: .public)\"")
         // Init new similarity index
-        let embeddings: DistilbertEmbeddings = DistilbertEmbeddings()
+        let embeddings: NativeEmbeddings = NativeEmbeddings()
         let metric: DotProduct = DotProduct()
         let similarityIndex: SimilarityIndex = await SimilarityIndex(
             model: embeddings,

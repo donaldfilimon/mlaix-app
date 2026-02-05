@@ -97,10 +97,11 @@ struct ModelExplorerView: View {
 	
 	/// Check if Hugging Face is reachable
 	private func checkModelUrl() {
-		URL.verifyURL(
-			url: URL(string: self.modelDownloadUrl)!,
-			timeoutInterval: 1
-		) { isValid in
+		Task { @MainActor in
+			let isValid = await URL.verifyURL(
+				url: URL(string: self.modelDownloadUrl)!,
+				timeoutInterval: 1
+			)
 			if !isValid {
 				self.modelDownloadUrl = self.modelDownloadUrl.replacingOccurrences(
 					of: "huggingface.co",

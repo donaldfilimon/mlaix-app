@@ -21,7 +21,7 @@ struct GeneralSettingsView: View {
     @AppStorage("useFunctions") private var useFunctions: Bool = Settings.useFunctions
     @AppStorage("checkFunctionsCompletion") private var checkFunctionsCompletion: Int = 0
 
-    @StateObject private var speechSynthesizer: SpeechSynthesizer = .shared
+    @EnvironmentObject private var speechSynthesizer: SpeechSynthesizer
 	
     var body: some View {
         Form {

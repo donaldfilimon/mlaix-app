@@ -10,6 +10,7 @@ import Foundation
 import FSKit_macOS
 import SwiftUI
 
+@MainActor
 public class DetectorViewController: ObservableObject {
 	
 	/// The state of the detector, of type ``DetectorState``

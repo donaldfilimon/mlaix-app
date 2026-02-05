@@ -7,8 +7,32 @@
 
 import Foundation
 import OSLog
-import SimilaritySearchKit
+@preconcurrency import SimilaritySearchKit
 import SwiftUI
+
+/// A thread-safe accumulator for collecting partial responses across actor boundaries
+private final class SendableAccumulator: @unchecked Sendable {
+    private let lock = NSLock()
+    private var _value: String = ""
+
+    var value: String {
+        lock.lock()
+        defer { lock.unlock() }
+        return _value
+    }
+
+    func append(_ string: String) {
+        lock.lock()
+        defer { lock.unlock() }
+        _value += string
+    }
+
+    func reset() {
+        lock.lock()
+        defer { lock.unlock() }
+        _value = ""
+    }
+}
 
 extension Model {
     
@@ -28,11 +52,11 @@ extension Model {
         canvasSelection: String? = nil,
         temporaryResources: [TemporaryResource] = [],
         showPreview: Bool = false,
-        handleResponseUpdate: @escaping (
+        handleResponseUpdate: @escaping @Sendable (
             String, // Full message
             String // Delta
         ) -> Void = { _, _ in },
-        handleResponseFinish: @escaping (
+        handleResponseFinish: @escaping @Sendable (
             String, // Pending message
             String,  // Final message
             Int? // Tokens used
@@ -59,7 +83,7 @@ extension Model {
         )
         let messagesWithSources: [Message.MessageSubset] = await messages
             .enumerated()
-            .asyncMap { index, message in
+            .asyncMap { @Sendable index, message in
                 return await Message.MessageSubset(
                     modelType: modelType,
                     usingRemoteModel: useServer,
@@ -93,10 +117,10 @@ extension Model {
                             mode: mode,
                             canReachRemoteServer: canReachRemoteServer,
                             messages: messagesWithSources,
-                            progressHandler: { partialResponse in
-                                DispatchQueue.main.async {
+                            progressHandler: { [weak self] partialResponse in
+                                Task { @MainActor in
                                     // Update response
-                                    self.handleCompletionProgress(
+                                    self?.handleCompletionProgress(
                                         showPreview: showPreview,
                                         partialResponse: partialResponse,
                                         handleResponseUpdate: handleResponseUpdate
@@ -109,10 +133,10 @@ extension Model {
                             mode: mode,
                             canReachRemoteServer: canReachRemoteServer,
                             messages: messagesWithSources,
-                            progressHandler: { partialResponse in
-                                DispatchQueue.main.async {
+                            progressHandler: { [weak self] partialResponse in
+                                Task { @MainActor in
                                     // Update response
-                                    self.handleCompletionProgress(
+                                    self?.handleCompletionProgress(
                                         showPreview: showPreview,
                                         partialResponse: partialResponse,
                                         handleResponseUpdate: handleResponseUpdate
@@ -126,10 +150,10 @@ extension Model {
                         mode: mode,
                         canReachRemoteServer: canReachRemoteServer,
                         messages: messagesWithSources,
-                        progressHandler: { partialResponse in
-                            DispatchQueue.main.async {
+                        progressHandler: { [weak self] partialResponse in
+                            Task { @MainActor in
                                 // Update response
-                                self.handleCompletionProgress(
+                                self?.handleCompletionProgress(
                                     showPreview: showPreview,
                                     partialResponse: partialResponse,
                                     handleResponseUpdate: handleResponseUpdate
@@ -201,7 +225,7 @@ extension Model {
         expert: Expert? = nil,
         similarityIndex: SimilarityIndex? = nil,
         showPreview: Bool,
-        handleResponseUpdate: @escaping (String, String) -> Void
+        handleResponseUpdate: @escaping @Sendable (String, String) -> Void
     ) async throws -> LlamaServer.CompleteResponse {
         // Define increment for update
         let increment: Int = 8
@@ -251,11 +275,12 @@ extension Model {
         functions: [AnyFunctionBox]? = nil,
         expert: Expert? = nil,
         showPreview: Bool,
-        handleResponseUpdate: @escaping (String, String) -> Void,
+        handleResponseUpdate: @escaping @Sendable (String, String) -> Void,
         increment: Int
     ) async throws -> LlamaServer.CompleteResponse {
         let canReachRemoteServer: Bool = await self.remoteServerIsReachable()
-        var updateResponse = ""
+        // Use a sendable accumulator for thread-safe partial response accumulation
+        let accumulator = SendableAccumulator()
         return try await self.mainModelServer.getChatCompletion(
             mode: mode,
             canReachRemoteServer: canReachRemoteServer,
@@ -264,21 +289,25 @@ extension Model {
             useFunctions: useFunctions,
             functions: functions,
             expert: expert,
-            updateStatusHandler: { status in
-                await self.updateStatus(status)
+            updateStatusHandler: { [weak self] status in
+                await MainActor.run {
+                    self?.updateStatus(status)
+                }
             },
-            progressHandler:  { partialResponse in
-                DispatchQueue.main.async {
-                    updateResponse += partialResponse
-                    let shouldUpdate = updateResponse.count >= increment ||
+            progressHandler: { [weak self, accumulator] partialResponse in
+                Task { @MainActor in
+                    guard let self = self else { return }
+                    accumulator.append(partialResponse)
+                    let currentValue = accumulator.value
+                    let shouldUpdate = currentValue.count >= increment ||
                     (self.pendingMessage?.text.count ?? 0 < increment)
                     if shouldUpdate {
                         self.handleCompletionProgress(
                             showPreview: showPreview,
-                            partialResponse: updateResponse,
+                            partialResponse: currentValue,
                             handleResponseUpdate: handleResponseUpdate
                         )
-                        updateResponse = ""
+                        accumulator.reset()
                     }
                 }
             }
@@ -294,7 +323,7 @@ extension Model {
         functions: [AnyFunctionBox]? = nil,
         similarityIndex: SimilarityIndex?,
         showPreview: Bool,
-        handleResponseUpdate: @escaping (
+        handleResponseUpdate: @escaping @Sendable (
             String, // Full message
             String // Delta
         ) -> Void = { _, _ in },
@@ -312,7 +341,7 @@ extension Model {
         var results: [FunctionCallResult] = []
         // Track consecutive malformed call attempts for circuit breaking
         var consecutiveMalformedAttempts: Int = 0
-        let maxConsecutiveMalformed: Int = 3
+        let maxConsecutiveMalformed: Int = InferenceSettings.maxConsecutiveMalformedToolCalls
         
         // Check for malformed tool calls in initial response
         if let malformedCalls = response?.malformedToolCalls, !malformedCalls.isEmpty {
@@ -504,9 +533,9 @@ Call another tool to obtain more information or execute more actions. Try breaki
                     hasAppendedChangeMessage = true
                 }
                 
-                var updateResponse: String = ""
-                self.pendingMessage?.text = updateResponse
-                
+                let loopAccumulator = SendableAccumulator()
+                self.pendingMessage?.text = ""
+
                 do {
                     response = try await self.mainModelServer.getChatCompletion(
                         mode: .chat,
@@ -515,23 +544,27 @@ Call another tool to obtain more information or execute more actions. Try breaki
                         useWebSearch: useWebSearch,
                         useFunctions: true,
                         functions: functions,
-                        updateStatusHandler: { status in
-                            await self.updateStatus(status)
+                        updateStatusHandler: { [weak self] status in
+                            await MainActor.run {
+                                self?.updateStatus(status)
+                            }
                         },
-                        progressHandler: { partialResponse in
-                            DispatchQueue.main.async {
-                                updateResponse += partialResponse
-                                let shouldUpdate = updateResponse.count >= increment ||
+                        progressHandler: { [weak self, loopAccumulator] partialResponse in
+                            Task { @MainActor in
+                                guard let self = self else { return }
+                                loopAccumulator.append(partialResponse)
+                                let currentValue = loopAccumulator.value
+                                let shouldUpdate = currentValue.count >= increment ||
                                 (
                                     self.pendingMessage?.text.count ?? 0 < increment
                                 )
                                 if shouldUpdate {
                                     self.handleCompletionProgress(
                                         showPreview: showPreview,
-                                        partialResponse: updateResponse,
+                                        partialResponse: currentValue,
                                         handleResponseUpdate: handleResponseUpdate
                                     )
-                                    updateResponse = ""
+                                    loopAccumulator.reset()
                                 }
                             }
                         }
@@ -632,27 +665,29 @@ Please try rephrasing your request or contact support if the issue persists.
             // Else, fall back on one-shot answer
             Self.logger.error("Maximum number of function calls reached. Falling back to one-shot answer.")
             // Declare variable for incremental update
-            var updateResponse: String = ""
-            self.pendingMessage?.text = updateResponse
+            let fallbackAccumulator = SendableAccumulator()
+            self.pendingMessage?.text = ""
             // Get response
             var response: LlamaServer.CompleteResponse = try await self.mainModelServer.getChatCompletion(
                 mode: .default,
                 canReachRemoteServer: canReachRemoteServer,
                 messages: messages,
-                progressHandler: { partialResponse in
-                    DispatchQueue.main.async {
-                        updateResponse += partialResponse
-                        let shouldUpdate = updateResponse.count >= increment ||
+                progressHandler: { [weak self, fallbackAccumulator] partialResponse in
+                    Task { @MainActor in
+                        guard let self = self else { return }
+                        fallbackAccumulator.append(partialResponse)
+                        let currentValue = fallbackAccumulator.value
+                        let shouldUpdate = currentValue.count >= increment ||
                         (
                             self.pendingMessage?.text.count ?? 0 < increment
                         )
                         if shouldUpdate {
                             self.handleCompletionProgress(
                                 showPreview: showPreview,
-                                partialResponse: updateResponse,
+                                partialResponse: currentValue,
                                 handleResponseUpdate: handleResponseUpdate
                             )
-                            updateResponse = ""
+                            fallbackAccumulator.reset()
                         }
                     }
                 }
@@ -742,7 +777,7 @@ Respond with YES if ALL 3 criteria above have been met. Respond with YES or NO o
     func handleCompletionProgress(
         showPreview: Bool = true,
         partialResponse: String,
-        handleResponseUpdate: @escaping (
+        handleResponseUpdate: @escaping @Sendable (
             String, // Full message
             String // Delta
         ) -> Void
@@ -762,5 +797,4 @@ Respond with YES if ALL 3 criteria above have been met. Respond with YES or NO o
     }
     
 }
-
 

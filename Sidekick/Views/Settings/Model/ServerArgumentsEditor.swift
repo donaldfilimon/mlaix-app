@@ -13,7 +13,7 @@ struct ServerArgumentsEditor: View {
     
     @State private var tableId: UUID = UUID()
     
-    @StateObject private var serverArgumentsManager: ServerArgumentsManager = .shared
+    @EnvironmentObject private var serverArgumentsManager: ServerArgumentsManager
     @State private var selections = Set<ServerArgument.ID>()
     
     var body: some View {

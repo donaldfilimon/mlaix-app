@@ -19,9 +19,9 @@ extension LlamaServer {
     ///   - operation: The async operation to retry
     /// - Returns: The result of the operation
     /// - Throws: The last error encountered if all retries fail
-    func retryOnNetworkError<T>(
+    func retryOnNetworkError<T: Sendable>(
         maxRetries: Int = 3,
-        operation: @escaping () async throws -> T
+        operation: @Sendable @escaping () async throws -> T
     ) async throws -> T {
         var lastError: Error?
         
@@ -71,7 +71,7 @@ extension LlamaServer {
         progressHandler: (@Sendable (String) -> Void)? = nil
     ) async throws -> CompleteResponse {
         // Wrap the actual completion call with retry logic
-        return try await retryOnNetworkError {
+        return try await retryOnNetworkError { [self] in
             try await self.getChatCompletionInternal(
                 mode: mode,
                 canReachRemoteServer: canReachRemoteServer,
@@ -124,14 +124,17 @@ extension LlamaServer {
         }
         // Get start time
         let start: CFAbsoluteTime = CFAbsoluteTimeGetCurrent()
+        // Capture actor-isolated properties before async let
+        let capturedModelType = self.modelType
+        let capturedSystemPrompt = self.systemPrompt
         // Formulate parameters
-        async let params = {
+        let params: ChatParameters = await {
             switch mode {
                 case .chat, .agent:
                     return await ChatParameters(
-                        modelType: self.modelType,
+                        modelType: capturedModelType,
                         usingRemoteModel: canReachRemoteServer,
-                        systemPrompt: self.systemPrompt,
+                        systemPrompt: capturedSystemPrompt,
                         messages: messages,
                         useWebSearch: useWebSearch,
                         useFunctions: useFunctions,
@@ -140,9 +143,9 @@ extension LlamaServer {
                     )
                 case .deepResearch:
                     return await ChatParameters(
-                        modelType: self.modelType,
+                        modelType: capturedModelType,
                         usingRemoteModel: canReachRemoteServer,
-                        systemPrompt: self.systemPrompt,
+                        systemPrompt: capturedSystemPrompt,
                         messages: messages,
                         useWebSearch: useWebSearch,
                         useFunctions: useFunctions,
@@ -151,9 +154,9 @@ extension LlamaServer {
                     )
                 case .default:
                     return await ChatParameters(
-                        modelType: self.modelType,
+                        modelType: capturedModelType,
                         usingRemoteModel: canReachRemoteServer,
-                        systemPrompt: self.systemPrompt,
+                        systemPrompt: capturedSystemPrompt,
                         messages: messages
                     )
             }
@@ -188,9 +191,9 @@ extension LlamaServer {
                     return [.tools]
             }
         }()
-        let requestJson: String = await params.toJSON(
+        let requestJson: String = params.toJSON(
             usingRemoteModel: rawUrl.usingRemoteServer,
-            modelType: self.modelType,
+            modelType: capturedModelType,
             omittedParams: omittedParams
         )
         request.httpBody = requestJson.data(using: .utf8)
@@ -769,12 +772,12 @@ extension LlamaServer {
         
     }
     
-    struct Usage: Codable {
-        
+    struct Usage: Codable, Sendable {
+
         let completion_tokens: Int?
         let prompt_tokens: Int?
         let total_tokens: Int?
-        
+
     }
     
     struct StopResponse: Codable {
@@ -784,8 +787,8 @@ extension LlamaServer {
         
     }
     
-    public struct CompleteResponse {
-        
+    public struct CompleteResponse: @unchecked Sendable {
+
         var text: String
         var responseStartSeconds: Double
         var predictedPerSecond: Double?
@@ -794,7 +797,7 @@ extension LlamaServer {
         var usage: Usage?
         /// A `Bool` indicating whether a remote server was used
         var usedServer: Bool
-        
+
         /// An array of ``FunctionCallRecord`` executed in the response
         var functionCallRecords: [FunctionCallRecord] = []
         /// A `Bool` representing if a function was called
@@ -942,15 +945,13 @@ extension LlamaServer {
         
     }
     
-    public struct Token: Codable {
-        
+    public struct Token: Codable, Sendable {
+
         var token: String
         var logprob: Double
-        
+
     }
     
 }
-
-extension EventSource.DataTask: @unchecked Sendable {  }
 
 

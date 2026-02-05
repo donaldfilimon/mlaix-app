@@ -9,7 +9,7 @@ import SwiftUI
 
 struct CompletionsDownloadView: View {
 
-	@StateObject private var downloadManager: DownloadManager = .shared
+	@EnvironmentObject private var downloadManager: DownloadManager
 	
 	@EnvironmentObject private var completionsSetupViewModel: CompletionsSetupViewModel
 	

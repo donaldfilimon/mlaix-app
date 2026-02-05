@@ -9,6 +9,7 @@ import Foundation
 import os.log
 import SwiftUI
 
+@MainActor
 public class SourcesManager: ObservableObject {
 	
 	init() {

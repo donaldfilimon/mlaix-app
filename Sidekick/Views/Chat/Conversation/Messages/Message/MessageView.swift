@@ -217,7 +217,7 @@ struct MessageView: View {
 	
 	/// Function to stop generation
 	private func stopGeneration() {
-		Task.detached { @MainActor in
+		Task { @MainActor in
 			await self.model.interrupt()
 			self.retryGeneration(
                 message: message

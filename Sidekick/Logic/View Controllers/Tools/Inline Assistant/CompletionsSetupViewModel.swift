@@ -8,6 +8,7 @@
 import Foundation
 import SwiftUI
 
+@MainActor
 public class CompletionsSetupViewModel: ObservableObject {
 	
 	@Published public var step: Step = .nextTokenTutorial

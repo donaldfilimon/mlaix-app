@@ -9,8 +9,8 @@ import SwiftUI
 
 struct ModelNameMenu: View {
     
-    var modelType: Sidekick.ModelType = .regular
-    var modelTypes: [ModelNameMenu.ModelType]
+    var modelType: ModelType = .regular
+    var modelTypes: [ModelSource]
     
     @AppStorage("endpoint") private var serverEndpoint: String = InferenceSettings.endpoint
     
@@ -22,7 +22,7 @@ struct ModelNameMenu: View {
     @State private var isManagingCustomModel: Bool = false
     
     @State private var localModelsListId: UUID = UUID()
-    @StateObject private var modelManager: ModelManager = .shared
+    @EnvironmentObject private var modelManager: ModelManager
     
     var showLocal: Bool {
         return modelTypes.contains(.local) && !modelManager.models.isEmpty
@@ -218,7 +218,7 @@ struct ModelNameMenu: View {
         self.remoteModelNames = await LlamaServer.getAvailableModels()
     }
     
-    enum ModelType: CaseIterable {
+    enum ModelSource: CaseIterable {
         case local, localSpeculative, remote
     }
     

@@ -10,7 +10,7 @@ import SwiftUI
 
 struct DashboardView: View {
     
-    @StateObject private var inferenceRecords: InferenceRecords = .shared
+    @EnvironmentObject private var inferenceRecords: InferenceRecords
     
     // Cached date formatter for performance
     private static let dateFormatter: Date.FormatStyle = .dateTime

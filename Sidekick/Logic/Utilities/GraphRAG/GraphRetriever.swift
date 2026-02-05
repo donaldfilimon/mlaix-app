@@ -8,7 +8,6 @@
 import Foundation
 import OSLog
 import SimilaritySearchKit
-import SimilaritySearchKitDistilbert
 
 /// Retrieves relevant information from a knowledge graph using multi-stage strategy
 public class GraphRetriever {
@@ -255,7 +254,7 @@ public class GraphRetriever {
     
     /// Generate embedding for text
     private static func generateEmbedding(for text: String) async -> [Float]? {
-        let embeddings = DistilbertEmbeddings()
+        let embeddings = NativeEmbeddings()
         return await embeddings.encode(sentence: text)
     }
     

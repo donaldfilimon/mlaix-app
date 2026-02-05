@@ -24,7 +24,7 @@ extension Theme {
 	/// Numbered list | ![](GitHubNumberedList)
 	/// Table | ![](GitHubTable)
 	
-	public static var gitHub: Theme {
+	@MainActor public static var gitHub: Theme {
 		Theme()
 			.text {
 				ForegroundColor(.text)

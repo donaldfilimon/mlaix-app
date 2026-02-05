@@ -9,6 +9,7 @@ import AppKit
 import Foundation
 import SwiftUI
 
+@MainActor
 public class InlineAssistantController: ObservableObject {
 	
 	/// Static constant for the global `InlineAssistantController` object

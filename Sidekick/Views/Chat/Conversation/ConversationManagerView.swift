@@ -15,7 +15,7 @@ struct ConversationManagerView: View {
     
     @AppStorage("remoteModelName") private var serverModelName: String = InferenceSettings.serverModelName
     
-    @StateObject private var model: Model = .shared
+    @EnvironmentObject private var model: Model
     @StateObject private var canvasController: CanvasController = .init()
     
     @EnvironmentObject private var appState: AppState

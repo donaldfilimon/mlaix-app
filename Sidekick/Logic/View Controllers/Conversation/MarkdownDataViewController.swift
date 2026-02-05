@@ -9,6 +9,7 @@ import Foundation
 import MarkdownUI
 import SwiftUI
 
+@MainActor
 public class MarkdownDataViewController: ObservableObject {
     
     init(

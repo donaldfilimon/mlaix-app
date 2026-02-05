@@ -119,7 +119,7 @@ struct PromptInputField: View {
                 self.removeKeyEventMonitor()
                 self.cancelDelayedClear()
             }
-            .onChange(of: self.promptController.prompt) { newValue in
+            .onChange(of: self.promptController.prompt) { _, newValue in
                 if !newValue.isEmpty {
                     self.cancelDelayedClear()
                 }
@@ -565,9 +565,9 @@ struct PromptInputField: View {
             await model.interrupt()
             // Don't show error dialog for user-initiated cancellation
             if case .cancelled = error {
-                await self.handleCancellation(originalConversation: originalConversation)
+                self.handleCancellation(originalConversation: originalConversation)
             } else {
-                await self.handleResponseError(
+                self.handleResponseError(
                     error,
                     originalConversation: originalConversation
                 )

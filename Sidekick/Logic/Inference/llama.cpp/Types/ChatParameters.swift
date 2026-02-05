@@ -92,7 +92,7 @@ struct ChatParameters: Codable {
         if let customFunctions = functions {
             enabledFunctions = customFunctions
         } else {
-            enabledFunctions = await MainActor.run { FunctionSelectionManager.shared.getEnabledFunctions() }
+            enabledFunctions = await Self.getEnabledFunctionsFromManager()
         }
         // Check if we should encourage using query_database function
         if let expert = expert,
@@ -238,6 +238,12 @@ The `\(expert.name)` is currently active. Use `query_database` to query the `\(e
         case reasoning
     }
     
+    /// Helper function to get enabled functions from FunctionSelectionManager on MainActor
+    @MainActor
+    private static func getEnabledFunctionsFromManager() -> [AnyFunctionBox] {
+        return FunctionSelectionManager.shared.getEnabledFunctions()
+    }
+
     /// Function to get the name of the model that will be used
     public static func getModelName(
         modelType: ModelType

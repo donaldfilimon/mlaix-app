@@ -21,40 +21,40 @@ public extension Sequence {
         return map { $0[keyPath: keyPath] }
     }
     
-    func concurrentMap<T>(
-        _ transform: @escaping (Element) async -> T
-    ) async -> [T] {
+    func concurrentMap<T: Sendable>(
+        _ transform: @escaping @Sendable (Element) async -> T
+    ) async -> [T] where Element: Sendable {
         await withTaskGroup(of: (Int, T).self) { group in
             for (index, element) in self.enumerated() {
                 group.addTask {
                     (index, await transform(element))
                 }
             }
-            
+
             var results: [(Int, T)] = []
             for await result in group {
                 results.append(result)
             }
-            
+
             return results.sorted { $0.0 < $1.0 }.map { $0.1 }
         }
     }
-    
-    func concurrentMap<T>(
-        _ transform: @escaping (Element) async throws -> T
-    ) async throws -> [T] {
+
+    func concurrentMap<T: Sendable>(
+        _ transform: @escaping @Sendable (Element) async throws -> T
+    ) async throws -> [T] where Element: Sendable {
         try await withThrowingTaskGroup(of: (Int, T).self) { group in
             for (index, element) in self.enumerated() {
                 group.addTask {
                     (index, try await transform(element))
                 }
             }
-            
+
             var results: [(Int, T)] = []
             for try await result in group {
                 results.append(result)
             }
-            
+
             return results.sorted { $0.0 < $1.0 }.map { $0.1 }
         }
     }
@@ -68,7 +68,7 @@ public extension Sequence {
         }
         return results
     }
-    
+
     func asyncMap<T>(
         _ transform: @escaping (Element) async throws -> T
     ) async throws -> [T] {
@@ -78,6 +78,26 @@ public extension Sequence {
         }
         return results
     }
-    
+
+    func asyncMap<T: Sendable>(
+        _ transform: @escaping @Sendable (Element) async -> T
+    ) async -> [T] where Element: Sendable {
+        var results: [T] = []
+        for element in self {
+            await results.append(transform(element))
+        }
+        return results
+    }
+
+    func asyncMap<T: Sendable>(
+        _ transform: @escaping @Sendable (Element) async throws -> T
+    ) async throws -> [T] where Element: Sendable {
+        var results: [T] = []
+        for element in self {
+            try await results.append(transform(element))
+        }
+        return results
+    }
+
 }
 

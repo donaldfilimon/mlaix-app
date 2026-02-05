@@ -9,7 +9,6 @@ import Foundation
 import FSKit_macOS
 import OSLog
 import SimilaritySearchKit
-import SimilaritySearchKitDistilbert
 import SwiftUI
 
 /// An object that manages a expert's resources
@@ -147,7 +146,7 @@ public struct Resources: Identifiable, Codable, Hashable, Sendable {
         let startTime: Date = .now
         // Init index
         let similarityIndex: SimilarityIndex = await SimilarityIndex(
-            model: DistilbertEmbeddings(),
+            model: NativeEmbeddings(),
             metric: CosineSimilarity()
         )
         // Load items

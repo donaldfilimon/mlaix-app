@@ -8,7 +8,6 @@
 import Foundation
 import OSLog
 import SimilaritySearchKit
-import SimilaritySearchKitDistilbert
 
 /// Detects hierarchical communities in a knowledge graph using Leiden algorithm
 public class CommunityDetector {
@@ -405,10 +404,9 @@ Focus on the main themes and key relationships.
         return (title: "Untitled Community", summary: text.prefix(200).description)
     }
     
-    /// Generate embedding for text using DistilBERT
+    /// Generate embedding for text using native embeddings
     private static func generateEmbedding(for text: String) async -> [Float]? {
-        let embeddings = DistilbertEmbeddings()
+        let embeddings = NativeEmbeddings()
         return await embeddings.encode(sentence: text)
     }
 }
-

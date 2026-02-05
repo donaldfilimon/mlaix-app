@@ -32,6 +32,7 @@ extension LlamaServer {
             heartbeat.fileHandleForWriting.write(data)
         }
         timer.resume()
+        self.heartbeatTimer = timer
         monitor.standardInput = heartbeat
         // Start monitor
         try monitor.run()
@@ -121,7 +122,7 @@ extension LlamaServer {
                 }
             }
             // Remove duplicate arguments
-            let activeArguments: [ServerArgument] = ServerArgumentsManager.shared.activeArguments
+            let activeArguments: [ServerArgument] = await MainActor.run { ServerArgumentsManager.shared.activeArguments }
             let activeFlags = activeArguments.map(keyPath: \.flag)
             arguments = arguments.filter { !activeFlags.contains($0.key) }
             // Convert dictionary to [String] format with each key and value as separate elements
@@ -133,7 +134,7 @@ extension LlamaServer {
                 }
             }
             // Add custom arguments
-            let allArguments: [String] = ServerArgumentsManager.shared.allArguments
+            let allArguments: [String] = await MainActor.run { ServerArgumentsManager.shared.allArguments }
             formattedArguments += allArguments
             // Assign arguments
             process.arguments = formattedArguments
@@ -176,6 +177,9 @@ extension LlamaServer {
     
     /// Function to stop the `llama-server` process
     public func stopServer() async {
+        // Cancel heartbeat timer
+        self.heartbeatTimer?.cancel()
+        self.heartbeatTimer = nil
         // Terminate processes
         if self.process.isRunning {
             self.process.terminate()

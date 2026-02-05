@@ -23,8 +23,13 @@ struct SidekickApp: App {
     @StateObject private var expertManager: ExpertManager = .shared
     @StateObject private var commandManager: CommandManager = .shared
     @StateObject private var memories: Memories = .shared
-    
     @StateObject private var lengthyTasksController: LengthyTasksController = .shared
+    @StateObject private var modelManager: ModelManager = .shared
+    @StateObject private var inferenceRecords: InferenceRecords = .shared
+    @StateObject private var speechSynthesizer: SpeechSynthesizer = .shared
+    @StateObject private var serverArgumentsManager: ServerArgumentsManager = .shared
+    @StateObject private var inlineAssistantController: InlineAssistantController = .shared
+    @StateObject private var model: Model = .shared
     
     /// Updater object for Sparkle
     private let updaterController: SPUStandardUpdaterController = .init(
@@ -55,6 +60,13 @@ struct SidekickApp: App {
                 .environmentObject(expertManager)
                 .environmentObject(lengthyTasksController)
                 .environmentObject(memories)
+                .environmentObject(modelManager)
+                .environmentObject(inferenceRecords)
+                .environmentObject(speechSynthesizer)
+                .environmentObject(serverArgumentsManager)
+                .environmentObject(inlineAssistantController)
+                .environmentObject(model)
+                .environmentObject(commandManager)
                 .applyWindowMaterial()
         }
         .windowToolbarStyle(.unified)
@@ -94,18 +106,20 @@ struct SidekickApp: App {
         // Window for Tool: Dashboard
         SwiftUI.Window("Dashboard", id: "dashboard") {
             DashboardView()
+                .environmentObject(inferenceRecords)
         }
         
         // Window for Tool: Detector
         SwiftUI.Window("Detector", id: "detector") {
             DetectorView()
         }
-        
+
         // Window for Tool: Diagrammer
         SwiftUI.Window("Diagrammer", id: "diagrammer") {
             DiagrammerView()
+                .environmentObject(model)
         }
-        
+
         // Window for Tool: Slide Studio
         SwiftUI.Window("Slide Studio", id: "slideStudio") {
             SlideStudioView()
@@ -115,6 +129,10 @@ struct SidekickApp: App {
         SwiftUI.Settings {
             SettingsView()
                 .environmentObject(commandManager)
+                .environmentObject(modelManager)
+                .environmentObject(speechSynthesizer)
+                .environmentObject(serverArgumentsManager)
+                .environmentObject(downloadManager)
         }
         
     }

@@ -5,9 +5,10 @@
 //  Created by John Bean on 2/18/25.
 //
 
-import DefaultModels
+@preconcurrency import DefaultModels
 import Foundation
 
+@MainActor
 public class ModelExplorerViewController: ObservableObject {
 	
 	/// An array of model families, of type ``ModelFamily``

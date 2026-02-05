@@ -184,7 +184,7 @@ public struct Message: Identifiable, Codable, Hashable {
 			messageId: self.id,
 			sources: results
 		)
-		SourcesManager.shared.add(sources)
+		await SourcesManager.shared.add(sources)
 		// Skip if no results
 		if results.isEmpty {
 			return (self.text, 0)
@@ -302,7 +302,7 @@ DO NOT reference sources outside of those provided below. If you did not referen
 	}
 	
 	/// A `View` for the sender's icon
-	var icon: some View {
+	@MainActor var icon: some View {
 		Group {
 			if let expertId = self.expertId,
 			   let expert = ExpertManager.shared.getExpert(id: expertId)
