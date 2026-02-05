@@ -78,7 +78,7 @@ struct MessageTextContentView: View {
             throttleTimer?.invalidate()
             let interval = throttleInterval - timeSinceLast
             throttleTimer = Timer.scheduledTimer(withTimeInterval: interval, repeats: false) { [self] _ in
-                Task { @MainActor in
+                MainActor.assumeIsolated {
                     self.lastUpdate = Date()
                     self.updateCachedMarkdown(with: converted)
                 }
