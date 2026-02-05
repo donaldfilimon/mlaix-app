@@ -66,6 +66,14 @@ struct SlideStudioPreviewEditor: View {
 		}
     }
 	
+	/// The code editor theme based on the current color scheme
+	private var editorTheme: Theme {
+		// Access the static properties with nonisolated(unsafe) to satisfy concurrency requirements
+		nonisolated(unsafe) let darkTheme = Theme.defaultDark
+		nonisolated(unsafe) let lightTheme = Theme.defaultLight
+		return colorScheme == .dark ? darkTheme : lightTheme
+	}
+
 	var editor: some View {
 		CodeEditor(
 			text: self.$slideStudioViewController.markdown,
@@ -73,7 +81,7 @@ struct SlideStudioPreviewEditor: View {
 			messages: self.$messages
 		)
 		.environment(
-			\.codeEditorTheme, self.colorScheme == .dark ? Theme.defaultDark : Theme.defaultLight
+			\.codeEditorTheme, editorTheme
 		)
 		.onChange(
 			of: self.slideStudioViewController.markdown

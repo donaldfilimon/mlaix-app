@@ -399,7 +399,7 @@ public struct KnownModel: Identifiable, Codable {
     // MARK: - Model Cache
     
     /// Cached models from OpenRouter API
-    private static var cachedModels: [KnownModel]?
+    nonisolated(unsafe) private static var cachedModels: [KnownModel]?
     
     /// File URL for persistent cache storage
     private static var cacheFileURL: URL {

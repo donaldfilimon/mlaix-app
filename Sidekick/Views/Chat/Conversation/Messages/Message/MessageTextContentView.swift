@@ -89,25 +89,19 @@ struct MessageTextContentView: View {
     private func updateCachedMarkdown(
         with text: String
     ) {
-        // Capture MainActor-isolated values before background work
+        // Keep markdown rendering on MainActor since it's a UI operation
+        // and avoids Sendable issues with AnyView and theme
         let currentTheme = self.theme
         let scaleFactor = self.imageScaleFactor
 
-        Task.detached(priority: .userInitiated) {
-            let rendered = await MainActor.run {
-                AnyView(
-                    Markdown(MarkdownContent(text))
-                        .markdownTheme(.gitHub)
-                        .markdownCodeSyntaxHighlighter(.splash(theme: currentTheme))
-                        .markdownImageProvider(MarkdownImageProvider(scaleFactor: scaleFactor))
-                        .markdownInlineImageProvider(MarkdownInlineImageProvider(scaleFactor: scaleFactor))
-                        .textSelection(.enabled)
-                )
-            }
-            await MainActor.run {
-                self.cachedMarkdown = rendered
-            }
-        }
+        self.cachedMarkdown = AnyView(
+            Markdown(MarkdownContent(text))
+                .markdownTheme(.gitHub)
+                .markdownCodeSyntaxHighlighter(.splash(theme: currentTheme))
+                .markdownImageProvider(MarkdownImageProvider(scaleFactor: scaleFactor))
+                .markdownInlineImageProvider(MarkdownInlineImageProvider(scaleFactor: scaleFactor))
+                .textSelection(.enabled)
+        )
     }
     
 }

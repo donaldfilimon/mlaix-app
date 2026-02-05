@@ -8,7 +8,7 @@
 import Foundation
 
 /// Providers that serve models
-public struct Provider: Identifiable {
+public struct Provider: Identifiable, Sendable {
     
     public var id: String { self.name }
     

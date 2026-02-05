@@ -8,55 +8,75 @@
 import SwiftUI
 
 struct TypedTextView: View {
-	
+
 	init(
 		_ text: String,
 		duration: Double = 1.0,
 		didFinish: Binding<Bool>,
-		onFinish: (() -> Void)? = nil
+		onFinish: (@MainActor () -> Void)? = nil
 	) {
 		self.text = text
 		self.duration = duration
 		self._didFinish = didFinish
 		self.onFinish = onFinish
 	}
-	
+
 	var text: String
 	var duration: Double
-	var onFinish: (() -> Void)?
-	
+	var onFinish: (@MainActor () -> Void)?
+
 	@Binding var didFinish: Bool
-	@State private var timer: Timer?
 	@State private var displayedText: String = ""
-	
+	@State private var typingTask: Task<Void, Never>?
+
 	var body: some View {
 		Group {
 			Text(displayedText)
 		}
-		.onAppear(perform: setTimer)
+		.onAppear {
+			startTyping()
+		}
 		.onChange(of: text) {
-			setTimer()
+			startTyping()
+		}
+		.onDisappear {
+			typingTask?.cancel()
 		}
 	}
-	
-	private func setTimer() {
-		let interval: Double = duration / Double(text.count)
-		timer?.invalidate()
-		self.didFinish = false
-		timer = Timer.scheduledTimer(
-			withTimeInterval: interval,
-			repeats: true
-		) { _ in
-			// Cancel timer when done
-			if displayedText == text {
-				timer?.invalidate()
-				self.didFinish = true
-				// Run handler
-				self.onFinish?()
+
+	private func startTyping() {
+		// Cancel any existing typing task
+		typingTask?.cancel()
+
+		// Reset state
+		displayedText = ""
+		didFinish = false
+
+		guard !text.isEmpty else {
+			didFinish = true
+			onFinish?()
+			return
+		}
+
+		let interval = duration / Double(text.count)
+		let textToType = text
+
+		typingTask = Task { @MainActor in
+			for index in 0..<textToType.count {
+				guard !Task.isCancelled else { return }
+
+				try? await Task.sleep(for: .seconds(interval))
+
+				guard !Task.isCancelled else { return }
+
+				let character: String = textToType[index]
+				displayedText.append(character)
 			}
-			// Add 1 character
-			let character: String = self.text[displayedText.count]
-			displayedText.append(character)
+
+			guard !Task.isCancelled else { return }
+
+			didFinish = true
+			onFinish?()
 		}
 	}
 	

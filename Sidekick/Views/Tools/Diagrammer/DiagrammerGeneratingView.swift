@@ -53,12 +53,15 @@ struct DiagrammerGeneratingView: View {
 	
 	/// Function to setup the stalling phrase timer
 	private func setupTimer() {
+		let phrasesCount = self.stallingPhrases.count
 		self.timer = Timer.scheduledTimer(
 			withTimeInterval: 10,
 			repeats: true
 		) { _ in
-			withAnimation(.linear) {
-				self.stallingPhraseIndex = (self.stallingPhraseIndex + 1) % self.stallingPhrases.count
+			MainActor.assumeIsolated {
+				withAnimation(.linear) {
+					self.stallingPhraseIndex = (self.stallingPhraseIndex + 1) % phrasesCount
+				}
 			}
 		}
 	}

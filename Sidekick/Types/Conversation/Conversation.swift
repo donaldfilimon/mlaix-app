@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct Conversation: Identifiable, Codable, Hashable {
+public struct Conversation: Identifiable, Codable, Hashable, Sendable {
 	
 	/// Stored property for `Identifiable` conformance
 	public var id: UUID = UUID()

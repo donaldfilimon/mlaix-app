@@ -8,7 +8,7 @@
 import Foundation
 
 /// Enum representing different categories of functions available for tool calling
-public enum FunctionCategory: String, Codable, CaseIterable, Identifiable, Equatable {
+public enum FunctionCategory: String, Codable, CaseIterable, Identifiable, Equatable, Sendable {
     
     case arithmetic = "Arithmetic"
     case calendar = "Calendar"

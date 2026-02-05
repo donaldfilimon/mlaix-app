@@ -106,7 +106,7 @@ struct SlideStudioPromptView: View {
 	
 	/// Function to start generation after prompt submission
 	private func onSubmit() {
-		Task.detached { @MainActor in
+		Task { @MainActor in
 			await slideStudioViewController.startGeneration()
 		}
 	}

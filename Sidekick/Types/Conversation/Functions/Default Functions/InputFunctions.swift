@@ -8,9 +8,9 @@
 import AppKit
 import Foundation
 
-public class InputFunctions {
-    
-    static var functions: [AnyFunctionBox] = [
+public final class InputFunctions: Sendable {
+
+    static let functions: [AnyFunctionBox] = [
         InputFunctions.getConfirmation,
         InputFunctions.getUserSelection,
         InputFunctions.getTextInput

@@ -81,13 +81,13 @@ public struct Resource: Identifiable, Codable, Hashable, Sendable {
     }
     
     /// Progress update information emitted while indexing a resource
-    public struct ProgressUpdate {
+    public struct ProgressUpdate: Sendable {
         public var current: Int
         public var total: Int
         public var stage: String
         public var entities: Int
         public var fractionComplete: Double
-        
+
         public init(
             current: Int,
             total: Int,
@@ -261,7 +261,7 @@ public struct Resource: Identifiable, Codable, Hashable, Sendable {
     public mutating func updateIndex(
         resourcesDirUrl: URL,
         useGraphRAG: Bool = false,
-        progressCallback: ((ProgressUpdate) -> Void)? = nil
+        progressCallback: (@Sendable (ProgressUpdate) -> Void)? = nil
     ) async -> Bool {
         // Log
         let url: URL = self.url
@@ -472,9 +472,9 @@ public struct Resource: Identifiable, Codable, Hashable, Sendable {
         }
         if shouldBuildGraph {
             Self.logger.notice("Graph RAG is enabled, starting graph build for resource \"\(url, privacy: .public)\"")
-            let graphProgressWrapper: ((Int, Int, String, Int) -> Void)?
+            let graphProgressWrapper: (@Sendable (Int, Int, String, Int) -> Void)?
             if let progressCallback {
-                graphProgressWrapper = { current, total, stage, entities in
+                graphProgressWrapper = { @Sendable current, total, stage, entities in
                     progressCallback(ProgressUpdate(
                         current: current,
                         total: total,
@@ -524,7 +524,7 @@ public struct Resource: Identifiable, Codable, Hashable, Sendable {
     private mutating func preprocessIndexUpdate(
         resourcesDirUrl: URL,
         useGraphRAG: Bool,
-        progressCallback: ((ProgressUpdate) -> Void)?
+        progressCallback: (@Sendable (ProgressUpdate) -> Void)?
     ) async -> PreprocessResult {
         // Exit update if file resource was moved
         if !self.isWebResource && self.wasMoved {
@@ -678,7 +678,7 @@ public struct Resource: Identifiable, Codable, Hashable, Sendable {
     private func buildAndSaveGraph(
         chunks: [String],
         resourcesDirUrl: URL,
-        progressCallback: ((Int, Int, String, Int) -> Void)?
+        progressCallback: (@Sendable (Int, Int, String, Int) -> Void)?
     ) async -> Bool {
         Self.logger.notice("Building knowledge graph for resource \"\(self.url, privacy: .public)\" with \(chunks.count) chunks")
         

@@ -7,32 +7,32 @@
 
 import Foundation
 
-public struct OpenAIFunction: Codable {
-    
+public struct OpenAIFunction: Codable, Sendable {
+
     let type: String
     let function: FunctionDetail
-    
+
 }
 
-public struct FunctionDetail: Codable {
-    
+public struct FunctionDetail: Codable, Sendable {
+
     let name: String
     let description: String
     let parameters: ParameterSchema
     let strict: Bool
-    
+
 }
 
-public struct ParameterSchema: Codable {
-    
+public struct ParameterSchema: Codable, Sendable {
+
     let type: String
     let properties: [String: PropertyDetail]
     let required: [String]
     let additionalProperties: Bool
-    
+
 }
 
-public struct PropertyDetail: Codable {
+public struct PropertyDetail: Codable, Sendable {
     
     init(
         functionParameter: FunctionParameter
@@ -58,11 +58,11 @@ public struct PropertyDetail: Codable {
     let description: String
     let items: ItemType?
     
-    public struct ItemType: Codable {
+    public struct ItemType: Codable, Sendable {
         var type: `Type`
     }
-    
-    public enum `Type`: String, Codable {
+
+    public enum `Type`: String, Codable, Sendable {
         
         init(
             type: FunctionParameter.Datatype

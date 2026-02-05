@@ -14,7 +14,7 @@ public protocol Agent: ObservableObject {
     var name: String { get }
     
     /// A `View` to display agent progress to users
-    var preview: AnyView { get }
+    @MainActor var preview: AnyView { get }
     
     /// Function to begin the agentic loop
     func run() async throws -> LlamaServer.CompleteResponse

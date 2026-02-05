@@ -8,9 +8,9 @@
 import EventKit
 import Foundation
 
-public class CalendarFunctions {
-    
-    static var functions: [AnyFunctionBox] = [
+public final class CalendarFunctions: Sendable {
+
+    static let functions: [AnyFunctionBox] = [
         CalendarFunctions.getEvents,
         CalendarFunctions.addEvent,
         CalendarFunctions.removeEvent,

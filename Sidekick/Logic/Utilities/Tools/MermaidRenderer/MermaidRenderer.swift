@@ -105,8 +105,8 @@ public class MermaidRenderer: @unchecked Sendable {
         try await withTaskCancellationHandler(operation: {
             try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
                 // Wrapper to ensure we only resume the continuation once
-                // Use a nonisolated local function to avoid escaping issues
-                func resumeOnce(
+                // Use a @Sendable local function to satisfy concurrency requirements
+                @Sendable func resumeOnce(
                     resuming result: Result<Void, Error>
                 ) {
                     Task {

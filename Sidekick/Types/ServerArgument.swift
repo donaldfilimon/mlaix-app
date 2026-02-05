@@ -8,7 +8,7 @@
 import Foundation
 import SwiftUI
 
-public struct ServerArgument: Identifiable, Codable, Equatable {
+public struct ServerArgument: Identifiable, Codable, Equatable, Sendable {
     
     public var id: UUID = UUID()
     
@@ -60,8 +60,8 @@ public struct ServerArgument: Identifiable, Codable, Equatable {
         )
     ]
     
-    public struct CommonArgument: Hashable {
-        
+    public struct CommonArgument: Hashable, Sendable {
+
         init(
             flag: String,
             name: String,
@@ -77,7 +77,7 @@ public struct ServerArgument: Identifiable, Codable, Equatable {
             self.values = values
             self.type = type
         }
-        
+
         init?(
             flag: String
         ) {
@@ -89,10 +89,11 @@ public struct ServerArgument: Identifiable, Codable, Equatable {
             }
             return nil
         }
-                
+
         var name: String
         var description: String
-        
+
+        @MainActor
         var label: some View {
             HStack {
                 Text(self.name)
@@ -112,13 +113,13 @@ public struct ServerArgument: Identifiable, Codable, Equatable {
                 .buttonStyle(.plain)
             }
         }
-        
+
         var flag: String
         var type: `Type`
-        
+
         var range: ClosedRange<Float>?
         var values: [String]?
-        
+
         static let commonArguments: [CommonArgument] = [
             CommonArgument(
                 flag: "--flash-attn",
@@ -177,7 +178,7 @@ public struct ServerArgument: Identifiable, Codable, Equatable {
             )
         ]
         
-        public enum `Type`: String, CaseIterable {
+        public enum `Type`: String, CaseIterable, Sendable {
             
             case integer, float, string, null
             
@@ -192,6 +193,7 @@ public struct ServerArgument: Identifiable, Codable, Equatable {
             
         }
         
+        @MainActor
         func getEditor(
             stringValue: Binding<String>
         ) -> some View {

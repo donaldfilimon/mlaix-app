@@ -182,27 +182,23 @@ public class Memories: ObservableObject {
             await self.initSimilarityIndex()
         }
         // Conduct search
-        if let similarityIndex = self.similarityIndex {
-            // Add items
-            similarityIndex.indexItems = memories.map(
-                keyPath: \.indexItem
-            )
-            // Search
-            let threshold: Float = 0.6
-            let results = await similarityIndex.search(
-                prompt,
-                top: maxResults,
-                metric: CosineSimilarity()
-            ).filter { result in
-                result.score >= threshold
-            }
-            // Return
-            return results.map { result in
-                return result.text
-            }
-        } else {
+        guard let similarityIndex = self.similarityIndex else {
             return nil
         }
+        // Add items
+        similarityIndex.indexItems = memories.map(
+            keyPath: \.indexItem
+        )
+        // Search
+        let threshold: Float = 0.6
+        let searchResults = await similarityIndex.search(
+            prompt,
+            top: maxResults,
+            metric: CosineSimilarity()
+        )
+        let filteredResults = searchResults.filter { $0.score >= threshold }
+        // Return
+        return filteredResults.map { $0.text }
     }
     
     /// Function to delete a memory

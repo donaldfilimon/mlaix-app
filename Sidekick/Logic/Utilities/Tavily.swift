@@ -119,7 +119,7 @@ public class Tavily {
 		return results
 	}
     
-    public enum TimeRange: String, CaseIterable, Codable {
+    public enum TimeRange: String, CaseIterable, Codable, Sendable {
         case day, week, month, year
     }
     

@@ -8,9 +8,9 @@
 import EventKit
 import Foundation
 
-public class RemindersFunctions {
-    
-    static var functions: [AnyFunctionBox] = [
+public final class RemindersFunctions: Sendable {
+
+    static let functions: [AnyFunctionBox] = [
         RemindersFunctions.getReminders,
         RemindersFunctions.addReminder,
         RemindersFunctions.removeReminder,

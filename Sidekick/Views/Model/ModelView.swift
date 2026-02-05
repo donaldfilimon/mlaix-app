@@ -100,10 +100,12 @@ struct ModelView: View {
 				return
 			}
 		}
+		// Capture model for use in task
+		let modelToDownload = model
 		// Start download
-		Task.detached { @MainActor in
+		Task { @MainActor in
 			await DownloadManager.shared.downloadModel(
-				model: model
+				model: modelToDownload
 			)
 		}
 		// Show in progress

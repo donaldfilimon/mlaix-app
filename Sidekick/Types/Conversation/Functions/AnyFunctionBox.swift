@@ -7,20 +7,20 @@
 
 import Foundation
 
-public protocol AnyFunctionBox {
-    
+public protocol AnyFunctionBox: Sendable {
+
     var name: String { get }
     var description: String { get }
     var params: [FunctionParameter] { get }
-    
+
     func getJsonSchema() -> String
     func call(withData data: Data) async throws -> String?
-    
+
     var paramsType: any FunctionParams.Type { get }
     var resultType: Codable.Type { get }
-    
+
     var openAiFunctionCall: OpenAIFunction { get }
-    
+
     var functionCallType: DecodableFunctionCall.Type { get }
-    
+
 }

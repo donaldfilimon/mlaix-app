@@ -59,6 +59,7 @@ public class DeepResearchAgent: Agent {
     }
     
     /// A `View` to visualize the agent's progress
+    @MainActor
     public var preview: AnyView {
         AnyView(
             DeepResearchPreviewView(
@@ -655,9 +656,13 @@ Respond with the array of JSON objects ONLY.
             }
         }
         // Draw diagrams
-        diagrams = try await diagrams.asyncMap { diagram in
-            return try await self.createDiagram(diagram)
-        }.compactMap({ $0 })
+        var createdDiagrams: [Diagram] = []
+        for diagram in diagrams {
+            if let created = try await self.createDiagram(diagram) {
+                createdDiagrams.append(created)
+            }
+        }
+        diagrams = createdDiagrams
         // Return
         return diagrams
     }
@@ -865,7 +870,7 @@ Insert them into the report as Markdown images where neccessary, using percent e
     }
     
     /// A enum for errors possible when conducting Deep Research
-    public enum DeepResearchError: LocalizedError {
+    public enum DeepResearchError: LocalizedError, Sendable {
         
         case noInstructions
         case failedToExtractPrompt
@@ -888,7 +893,7 @@ Insert them into the report as Markdown images where neccessary, using percent e
     }
     
     /// A section in the research report
-    public struct Section: Codable, Hashable {
+    public struct Section: Codable, Hashable, Sendable {
         
         /// A `String` containing a title for this section
         var title: String
@@ -933,7 +938,7 @@ Description: \(self.description)
         }
         
         /// A research result for a section
-        public struct Result: Codable, Hashable {
+        public struct Result: Codable, Hashable, Sendable {
             
             var url: String
             var text: String
@@ -950,7 +955,7 @@ Description: \(self.description)
         
     }
     
-    public struct Diagram: Codable, Hashable {
+    public struct Diagram: Codable, Hashable, Sendable {
         
         var filename: String
         var description: String
@@ -960,7 +965,7 @@ Description: \(self.description)
     }
     
     /// The steps in the Deep Research process
-    public enum Step: String, CaseIterable {
+    public enum Step: String, CaseIterable, Sendable {
         
         case checkSufficientInformation
         case analyzePrompt

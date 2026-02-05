@@ -27,15 +27,15 @@ public protocol DecodableFunctionCall: Decodable {
 }
 
 // MARK: - Updated Function Parameter
-public struct FunctionParameter: Codable {
-    
+public struct FunctionParameter: Codable, Sendable {
+
     var label: String
     var description: String
     var datatype: Datatype
     var isRequired: Bool = true
-    
-    public enum Datatype: String, Codable {
-        
+
+    public enum Datatype: String, Codable, Sendable {
+
         case string
         case integer
         case float
@@ -43,7 +43,7 @@ public struct FunctionParameter: Codable {
         case stringArray
         case integerArray
         case floatArray
-        
+
         var isArray: Bool {
             switch self {
                 case .stringArray, .integerArray, .floatArray:
@@ -52,48 +52,48 @@ public struct FunctionParameter: Codable {
                     return false
             }
         }
-        
+
     }
-    
+
 }
 
 // MARK: - Function Protocol
 protocol FunctionProtocol: Identifiable {
-    
+
     associatedtype Parameters
     associatedtype Result
-    
+
     var id: String { get }
     var name: String { get }
     var description: String { get }
     var params: [FunctionParameter] { get }
-    var run: (Parameters) async throws -> Result { get }
-    
+    var run: @MainActor @Sendable (Parameters) async throws -> Result { get }
+
     func getJsonSchema() -> String
-    
+
 }
 
 // MARK: - Generic Function Implementation
-public struct Function<Parameter: FunctionParams, Result: Codable>: FunctionProtocol, AnyFunctionBox {
+public struct Function<Parameter: FunctionParams, Result: Codable>: FunctionProtocol, AnyFunctionBox, @unchecked Sendable {
 
     public var id: String { return name }
-    
-    public var name: String
-    public var description: String
-    public var clearance: Clearance
-    
-    public var params: [FunctionParameter]
-    public var run: (Parameter) async throws -> Result
-    
-    public var paramsType: any FunctionParams.Type
-    public var resultType: Codable.Type
-    
+
+    public let name: String
+    public let description: String
+    public let clearance: Clearance
+
+    public let params: [FunctionParameter]
+    public let run: @MainActor @Sendable (Parameter) async throws -> Result
+
+    public let paramsType: any FunctionParams.Type
+    public let resultType: Codable.Type
+
     public init(
         name: String,
         description: String,
         clearance: Clearance = .regular,
         params: [FunctionParameter] = [],
-        run: @MainActor @escaping (Parameter) async throws -> Result
+        run: @MainActor @Sendable @escaping (Parameter) async throws -> Result
     ) {
         self.name = name
         self.description = description
@@ -237,17 +237,17 @@ Do you wish to permit this?
         )
     }
     
-    public enum Clearance: String, CaseIterable, Codable {
+    public enum Clearance: String, CaseIterable, Codable, Sendable {
         case regular
         case sensitive
         case dangerous
     }
     
-    public enum FunctionCallError: LocalizedError {
-        
+    public enum FunctionCallError: LocalizedError, Sendable {
+
         case permissionsDenied
         case functionNotFound
-        
+
         public var errorDescription: String? {
             switch self {
                 case .permissionsDenied:
@@ -256,7 +256,7 @@ Do you wish to permit this?
                     return "The function called is not available."
             }
         }
-        
+
     }
     
     public struct FunctionObject: Codable {

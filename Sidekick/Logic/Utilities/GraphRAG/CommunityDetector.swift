@@ -318,18 +318,15 @@ Focus on the main themes and key relationships.
         }
         
         // Get response from worker model
-        var responseText = ""
         do {
             let response = try await Model.shared.listenThinkRespond(
                 messages: [systemMessage, userMessage],
                 modelType: .worker,
                 mode: .default,
                 handleResponseUpdate: { _, _ in },
-                handleResponseFinish: { fullMessage, _, _ in
-                    responseText = fullMessage
-                }
+                handleResponseFinish: { _, _, _ in }
             )
-            responseText = response.text
+            let responseText = response.text
             
             // Restore previous status
             await MainActor.run {

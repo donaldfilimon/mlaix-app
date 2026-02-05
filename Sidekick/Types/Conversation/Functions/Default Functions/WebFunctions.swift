@@ -10,8 +10,8 @@ import ExtractKit_macOS
 import Foundation
 import GoogleSearch
 
-public class WebFunctions {
-    
+public final class WebFunctions: Sendable {
+
     static var functions: [AnyFunctionBox] {
         var functions: [AnyFunctionBox] = [
             WebFunctions.getWebsiteContent,

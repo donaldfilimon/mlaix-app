@@ -8,9 +8,9 @@
 import Foundation
 import SimilaritySearchKit
 
-public class ExpertFunctions {
-    
-    static var functions: [AnyFunctionBox] = [
+public final class ExpertFunctions: Sendable {
+
+    static let functions: [AnyFunctionBox] = [
         ExpertFunctions.queryVectorDatabase
     ]
     

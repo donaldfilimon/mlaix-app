@@ -409,12 +409,12 @@ Respond with the Markdown ONLY. Do not include comments.
 			// Print error
 			print("Error generating diagram: \(error)")
 			// Return to first step
-			Task.detached { @MainActor in
+			Task { @MainActor [weak self] in
 				Dialogs.showAlert(
 					title: String(localized: "Error"),
 					message: String(localized: "An error occurred while generating the slides.")
 				)
-				self.reset()
+				self?.reset()
 			}
 		}
 	}
@@ -486,12 +486,12 @@ Respond with the Markdown ONLY. Do not include comments.
 			// Print error
 			print("Error generating slides: \(error)")
 			// Return to first step
-			Task.detached { @MainActor in
+			Task { @MainActor [weak self] in
 				Dialogs.showAlert(
 					title: String(localized: "Error"),
 					message: String(localized: "An error occurred while exporting the slides.")
 				)
-				self.reset()
+				self?.reset()
 			}
 		}
 	}
@@ -543,10 +543,10 @@ Respond with the Markdown ONLY. Do not include comments.
 			itemProvider.loadItem(
 				forTypeIdentifier: "public.file-url",
 				options: nil
-			) { (item, error) in
+			) { [weak self] (item, error) in
 				if let data = item as? Data {
-					Task.detached { @MainActor in
-						await self.addFile(data)
+					Task { @MainActor in
+						await self?.addFile(data)
 					}
 				}
 			}
@@ -602,37 +602,38 @@ Respond with the Markdown ONLY. Do not include comments.
 	}
 	
 	/// A configuration to export the slides
-	public struct SlideExportConfiguration {
-		
+	public struct SlideExportConfiguration: Sendable {
+
 		/// The name of the slides file
 		public var name: String = "slides \(Date.now.dateString)"
-		
+
 		/// The format of the exported slides, of type `Format`
 		public var format: Format
 		/// The `URL` to the directory which contains the exported slides
 		public var outputDirUrl: URL
-		
+
 		/// The `URL` to the exported slides
 		public var outputUrl: URL {
 			let filename: String = "\(self.name).\(self.format.fileExtension)"
 			return self.outputDirUrl.appendingPathComponent(filename)
 		}
-		
+
 		/// A `Bool` representing if the export configuration is valid
+		@MainActor
 		public var isValid: Bool {
 			let hasName: Bool = !self.name.isEmpty
 			let hasValidFormat: Bool = self.format.isAvailable
 			return hasName && hasValidFormat
 		}
-		
+
 		/// The format of the exported Slides
-		public enum Format: String, CaseIterable {
-			
+		public enum Format: String, CaseIterable, Sendable {
+
 			case pdf
 			case pptx
 			case pptxEditable
 			case html
-			
+
 			/// The file extension for the format, of type `String`
 			public var fileExtension: String {
 				switch self {
@@ -642,8 +643,9 @@ Respond with the Markdown ONLY. Do not include comments.
 						return self.rawValue
 				}
 			}
-			
+
 			/// The displayed name for the format, of type `String`
+			@MainActor
 			public var displayName: String {
 				switch self {
 					case .pdf:
@@ -658,8 +660,9 @@ Respond with the Markdown ONLY. Do not include comments.
 						return String(localized: "Website")
 				}
 			}
-			
+
 			/// A `Bool` indicating if the export format can be selected
+			@MainActor
 			var isAvailable: Bool {
 				// If not editable ppt, return true
 				if self != .pptxEditable {
@@ -674,15 +677,15 @@ Respond with the Markdown ONLY. Do not include comments.
 					return url != nil
 				}
 			}
-			
+
 		}
-		
+
 		/// The default export config
 		static public let `default`: SlideExportConfiguration = .init(
 			format: .pdf,
 			outputDirUrl: URL.downloadsDirectory
 		)
-		
+
 	}
 	
 }

@@ -7,17 +7,16 @@
 
 import Foundation
 
-import Foundation
+/// Utility for validating SVG files
+enum SVGValidator {
 
-class SVGValidator {
-    
     static func validateSVG(at url: URL) -> Bool {
         do {
             let data = try Data(contentsOf: url)
             let parser = XMLParser(data: data)
             let delegate = SVGXMLParserDelegate()
             parser.delegate = delegate
-            
+
             if parser.parse(), delegate.isSVGRootFound {
                 return true
             } else {
@@ -27,14 +26,14 @@ class SVGValidator {
             return false
         }
     }
-    
+
 }
 
-private class SVGXMLParserDelegate: NSObject, XMLParserDelegate {
-    
+private final class SVGXMLParserDelegate: NSObject, XMLParserDelegate {
+
     var isSVGRootFound = false
     private var didCheckRoot = false
-    
+
     func parser(
         _ parser: XMLParser,
         didStartElement elementName: String,
@@ -47,5 +46,5 @@ private class SVGXMLParserDelegate: NSObject, XMLParserDelegate {
             isSVGRootFound = (elementName.lowercased() == "svg")
         }
     }
-    
+
 }

@@ -38,7 +38,7 @@ struct DetectorInputView: View {
 				return
 			}
 			// If check passed, start analysis
-			Task.detached { @MainActor in
+			Task { @MainActor in
 				await self.detectorViewController.evaluateText()
 			}
 		} label: {

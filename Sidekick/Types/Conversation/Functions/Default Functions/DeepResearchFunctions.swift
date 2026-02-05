@@ -7,8 +7,8 @@
 
 import Foundation
 
-public class DeepResearchFunctions {
-    
+public final class DeepResearchFunctions: Sendable {
+
     static var functions: [AnyFunctionBox] {
         var functions: [AnyFunctionBox] = [
             WebFunctions.getLocation
