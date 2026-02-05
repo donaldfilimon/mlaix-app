@@ -5,7 +5,7 @@
 //  Created by Bean John on 9/22/24.
 //
 
-import DefaultModels
+@preconcurrency import DefaultModels
 import Foundation
 import OSLog
 import SwiftUI

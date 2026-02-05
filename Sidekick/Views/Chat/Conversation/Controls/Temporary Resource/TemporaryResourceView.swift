@@ -36,7 +36,7 @@ struct TemporaryResourceView: View {
 			self.isHovering = hovering
 		}
 		.onAppear {
-			Task.detached { @MainActor in
+			Task { @MainActor in
 				await $tempResource.scan()
 			}
 		}

@@ -71,8 +71,9 @@ struct DeepResearchPreviewView: View {
                     alignment: .leading
                 ) {
                     ForEach(
-                        enumerating: self.sections
-                    ) { (index, section) in
+                        Array(self.sections.enumerated()),
+                        id: \.offset
+                    ) { index, section in
                         Text("\(index + 1): \(section.title)")
                             .padding(.leading, 8)
                     }

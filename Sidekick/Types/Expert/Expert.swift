@@ -41,7 +41,7 @@ public struct Expert: Identifiable, Codable, Hashable, Sendable {
     }
     
     /// Computed property returning the expert's label, of type `View`
-    public var label: some View {
+    @MainActor public var label: some View {
         Label(self.name, systemImage: symbolName)
             .labelStyle(.titleAndIcon)
             .bold()

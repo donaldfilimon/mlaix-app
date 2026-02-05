@@ -120,6 +120,7 @@ struct MultilineTextField: NSViewRepresentable {
         }
     }
     
+    @MainActor
     class Coordinator: NSObject, NSTextViewDelegate {
         
         var parent: MultilineTextField

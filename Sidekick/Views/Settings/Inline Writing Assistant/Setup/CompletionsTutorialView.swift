@@ -5,6 +5,7 @@
 //  Created by John Bean on 3/25/25.
 //
 
+import AppKit
 import MarkdownUI
 import SwiftUI
 
@@ -87,10 +88,10 @@ struct CompletionsTutorialView: View {
 		}
 		.if(!completeByWord) { view in
 			view
-				.onKeyboardShortcut(
-					.tab,
-					modifiers: .shift
-				) {
+				.onKeyPress(.tab) {
+					guard NSApp.currentEvent?.modifierFlags.contains(.shift) == true else {
+						return .ignored
+					}
 					withAnimation(
 						.linear(duration: 0.1)
 					) {
@@ -99,14 +100,17 @@ struct CompletionsTutorialView: View {
 							self.chunks.count
 						)
 					}
+					return .handled
 				}
 		}
 		.padding(3)
     }
 	
 	var preview: some View {
-		HStack {
-			Text(text) + Text(completionSuggestion).foregroundStyle(.secondary.opacity(0.7))
+		HStack(spacing: 0) {
+			Text(text)
+			Text(completionSuggestion)
+				.foregroundStyle(.secondary.opacity(0.7))
 			Spacer()
 		}
 		.font(.title3)

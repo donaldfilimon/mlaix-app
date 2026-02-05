@@ -77,8 +77,11 @@ struct FunctionCallsView: View {
                     .frame(width: 10, height: 10)
                     .foregroundStyle(self.functionCall.status?.color ?? .gray)
                     .padding(.horizontal, 5)
-                Group {
-                    Text("Function: ").bold() + Text(self.functionCall.name).italic()
+                HStack(spacing: 0) {
+                    Text("Function: ")
+                        .bold()
+                    Text(self.functionCall.name)
+                        .italic()
                 }
                 .opacity(0.8)
                 .if(!self.didExecute) { view in
@@ -89,7 +92,7 @@ struct FunctionCallsView: View {
                     Image(systemName: "chevron.up")
                         .fontWeight(.semibold)
                         .foregroundStyle(.secondary.opacity(0.8))
-                        .rotationEffect(showDetails ? .zero : .degrees(180))
+                        .rotationEffect(showDetails ? .zero : .degrees(180.0))
                 }
             }
             .padding(.horizontal, 7)
@@ -98,8 +101,12 @@ struct FunctionCallsView: View {
         var details: some View {
             VStack(alignment: .leading) {
                 if let result = functionCall.result {
-                    Text("Result: ").bold() + Text(self.truncateMiddle(result))
-                        .italic()
+                    HStack(spacing: 0) {
+                        Text("Result: ")
+                            .bold()
+                        Text(self.truncateMiddle(result))
+                            .italic()
+                    }
                 }
             }
             .textSelection(.enabled)
@@ -107,6 +114,7 @@ struct FunctionCallsView: View {
             .padding(.horizontal, 9)
             .padding(.vertical, 9)
         }
+
         
         func truncateMiddle(
             _ text: String,

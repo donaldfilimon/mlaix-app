@@ -103,10 +103,8 @@ public class PromptController: ObservableObject, DropDelegate {
         createRecognitionRequest()
         setupRecognitionTask()
         startAudioEngine()
-        DispatchQueue.main.sync {
-            withAnimation(.linear) {
-                self.isRecording = true
-            }
+        withAnimation(.linear) {
+            self.isRecording = true
         }
     }
     
@@ -118,10 +116,8 @@ public class PromptController: ObservableObject, DropDelegate {
         audioEngine.inputNode.removeTap(onBus: 0)
         recognitionRequest?.endAudio()
         recognitionTask?.cancel()
-        DispatchQueue.main.async {
-            withAnimation(.linear) {
-                self.isRecording = false
-            }
+        withAnimation(.linear) {
+            self.isRecording = false
         }
     }
     

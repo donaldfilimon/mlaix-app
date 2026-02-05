@@ -53,7 +53,9 @@ struct SpecialtyView: View {
 	}
 	
     var body: some View {
-		Label(specialty.rawValue) {
+		Label {
+			Text(specialty.rawValue)
+		} icon: {
 			Image(systemName: symbolName)
 				.foregroundStyle(symbolColor)
 		}

@@ -555,6 +555,7 @@ public struct Resource: Identifiable, Codable, Hashable, Sendable {
             
             for index in self.children.indices {
                 let childUnits = Double(childWorkUnits[index])
+                let baseCompletedUnits = completedUnits
                 
                 progressCallback?(ProgressUpdate(
                     current: index,
@@ -569,7 +570,7 @@ public struct Resource: Identifiable, Codable, Hashable, Sendable {
                     useGraphRAG: useGraphRAG,
                     progressCallback: { update in
                         let fraction = (
-                            completedUnits + (childUnits * max(0.0, min(update.fractionComplete, 1.0)))
+                            baseCompletedUnits + (childUnits * max(0.0, min(update.fractionComplete, 1.0)))
                         ) / Double(totalUnits)
                         progressCallback?(ProgressUpdate(
                             current: update.current,

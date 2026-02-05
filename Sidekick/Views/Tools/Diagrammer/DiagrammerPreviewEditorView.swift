@@ -6,7 +6,7 @@
 //
 
 import SwiftUI
-import CodeEditorView
+@preconcurrency import CodeEditorView
 import LanguageSupport
 
 struct DiagrammerPreviewEditorView: View {
@@ -34,7 +34,8 @@ struct DiagrammerPreviewEditorView: View {
 			ZStack {
 				Rectangle()
 					.fill(Color.clear)
-					.frame(width: 1, height: .greedy)
+					.frame(width: 1)
+					.frame(maxHeight: .infinity)
                 ZoomablePannableView {
                     self.diagrammerViewController.preview
                         .id(previewId)

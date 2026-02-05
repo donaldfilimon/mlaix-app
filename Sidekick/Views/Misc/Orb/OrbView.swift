@@ -36,7 +36,7 @@ struct OrbView: View {
 						),
 					in: .circle
 				)
-				.rotationEffect(.degrees(self.rotation ? 360 : 0))
+				.rotationEffect(.degrees(self.rotation ? 360.0 : 0.0))
 			Circle()
 				.frame(
 					width: 20 * self.size.rawValue,
@@ -44,7 +44,7 @@ struct OrbView: View {
 				)
 				.blur(radius: 10 * self.size.rawValue)
 				.offset(y: -10 * self.size.rawValue)
-				.rotationEffect(.degrees(self.rotation ? 360 : 0))
+				.rotationEffect(.degrees(self.rotation ? 360.0 : 0.0))
 		}
 		.frame(width: 50 * self.size.rawValue, height: 50 * self.size.rawValue)
 		.clipShape(Circle())

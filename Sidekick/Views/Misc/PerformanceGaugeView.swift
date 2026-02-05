@@ -44,10 +44,9 @@ struct PerformanceGaugeView: View {
 	}
 	
 	var guage: some View {
-		GeometryReader(
-			alignment: .center
-		) { proxy in
+		GeometryReader { proxy in
 			scaleLine
+				.frame(maxHeight: .infinity, alignment: .center)
 				.clipShape(
 					Capsule()
 				)

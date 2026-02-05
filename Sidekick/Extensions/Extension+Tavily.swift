@@ -32,7 +32,7 @@ public extension Tavily {
             return String(data: jsonData!, encoding: .utf8)!
         }
         
-        public enum SearchDepth: String, Codable {
+        public enum SearchDepth: String, Codable, Sendable {
             case basic
             case advanced
         }
@@ -63,7 +63,7 @@ public extension Tavily {
         var include_images: Bool = false
         var extract_depth: ExtractDepth = .advanced
         
-        public enum ExtractDepth: String, Codable {
+        public enum ExtractDepth: String, Codable, Sendable {
             case basic
             case advanced
         }

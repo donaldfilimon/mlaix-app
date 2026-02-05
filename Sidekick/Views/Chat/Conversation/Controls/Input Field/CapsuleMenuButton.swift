@@ -195,6 +195,7 @@ struct MenuIcon: NSViewRepresentable {
         )
     }
     
+    @MainActor
     class Coordinator: NSObject {
         
         let menu: NSMenu
@@ -234,7 +235,7 @@ struct MenuIcon: NSViewRepresentable {
 
 extension NSMenu {
     
-    static func fromOptions<Options: MenuOptions>(
+    @MainActor static func fromOptions<Options: MenuOptions>(
         options: [Options],
         selectionHandler: @escaping (Options) -> Void
     ) -> NSMenu {
@@ -262,6 +263,7 @@ extension NSMenu {
 }
 
 /// Helper class to bring Swift closures to AppKit actions
+@MainActor
 fileprivate class MenuHandler: NSObject {
     
     static let shared = MenuHandler()

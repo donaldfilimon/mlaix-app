@@ -172,7 +172,6 @@
 		2031B9982CEAE78F00627D53 /* ShortcutController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2031B9972CEAE78F00627D53 /* ShortcutController.swift */; };
 		2031B99A2CEAE7A900627D53 /* Extension+KeyboardShortcut.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2031B9992CEAE7A900627D53 /* Extension+KeyboardShortcut.swift */; };
 		203224302EBAA8280003E1A8 /* ExtractKit-macOS in Frameworks */ = {isa = PBXBuildFile; productRef = 2032242F2EBAA8280003E1A8 /* ExtractKit-macOS */; };
-		203224332EBAA9EB0003E1A8 /* SwiftUIX in Frameworks */ = {isa = PBXBuildFile; productRef = 203224322EBAA9EB0003E1A8 /* SwiftUIX */; };
 		203224352EBAAC0A0003E1A8 /* Extension+Sequence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 203224342EBAAC0A0003E1A8 /* Extension+Sequence.swift */; };
 		203224372EBAAE130003E1A8 /* Extension+Optional.swift in Sources */ = {isa = PBXBuildFile; fileRef = 203224362EBAAE130003E1A8 /* Extension+Optional.swift */; };
 		203224392EBAB4400003E1A8 /* Sidekick.icon in Resources */ = {isa = PBXBuildFile; fileRef = 203224382EBAB4400003E1A8 /* Sidekick.icon */; };
@@ -362,6 +361,10 @@
 		20A40C872D7190BA00A9D9A9 /* SlideStudioPromptOptionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20A40C862D7190BA00A9D9A9 /* SlideStudioPromptOptionsView.swift */; };
 		20A40C892D72AEE600A9D9A9 /* SlideStudioExportOptionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20A40C882D72AEE600A9D9A9 /* SlideStudioExportOptionsView.swift */; };
 		20A40CF92D73763500A9D9A9 /* Extension+Date.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20A40CF82D73763500A9D9A9 /* Extension+Date.swift */; };
+		20C7B0A22F1A123400ABCD01 /* Extension+Bundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20C7B0A12F1A123400ABCD01 /* Extension+Bundle.swift */; };
+		20C7B0A42F1A123400ABCD01 /* Extension+ExtractionSpeed.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20C7B0A32F1A123400ABCD01 /* Extension+ExtractionSpeed.swift */; };
+		20C7B0A62F1A123400ABCD01 /* Extension+QLThumbnailRepresentation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20C7B0A52F1A123400ABCD01 /* Extension+QLThumbnailRepresentation.swift */; };
+		20C7B0A82F1A123400ABCD01 /* ModelNameFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20C7B0A72F1A123400ABCD01 /* ModelNameFormatter.swift */; };
 		20A7E8FC2D8304AB00223D47 /* HelpCommands.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20A7E8FB2D8304AB00223D47 /* HelpCommands.swift */; };
 		20A8B65B2CB2709100B756FD /* Resources.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20A8B65A2CB2709100B756FD /* Resources.swift */; };
 		20A8B65D2CB2829500B756FD /* ExpertManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20A8B65C2CB2829500B756FD /* ExpertManager.swift */; };
@@ -854,6 +857,10 @@
 		20A40C862D7190BA00A9D9A9 /* SlideStudioPromptOptionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SlideStudioPromptOptionsView.swift; sourceTree = "<group>"; };
 		20A40C882D72AEE600A9D9A9 /* SlideStudioExportOptionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SlideStudioExportOptionsView.swift; sourceTree = "<group>"; };
 		20A40CF82D73763500A9D9A9 /* Extension+Date.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Extension+Date.swift"; sourceTree = "<group>"; };
+		20C7B0A12F1A123400ABCD01 /* Extension+Bundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Extension+Bundle.swift"; sourceTree = "<group>"; };
+		20C7B0A32F1A123400ABCD01 /* Extension+ExtractionSpeed.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Extension+ExtractionSpeed.swift"; sourceTree = "<group>"; };
+		20C7B0A52F1A123400ABCD01 /* Extension+QLThumbnailRepresentation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Extension+QLThumbnailRepresentation.swift"; sourceTree = "<group>"; };
+		20C7B0A72F1A123400ABCD01 /* ModelNameFormatter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelNameFormatter.swift; sourceTree = "<group>"; };
 		20A7E8FB2D8304AB00223D47 /* HelpCommands.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpCommands.swift; sourceTree = "<group>"; };
 		20A8B65A2CB2709100B756FD /* Resources.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Resources.swift; sourceTree = "<group>"; };
 		20A8B65C2CB2829500B756FD /* ExpertManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExpertManager.swift; sourceTree = "<group>"; };
@@ -951,7 +958,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				203224332EBAA9EB0003E1A8 /* SwiftUIX in Frameworks */,
 				20457D392D92A5FB00954892 /* AXSwift in Frameworks */,
 				20A40C832D718D4300A9D9A9 /* CodeEditorView in Frameworks */,
 				203786382DA76EBB003975CC /* SimilaritySearchKit in Frameworks */,
@@ -1702,6 +1708,7 @@
 				209370752D6AB36900E1AF73 /* Refactorer.swift */,
 				2051FED82D8E51FA001B1E0D /* SpeechService.swift */,
 				208E34A32EC1B019009B75C9 /* ContextCompressor.swift */,
+				20C7B0A72F1A123400ABCD01 /* ModelNameFormatter.swift */,
 				2041868C2D81E6B2002A5D1C /* NetworkMonitor.swift */,
 				200AAE102EC4F06C000995B7 /* StartupMetrics.swift */,
 				206AB9662DB09BB800385510 /* Location.swift */,
@@ -2074,6 +2081,9 @@
 				209370932D6B598500E1AF73 /* Extension+CaseIterable.swift */,
 				201A1A922CDB8109001E9BA9 /* Extension+Collection.swift */,
 				20A40CF82D73763500A9D9A9 /* Extension+Date.swift */,
+				20C7B0A12F1A123400ABCD01 /* Extension+Bundle.swift */,
+				20C7B0A32F1A123400ABCD01 /* Extension+ExtractionSpeed.swift */,
+				20C7B0A52F1A123400ABCD01 /* Extension+QLThumbnailRepresentation.swift */,
 				209370A22D6C05B900E1AF73 /* Extension+Double.swift */,
 				20B4D6B02CC3D72700817E15 /* Extension+IndexItem.swift */,
 				2031B9992CEAE7A900627D53 /* Extension+KeyboardShortcut.swift */,
@@ -2332,7 +2342,6 @@
 				200B236C2DB15AA800127D48 /* Shimmer */,
 				203E6B182DFAB8AD00A3F6D0 /* WebViewKit */,
 				2032242F2EBAA8280003E1A8 /* ExtractKit-macOS */,
-				203224322EBAA9EB0003E1A8 /* SwiftUIX */,
 				208E34A12EC19A87009B75C9 /* GoogleSearch */,
 				200AADF72EC2AB27000995B7 /* SQLite */,
 			);
@@ -2455,7 +2464,6 @@
 				200B236B2DB15AA800127D48 /* XCRemoteSwiftPackageReference "SwiftUI-Shimmer" */,
 				203E6B172DFAB8AD00A3F6D0 /* XCRemoteSwiftPackageReference "WebViewKit" */,
 				2032242E2EBAA8280003E1A8 /* XCRemoteSwiftPackageReference "ExtractKit-macOS" */,
-				203224312EBAA9EB0003E1A8 /* XCRemoteSwiftPackageReference "SwiftUIX" */,
 				208E34A02EC19A87009B75C9 /* XCRemoteSwiftPackageReference "GoogleSearch" */,
 				200AADF62EC2AB27000995B7 /* XCRemoteSwiftPackageReference "SQLite" */,
 			);
@@ -2846,6 +2854,10 @@
 				208388ED2CBF825400C2A9F8 /* Extension+Tavily.swift in Sources */,
 				204AE3BB2CEAF5AC0086B42D /* Command.swift in Sources */,
 				20A40CF92D73763500A9D9A9 /* Extension+Date.swift in Sources */,
+				20C7B0A22F1A123400ABCD01 /* Extension+Bundle.swift in Sources */,
+				20C7B0A42F1A123400ABCD01 /* Extension+ExtractionSpeed.swift in Sources */,
+				20C7B0A62F1A123400ABCD01 /* Extension+QLThumbnailRepresentation.swift in Sources */,
+				20C7B0A82F1A123400ABCD01 /* ModelNameFormatter.swift in Sources */,
 				209D397C2DC0E71600D1E5E5 /* ServerArgumentsManager.swift in Sources */,
 				20C62EC72D71403A00996566 /* SlideStudioQuickPromptsView.swift in Sources */,
 				208E34A62EC1BF40009B75C9 /* MalformedToolCall.swift in Sources */,
@@ -3401,14 +3413,6 @@
 				kind = branch;
 			};
 		};
-		203224312EBAA9EB0003E1A8 /* XCRemoteSwiftPackageReference "SwiftUIX" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/SwiftUIX/SwiftUIX";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 0.2.4;
-			};
-		};
 		203786362DA76EBB003975CC /* XCRemoteSwiftPackageReference "similarity-search-kit" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/johnbean393/similarity-search-kit";
@@ -3561,11 +3565,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 2032242E2EBAA8280003E1A8 /* XCRemoteSwiftPackageReference "ExtractKit-macOS" */;
 			productName = "ExtractKit-macOS";
-		};
-		203224322EBAA9EB0003E1A8 /* SwiftUIX */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 203224312EBAA9EB0003E1A8 /* XCRemoteSwiftPackageReference "SwiftUIX" */;
-			productName = SwiftUIX;
 		};
 		203786372DA76EBB003975CC /* SimilaritySearchKit */ = {
 			isa = XCSwiftPackageProductDependency;

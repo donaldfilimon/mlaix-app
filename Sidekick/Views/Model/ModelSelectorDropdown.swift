@@ -51,216 +51,21 @@ struct ModelSelectorDropdown: View {
     // Get the current model name for display
     var currentModelName: String {
         if let selectedModelName = model.selectedModelName {
-            return formatModelName(selectedModelName)
+            return ModelNameFormatter.formatModelName(selectedModelName)
         } else if InferenceSettings.useServer {
-            return serverModelName.isEmpty ? "No Model Selected" : formatModelName(serverModelName)
+            return serverModelName.isEmpty ? "No Model Selected" : ModelNameFormatter.formatModelName(serverModelName)
         } else {
             return "No Model Selected"
         }
-    }
-    
-    // Format model name for toolbar display
-    private func formatModelName(_ name: String) -> String {
-        let components = parseModelIdentifier(name)
-        
-        if let knownModel = KnownModel.findModel(byIdentifier: name, in: KnownModel.availableModels) {
-            var displayName: String
-            if let explicitName = knownModel.displayName?.trimmingCharacters(in: .whitespacesAndNewlines), !explicitName.isEmpty {
-                displayName = explicitName
-            } else {
-                // For unknown organizations, use the stored organizationIdentifier
-                let providerSource: String
-                if knownModel.organization == .other, let orgId = knownModel.organizationIdentifier {
-                    providerSource = orgId
-                } else {
-                    providerSource = components.provider ?? knownModel.organization.rawValue
-                }
-                // Use the matched model's variant, not the original identifier's variant
-                let matchedComponents = parseModelIdentifier(knownModel.primaryName)
-                let baseName = String(knownModel.primaryName.split(separator: ":").first ?? Substring(knownModel.primaryName))
-                displayName = buildDisplayName(provider: providerSource, model: baseName, variant: matchedComponents.variant)
-            }
-            // For unknown organizations, use the stored organizationIdentifier
-            let providerForPrefix: String
-            if knownModel.organization == .other, let orgId = knownModel.organizationIdentifier {
-                providerForPrefix = orgId
-            } else {
-                providerForPrefix = components.provider ?? knownModel.organization.rawValue
-            }
-            displayName = applyProviderPrefixIfNeeded(displayName, provider: providerForPrefix)
-            // Use the matched model's variant for harmonization, not the original
-            let matchedComponents = parseModelIdentifier(knownModel.primaryName)
-            displayName = harmonizeVariantDisplay(displayName, expectedVariant: matchedComponents.variant)
-            return displayName
-        }
-        
-        return buildDisplayName(provider: components.provider, model: components.model, variant: components.variant)
-    }
-    
-    private func parseModelIdentifier(_ name: String) -> (provider: String?, model: String, variant: String?) {
-        var remainder = name
-        var provider: String? = nil
-        if let slashIndex = remainder.firstIndex(of: "/") {
-            provider = String(remainder[..<slashIndex])
-            remainder = String(remainder[remainder.index(after: slashIndex)...])
-        }
-        var variant: String? = nil
-        if let colonIndex = remainder.firstIndex(of: ":") {
-            variant = String(remainder[remainder.index(after: colonIndex)...])
-            remainder = String(remainder[..<colonIndex])
-        }
-        return (provider, remainder, variant)
-    }
-    
-    private func buildDisplayName(provider: String?, model: String, variant: String?) -> String {
-        let formattedModel = formatModelComponent(model)
-        var result = ""
-        if let provider {
-            result = "\(formatProviderName(provider)): "
-        }
-        result += formattedModel
-        if let variant = variant?.trimmingCharacters(in: .whitespacesAndNewlines), !variant.isEmpty {
-            let lowerVariant = variant.lowercased()
-            if Self.variantSuffixTokens.contains(lowerVariant) {
-                result += " (\(lowerVariant))"
-            } else {
-                result += " \(variant)"
-            }
-        }
-        return result
-    }
-    
-    private func formatProviderName(_ provider: String) -> String {
-        return (provider.prefix(1).uppercased() + provider.dropFirst().lowercased())
-            .replacingOccurrences(of: "Bytedance", with: "ByteDance")
-            .replacingOccurrences(of: "Openrouter", with: "OpenRouter")
-            .replacingOccurrences(of: "Deepseek", with: "DeepSeek")
-            .replacingOccurrences(of: "Deepcogito", with: "DeepCogito")
-            .replacingOccurrences(of: "X-ai", with: "xAI")
-            .replacingOccurrences(of: "Meta-llama", with: "Meta-Llama")
-            .replacingOccurrences(of: "Minimax", with: "MiniMax")
-            .replacingOccurrences(of: "Z-ai", with: "Zhipu AI")
-            .replacingOccurrences(of: "Nousresearch", with: "NousResearch")
-            .replacingSuffix("ai", with: "AI")
-            .replacingSuffix("org", with: "Org")
-            .replacingSuffix("labs", with: "Labs")
-    }
-    
-    private func formatModelComponent(_ model: String) -> String {
-        var spacedResult = ""
-        for (index, char) in model.enumerated() {
-            if char.isUppercase && index > 0 {
-                let previousIndex = model.index(model.startIndex, offsetBy: index - 1)
-                if model[previousIndex].isLowercase {
-                    spacedResult += " "
-                }
-            }
-            spacedResult.append(char)
-        }
-        let condensed = spacedResult.components(separatedBy: .whitespaces)
-            .filter { !$0.isEmpty }
-            .joined(separator: " ")
-        return condensed.lowercased()
-    }
-    
-    private func applyProviderPrefixIfNeeded(_ displayName: String, provider: String?) -> String {
-        guard let provider else { return displayName.trimmingCharacters(in: .whitespacesAndNewlines) }
-        let trimmed = displayName.trimmingCharacters(in: .whitespacesAndNewlines)
-        if trimmed.contains(":") {
-            return trimmed
-        }
-        return "\(formatProviderName(provider)): \(trimmed)"
-    }
-    
-    private func harmonizeVariantDisplay(_ displayName: String, expectedVariant rawVariant: String?) -> String {
-        let trimmed = displayName.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard let rawVariant = rawVariant?.trimmingCharacters(in: .whitespacesAndNewlines), !rawVariant.isEmpty else {
-            return removeRecognizedVariantSuffix(from: trimmed)
-        }
-        let lowerVariant = rawVariant.lowercased()
-        if Self.variantSuffixTokens.contains(lowerVariant) {
-            if trimmed.range(of: "(\(lowerVariant))", options: .caseInsensitive) != nil {
-                return trimmed
-            }
-            let base = removeRecognizedVariantSuffix(from: trimmed)
-            return base + " (\(lowerVariant))"
-        } else {
-            if trimmed.range(of: rawVariant, options: .caseInsensitive) != nil {
-                return trimmed
-            }
-            return trimmed + " \(rawVariant)"
-        }
-    }
-    
-    private func removeRecognizedVariantSuffix(from displayName: String) -> String {
-        var result = displayName
-        for token in Self.variantSuffixTokens {
-            let suffix = " (\(token))"
-            if result.lowercased().hasSuffix(suffix) {
-                result = String(result.dropLast(suffix.count)).trimmingCharacters(in: .whitespacesAndNewlines)
-            }
-        }
-        return result
-    }
-    
-    private static let variantSuffixTokens: Set<String> = ["free", "exacto"]
-    
-    
-    // Fuzzy search matching - more strict version
-    private func fuzzyMatch(_ text: String, query: String) -> Bool {
-        if query.isEmpty {
-            return true
-        }
-        
-        // Normalize both strings: lowercase and remove special characters
-        let normalizedText = text.lowercased()
-            .replacingOccurrences(of: "-", with: " ")
-            .replacingOccurrences(of: "_", with: " ")
-            .replacingOccurrences(of: "/", with: " ")
-            .replacingOccurrences(of: ":", with: " ")
-        
-        let normalizedQuery = query.lowercased()
-            .replacingOccurrences(of: "-", with: " ")
-            .replacingOccurrences(of: "_", with: " ")
-        
-        // Split into tokens
-        let textTokens = normalizedText.components(separatedBy: .whitespaces)
-            .filter { !$0.isEmpty }
-        let queryTokens = normalizedQuery.components(separatedBy: .whitespaces)
-            .filter { !$0.isEmpty }
-        
-        // Check if all query tokens are found in text tokens with stricter matching
-        for queryToken in queryTokens {
-            let found = textTokens.contains { textToken in
-                // Match if:
-                // 1. Text token starts with query token (prefix match)
-                // 2. Query token is at least 3 chars and text token contains it
-                // 3. Exact match
-                if textToken.hasPrefix(queryToken) {
-                    return true
-                }
-                if queryToken.count >= 3 && textToken.contains(queryToken) {
-                    return true
-                }
-                // Also check if query token starts with text token (for partial typing)
-                if queryToken.count >= 3 && queryToken.hasPrefix(textToken) {
-                    return true
-                }
-                return false
-            }
-            if !found {
-                return false
-            }
-        }
-        
-        return true
     }
     
     // Filter models based on fuzzy search
     var filteredLocalModels: [ModelManager.ModelFile] {
         let filtered = searchText.isEmpty
         ? modelManager.models
-        : modelManager.models.filter { model in fuzzyMatch(model.name, query: searchText) }
+        : modelManager.models.filter { model in
+            ModelSearchMatcher.fuzzyMatch(model.name, query: searchText)
+        }
         
         // Sort by parameter count (largest first)
         return filtered.sorted { model1, model2 in
@@ -281,7 +86,9 @@ struct ModelSelectorDropdown: View {
         let allRemoteModels = remoteModelNames + customModelNames
         let filtered = searchText.isEmpty
         ? allRemoteModels
-        : allRemoteModels.filter { modelName in fuzzyMatch(modelName, query: searchText) }
+        : allRemoteModels.filter { modelName in
+            ModelSearchMatcher.fuzzyMatch(modelName, query: searchText)
+        }
         
         // Sort by parameter count (largest first)
         return filtered.sortedByModelSize()
@@ -420,7 +227,7 @@ struct ModelSelectorDropdown: View {
                             ForEach(filteredRemoteModels, id: \.self) { modelName in
                                 let capabilities = getModelCapabilities(modelName)
                                 RemoteModelRow(
-                                    modelName: self.formatModelName(modelName),
+                                    modelName: ModelNameFormatter.formatModelName(modelName),
                                     isSelected: modelName == serverModelName && InferenceSettings.useServer,
                                     isRemoteServerReachable: remoteServerReachable,
                                     isReasoning: capabilities.isReasoning,

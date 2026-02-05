@@ -196,8 +196,10 @@ struct ResourceSectionView: View {
                                 .font(.caption)
                         }
                         Spacer()
-                        Button("Rebuild") {
+                        Button {
                             rebuildGraph()
+                        } label: {
+                            Text("Rebuild")
                         }
                         .disabled(isUpdating)
                     }
@@ -268,7 +270,9 @@ struct ResourceSectionView: View {
             }
             var updatedExpert = expert
             await updatedExpert.resources.migrateToGraphRAG(expertName: expertName) { progress in
-                updateExpertProgress(expertId: expertId, progress: progress)
+                Task { @MainActor in
+                    updateExpertProgress(expertId: expertId, progress: progress)
+                }
             }
             await MainActor.run {
                 expert = updatedExpert
@@ -331,7 +335,9 @@ struct ResourceSectionView: View {
         await updatedExpert.resources.updateResourcesIndex(
             expertName: expertName,
             progressUpdate: { progress in
-                updateExpertProgress(expertId: expertId, progress: progress)
+                Task { @MainActor in
+                    updateExpertProgress(expertId: expertId, progress: progress)
+                }
             }
         )
         await MainActor.run {
@@ -340,15 +346,14 @@ struct ResourceSectionView: View {
         }
     }
     
+    @MainActor
     private func updateExpertProgress(expertId: UUID, progress: Resources.GraphProgress) {
-        Task { @MainActor in
-            guard var current = ExpertManager.shared.getExpert(id: expertId) else {
-                return
-            }
-            current.resources.graphStatus = .building
-            current.resources.graphProgress = progress
-            ExpertManager.shared.update(current)
+        guard var current = ExpertManager.shared.getExpert(id: expertId) else {
+            return
         }
+        current.resources.graphStatus = .building
+        current.resources.graphProgress = progress
+        ExpertManager.shared.update(current)
     }
     
 }

@@ -95,6 +95,7 @@ struct GeneralSettingsView: View {
             }
             Spacer()
             Picker(
+                "",
                 selection: self.$useCommandReturn
             ) {
                 Settings.SendShortcut(true).label
@@ -102,6 +103,7 @@ struct GeneralSettingsView: View {
                 Settings.SendShortcut(false).label
                     .tag(false)
             }
+            .labelsHidden()
         }
     }
     
@@ -170,6 +172,7 @@ struct GeneralSettingsView: View {
             }
             Spacer()
             Picker(
+                "",
                 selection: $checkFunctionsCompletion.animation(.linear)
             ) {
                 ForEach(
@@ -179,6 +182,7 @@ struct GeneralSettingsView: View {
                         .tag(mode.rawValue)
                 }
             }
+            .labelsHidden()
             .pickerStyle(.menu)
         }
     }
@@ -194,6 +198,7 @@ struct GeneralSettingsView: View {
 			}
 			Spacer()
 			Picker(
+				"",
 				selection: self.$voiceId
 			) {
 				ForEach(
@@ -204,6 +209,7 @@ struct GeneralSettingsView: View {
 						.tag(voice.identifier)
 				}
 			}
+			.labelsHidden()
 		}
 	}
 	

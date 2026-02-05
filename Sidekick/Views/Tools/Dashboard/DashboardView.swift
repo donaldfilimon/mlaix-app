@@ -248,6 +248,7 @@ struct DashboardView: View {
     
     var typePicker: some View {
         Picker(
+            "",
             selection: self.$inferenceRecords.selectedType.animation(
                 .linear
             )
@@ -260,11 +261,13 @@ struct DashboardView: View {
                     .tag(type)
             }
         }
+        .labelsHidden()
         .pickerStyle(.segmented)
     }
     
     var modelPicker: some View {
         Picker(
+            "",
             selection: self.$inferenceRecords.selectedModel.animation(
                 .linear
             )
@@ -279,11 +282,13 @@ struct DashboardView: View {
                     .tag(model)
             }
         }
+        .labelsHidden()
         .pickerStyle(.menu)
     }
     
     var timeframePicker: some View {
         Picker(
+            "",
             selection: self.$inferenceRecords.selectedTimeframe.animation(
                 .linear
             )
@@ -296,6 +301,7 @@ struct DashboardView: View {
                     .tag(timeframe)
             }
         }
+        .labelsHidden()
         .pickerStyle(.menu)
     }
     

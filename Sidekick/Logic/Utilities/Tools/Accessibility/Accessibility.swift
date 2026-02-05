@@ -7,7 +7,7 @@
 
 import Foundation
 import AppKit
-import ApplicationServices
+@preconcurrency import ApplicationServices
 import CoreGraphics
 
 /// A class to abstract use of macOS's Accessibility API

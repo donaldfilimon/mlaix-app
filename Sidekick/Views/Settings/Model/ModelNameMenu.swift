@@ -98,7 +98,11 @@ struct ModelNameMenu: View {
             }
         } label: {
             if self.modelTypes == [.remote] {
-                Text(self.serverModelName)
+                Text(
+                    self.serverModelName.isEmpty
+                    ? String(localized: "No Model Selected")
+                    : ModelNameFormatter.formatModelName(self.serverModelName)
+                )
             } else {
                 Label("Model", systemImage: "brain")
             }
@@ -273,11 +277,14 @@ struct ModelNameMenu: View {
                 )
             } label: {
                 if modelName == serverModelName {
-                    Label(modelName, systemImage: "checkmark")
+                    Label(
+                        ModelNameFormatter.formatModelName(modelName),
+                        systemImage: "checkmark"
+                    )
                         .labelStyle(.titleAndIcon)
                         .bold()
                 } else {
-                    Text(modelName)
+                    Text(ModelNameFormatter.formatModelName(modelName))
                 }
             }
         }
