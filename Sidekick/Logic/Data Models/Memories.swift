@@ -15,7 +15,7 @@ public class Memories: ObservableObject {
     
     /// A `Logger` object for the ``Memories`` object
     private static let logger: Logger = .init(
-        subsystem: Bundle.main.bundleIdentifier!,
+        subsystem: Bundle.main.logSubsystem,
         category: String(describing: Memories.self)
     )
     
@@ -48,6 +48,9 @@ public class Memories: ObservableObject {
         )
     }
     
+    /// Maximum number of memories to retain (prevents unbounded growth)
+    private static let maxMemories: Int = 1000
+
     /// All memories
     @Published public var memories: [Memory] = []
     /// Whether the datastore has been loaded
@@ -215,6 +218,10 @@ public class Memories: ObservableObject {
     public func remember(_ memory: Memory) {
         withAnimation(.linear) {
             self.memories.append(memory)
+            // Prune oldest memories if limit exceeded (LRU eviction)
+            if self.memories.count > Self.maxMemories {
+                self.memories = Array(self.memories.suffix(Self.maxMemories))
+            }
         }
         self.save()
     }
