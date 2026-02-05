@@ -376,7 +376,7 @@ public class GraphDatabase {
 	}
 	
 	/// Error types
-	public enum DatabaseError: Error {
+	public enum DatabaseError: Error, Sendable {
 		case initializationFailed(String)
 		case saveFailed(String)
 		case loadFailed(String)

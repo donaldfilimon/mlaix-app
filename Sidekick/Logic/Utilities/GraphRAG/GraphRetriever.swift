@@ -19,7 +19,7 @@ public class GraphRetriever {
     )
     
     /// Enhanced search result combining vector and graph information
-    public struct EnhancedResult {
+    public struct EnhancedResult: Sendable {
         public var text: String
         public var score: Float
         public var source: String
@@ -87,7 +87,7 @@ public class GraphRetriever {
         Self.logger.info("Expanded to \(expandedChunkIndices.count) total chunks")
         
         // Stage 5: Find relevant community summaries
-        let relevantCommunities = findRelevantCommunities(
+        let relevantCommunities = await findRelevantCommunities(
             entities: expandedEntities,
             graph: graph,
             query: query
@@ -155,36 +155,34 @@ public class GraphRetriever {
         entities: [GraphEntity],
         graph: KnowledgeGraph,
         query: String
-    ) -> [Community] {
+    ) async -> [Community] {
         let entityIds = Set(entities.map { $0.id })
-        
+
         // Find communities that contain these entities
         var relevantCommunities = graph.communities.filter { community in
             let communityEntityIds = Set(community.memberEntityIds)
             return !communityEntityIds.intersection(entityIds).isEmpty
         }
-        
+
         // Sort by level (prefer higher-level for broader context)
         relevantCommunities.sort { $0.level > $1.level }
-        
+
         // If we have community embeddings, rank by similarity to query
-        Task {
-            if let queryEmbedding = await generateEmbedding(for: query) {
-                relevantCommunities = relevantCommunities.compactMap { community in
-                    guard let communityEmbedding = community.embedding else {
-                        return (community, 0.0)
-                    }
-                    let similarity = cosineSimilarity(
-                        queryEmbedding,
-                        communityEmbedding
-                    )
-                    return (community, Double(similarity))
+        if let queryEmbedding = await generateEmbedding(for: query) {
+            relevantCommunities = relevantCommunities.compactMap { community in
+                guard let communityEmbedding = community.embedding else {
+                    return (community, 0.0)
                 }
-                .sorted { $0.1 > $1.1 }  // Sort by similarity descending
-                .map { $0.0 }
+                let similarity = cosineSimilarity(
+                    queryEmbedding,
+                    communityEmbedding
+                )
+                return (community, Double(similarity))
             }
+            .sorted { $0.1 > $1.1 }  // Sort by similarity descending
+            .map { $0.0 }
         }
-        
+
         return Array(relevantCommunities.prefix(3))  // Top 3 communities
     }
     

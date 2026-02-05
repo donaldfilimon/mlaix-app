@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct Command: Identifiable, Codable {
+public struct Command: Identifiable, Codable, Sendable {
 	
 	public var id: UUID = UUID()
 	

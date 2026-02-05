@@ -125,7 +125,7 @@ public class ConversationManager: ObservableObject {
             return
         }
         let targetUrl: URL = fromBackup ? self.backupDatastoreUrl : self.datastoreUrl
-        self.loadTask = Task.detached(priority: .userInitiated) { [weak self] in
+        self.loadTask = Task.detached(priority: .userInitiated) {
             let signpost = StartupMetrics.begin("ConversationManager.loadDatastore")
             defer { StartupMetrics.end("ConversationManager.loadDatastore", signpost) }
             let conversations: [Conversation]
@@ -134,7 +134,7 @@ public class ConversationManager: ObservableObject {
                 let decoder: JSONDecoder = JSONDecoder()
                 conversations = try decoder.decode([Conversation].self, from: rawData)
             } catch {
-                await MainActor.run { @MainActor @Sendable in
+                Task { @MainActor [weak self] in
                     guard let self else { return }
                     self.newDatastore()
                     self.isLoaded = true
@@ -142,7 +142,7 @@ public class ConversationManager: ObservableObject {
                 }
                 return
             }
-            await MainActor.run { @MainActor @Sendable in
+            Task { @MainActor [weak self] in
                 guard let self else { return }
                 self.conversations = conversations
                 self.isLoaded = true

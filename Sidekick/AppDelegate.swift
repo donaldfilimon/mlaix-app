@@ -13,8 +13,9 @@ import SwiftUI
 import TipKit
 
 /// The app's delegate which handles life cycle events
+@MainActor
 public class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
-    
+
     /// A object of type  ``InlineAssistantController`` controller
     let inlineAssistantController: InlineAssistantController = .shared
     /// A object of type  ``CompletionsController`` controller

@@ -8,7 +8,7 @@
 import Foundation
 import OSLog
 
-public struct Snapshot: Identifiable, Codable, Equatable, Hashable {
+public struct Snapshot: Identifiable, Codable, Equatable, Hashable, Sendable {
 	
 	init(
 		text: String = "",
@@ -48,8 +48,8 @@ public struct Snapshot: Identifiable, Codable, Equatable, Hashable {
 	/// The ``Site`` in the snapshot, if available
 	public var site: Site?
 	
-	public struct Site: Identifiable, Codable, Hashable {
-		
+	public struct Site: Identifiable, Codable, Hashable, Sendable {
+
 		/// A `Logger` object for the ``Site`` object
 		private static let logger: Logger = .init(
 			subsystem: Bundle.main.bundleIdentifier!,
@@ -140,7 +140,7 @@ public struct Snapshot: Identifiable, Codable, Equatable, Hashable {
 	}
 	
 	/// Possible types of the ``Snapshot``
-	public enum `Type`: String, Codable, CaseIterable {
+	public enum `Type`: String, Codable, CaseIterable, Sendable {
 		case text
 		case site
 	}
@@ -150,7 +150,7 @@ public struct Snapshot: Identifiable, Codable, Equatable, Hashable {
 		return lhs.id == rhs.id
 	}
 	
-	public enum ExtractionError: Error {
+	public enum ExtractionError: Error, Sendable {
 		case noSelectedConversation
 		case noAssistantMessages
 		case couldNotLocateUserMessage

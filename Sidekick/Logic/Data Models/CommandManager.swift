@@ -88,14 +88,14 @@ public class CommandManager: ObservableObject {
             return
         }
         let targetUrl: URL = self.datastoreUrl
-        self.loadTask = Task.detached(priority: .userInitiated) { [weak self] in
+        self.loadTask = Task.detached(priority: .userInitiated) {
             let signpost = StartupMetrics.begin("CommandManager.loadDatastore")
             defer { StartupMetrics.end("CommandManager.loadDatastore", signpost) }
             let rawData: Data
             do {
                 rawData = try Data(contentsOf: targetUrl)
             } catch {
-                await MainActor.run { @MainActor @Sendable in
+                Task { @MainActor [weak self] in
                     guard let self else { return }
                     self.newDatastore()
                     self.isLoaded = true
@@ -105,7 +105,7 @@ public class CommandManager: ObservableObject {
             }
             let decoder: JSONDecoder = JSONDecoder()
             let commands = (try? decoder.decode([Command].self, from: rawData)) ?? []
-            await MainActor.run { @MainActor @Sendable in
+            Task { @MainActor [weak self] in
                 guard let self else { return }
                 self.commands = commands
                 self.isLoaded = true

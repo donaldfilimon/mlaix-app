@@ -9,7 +9,7 @@ import Foundation
 import SimilaritySearchKit
 import SwiftUI
 
-public struct Message: Identifiable, Codable, Hashable {
+public struct Message: Identifiable, Codable, Hashable, Sendable {
 	
 	init(
 		text: String,
@@ -416,7 +416,7 @@ DO NOT reference sources outside of those provided below. If you did not referen
 		self.outputEnded = true
 	}
 	
-    public struct MessageSubset: Codable {
+    public struct MessageSubset: Codable, Sendable {
         
         init(
             modelType: ModelType = .regular,
@@ -533,7 +533,7 @@ Output the full text again with the changes applied. Keep as much of the previou
         /// The message's content
         var content: ContentValue
         
-        public enum Content: Codable {
+        public enum Content: Codable, Sendable {
             
             case text(String)
             case imageURL(ImageURL)
@@ -573,11 +573,11 @@ Output the full text again with the changes applied. Keep as much of the previou
             }
         }
         
-        public struct ImageURL: Codable {
+        public struct ImageURL: Codable, Sendable {
             let url: String
         }
         
-        public enum ContentValue: Codable {
+        public enum ContentValue: Codable, Sendable {
             
             case textOnly(String)
             case multimodal([Content])
@@ -613,7 +613,7 @@ Output the full text again with the changes applied. Keep as much of the previou
            
     }
 	
-	public enum ContentType: String, CaseIterable {
+	public enum ContentType: String, CaseIterable, Sendable {
 		case text
 		case image
 	}

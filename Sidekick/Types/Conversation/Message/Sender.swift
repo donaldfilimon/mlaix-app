@@ -8,14 +8,14 @@
 import Foundation
 import SwiftUI
 
-public enum Sender: String, Codable {
-	
+public enum Sender: String, Codable, Sendable {
+
 	case user = "user"
 	case assistant = "assistant"
 	case system = "system"
-	
+
 	/// A `View` for the sender's icon
-	var icon: some View {
+	@MainActor var icon: some View {
 		ZStack {
 			Circle()
 				.fill(self == .user ? Color.purple : Color.green)
@@ -29,5 +29,5 @@ public enum Sender: String, Codable {
 				)
 		}
 	}
-	
+
 }

@@ -7,16 +7,16 @@
 
 import SwiftUI
 
-public enum OriginType: String {
-	
+public enum OriginType: String, Sendable {
+
     case caret = "Caret"
 	case caretFallback = "Caret Fallback"
     case rect = "Text Rect"
     case mouseCursor = "Mouse Cursor"
-	
+
 }
 
-public struct Origin: Hashable {
+public struct Origin: Hashable, Sendable {
     public private(set) var id: UUID
     public var type: OriginType
     public var NSPoint: NSPoint
@@ -28,7 +28,7 @@ public struct Origin: Hashable {
     }
 }
 
-public struct CursorPositionResult {
+public struct CursorPositionResult: Sendable {
     var type: OriginType
     var bounds: CGRect
 }

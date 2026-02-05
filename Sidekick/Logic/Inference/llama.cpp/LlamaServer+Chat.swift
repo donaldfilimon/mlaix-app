@@ -70,16 +70,20 @@ extension LlamaServer {
         updateStatusHandler: (@Sendable (Model.Status) async -> Void)? = nil,
         progressHandler: (@Sendable (String) -> Void)? = nil
     ) async throws -> CompleteResponse {
+        // Capture values before closure for Sendable compliance
+        let capturedMessages = messages
+        let capturedFunctions = functions
+        let capturedExpert = expert
         // Wrap the actual completion call with retry logic
         return try await retryOnNetworkError { [self] in
             try await self.getChatCompletionInternal(
                 mode: mode,
                 canReachRemoteServer: canReachRemoteServer,
-                messages: messages,
+                messages: capturedMessages,
                 useWebSearch: useWebSearch,
                 useFunctions: useFunctions,
-                functions: functions,
-                expert: expert,
+                functions: capturedFunctions,
+                expert: capturedExpert,
                 updateStatusHandler: updateStatusHandler,
                 progressHandler: progressHandler
             )
@@ -127,6 +131,10 @@ extension LlamaServer {
         // Capture actor-isolated properties before async let
         let capturedModelType = self.modelType
         let capturedSystemPrompt = self.systemPrompt
+        // Capture messages and functions before closure for Sendable compliance
+        let capturedMessages = messages
+        let capturedFunctions = functions
+        let capturedExpert = expert
         // Formulate parameters
         let params: ChatParameters = await {
             switch mode {
@@ -135,29 +143,29 @@ extension LlamaServer {
                         modelType: capturedModelType,
                         usingRemoteModel: canReachRemoteServer,
                         systemPrompt: capturedSystemPrompt,
-                        messages: messages,
+                        messages: capturedMessages,
                         useWebSearch: useWebSearch,
                         useFunctions: useFunctions,
-                        functions: functions,
-                        expert: expert
+                        functions: capturedFunctions,
+                        expert: capturedExpert
                     )
                 case .deepResearch:
                     return await ChatParameters(
                         modelType: capturedModelType,
                         usingRemoteModel: canReachRemoteServer,
                         systemPrompt: capturedSystemPrompt,
-                        messages: messages,
+                        messages: capturedMessages,
                         useWebSearch: useWebSearch,
                         useFunctions: useFunctions,
-                        functions: functions,
-                        expert: expert
+                        functions: capturedFunctions,
+                        expert: capturedExpert
                     )
                 case .default:
                     return await ChatParameters(
                         modelType: capturedModelType,
                         usingRemoteModel: canReachRemoteServer,
                         systemPrompt: capturedSystemPrompt,
-                        messages: messages
+                        messages: capturedMessages
                     )
             }
         }()

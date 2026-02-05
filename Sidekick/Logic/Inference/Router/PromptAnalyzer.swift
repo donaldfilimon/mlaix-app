@@ -99,6 +99,7 @@ public class PromptAnalyzer {
 		case image = "image-generation"
 		
 		/// A `Bool` value indicating whether the result type is available
+		@MainActor
 		public var isAvailable: Bool {
 			switch self {
 				case .text:

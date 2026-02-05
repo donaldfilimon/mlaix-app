@@ -9,9 +9,9 @@ import ApplicationServices
 import Cocoa
 import Foundation
 
-class ActiveApplicationInspector {
-	
-	enum InspectorError: Error {
+enum ActiveApplicationInspector {
+
+	enum InspectorError: Error, Sendable {
 		case noActiveApp
 		case permissionDenied
 		case invalidParentElement

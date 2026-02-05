@@ -7,7 +7,7 @@
 
 import Foundation
 
-public enum SearchState: String, MenuOptions {
+public enum SearchState: String, MenuOptions, Sendable {
     
     case search
     case deepResearch

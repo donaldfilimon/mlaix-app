@@ -8,8 +8,8 @@
 import Foundation
 import SwiftUI
 
-public struct QuickPrompt: Identifiable {
-	
+public struct QuickPrompt: Identifiable, Sendable {
+
 	public init(
 		text: String,
 		description: String,
@@ -21,22 +21,22 @@ public struct QuickPrompt: Identifiable {
 		self.icon = icon
 		self.color = color
 	}
-	
+
 	/// Conform to identifiable
 	public let id: UUID = UUID()
-	
+
 	/// String containing the text of the prompt
 	public var text: String
-	
+
 	/// String containing a short description of the prompt
 	private var description: String
 	/// The identifier used for the prompt's icon's image
 	private var icon: String
 	/// The color used for the prompt's icon's image
-	private var color: Color = Color.secondary
-	
+	private nonisolated(unsafe) var color: Color = Color.secondary
+
 	/// This prompt's label
-	var label: some View {
+	@MainActor var label: some View {
 		HStack(
 			alignment: .center
 		) {

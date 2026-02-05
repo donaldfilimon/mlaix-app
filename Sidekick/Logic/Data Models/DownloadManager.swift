@@ -205,7 +205,8 @@ extension DownloadManager: URLSessionDelegate, URLSessionDownloadDelegate {
 			// Move the model to the directory
 			try fileManager.moveItem(at: location, to: destinationURL)
 			// Point to the model if needed
-			Task { @MainActor in
+			Task { @MainActor [weak self] in
+				guard let self else { return }
 				if self.shouldAddModel {
 					if Settings.modelUrl == nil {
 						Settings.modelUrl = destinationURL

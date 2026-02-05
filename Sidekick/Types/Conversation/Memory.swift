@@ -6,9 +6,9 @@
 //
 
 import Foundation
-import SimilaritySearchKit
+@preconcurrency import SimilaritySearchKit
 
-public struct Memory: Identifiable, Equatable, Codable {
+public struct Memory: Identifiable, Equatable, Codable, Sendable {
     
     init?(
         messageId: UUID,

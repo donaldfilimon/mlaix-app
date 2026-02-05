@@ -8,7 +8,7 @@
 import Foundation
 import SimilaritySearchKit
 
-public struct Source: Identifiable, Codable, Hashable {
+public struct Source: Identifiable, Codable, Hashable, Sendable {
 	
 	/// Stored property for `Identifiable` conformance
 	public var id: UUID = UUID()
@@ -37,12 +37,12 @@ public struct Source: Identifiable, Codable, Hashable {
         return SourceContent(url: self.source, content: content)
     }
     
-    public struct SourceInfo: Codable {
+    public struct SourceInfo: Codable, Sendable {
         public var url: String
         public var text: String
     }
-    
-    public struct SourceContent: Codable {
+
+    public struct SourceContent: Codable, Sendable {
         public var url: String
         public var content: String
     }
@@ -75,7 +75,7 @@ public struct Source: Identifiable, Codable, Hashable {
     
 }
 
-public struct Sources: Identifiable, Codable, Hashable {
+public struct Sources: Identifiable, Codable, Hashable, Sendable {
 	
 	/// Stored property for `Identifiable` conformance
 	public var id: UUID = UUID()

@@ -7,9 +7,9 @@
 
 import Foundation
 
-public class ArithmeticFunctions {
-    
-    static var functions: [AnyFunctionBox] = [
+public final class ArithmeticFunctions: Sendable {
+
+    static let functions: [AnyFunctionBox] = [
         ArithmeticFunctions.sum,
         ArithmeticFunctions.average,
         ArithmeticFunctions.multiply,

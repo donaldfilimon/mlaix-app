@@ -7,15 +7,15 @@
 
 import Foundation
 
-public class TodoFunctions {
-    
+public final class TodoFunctions: @unchecked Sendable {
+
     /// Storage for active to-do lists (keyed by conversation ID or session)
-    static var activeTodoLists: [String: TodoList] = [:]
-    
+    private nonisolated(unsafe) static var activeTodoLists: [String: TodoList] = [:]
+
     /// Thread-safe access to active to-do lists
     private static let todoListQueue = DispatchQueue(label: "com.sidekick.todolist", attributes: .concurrent)
-    
-    static var functions: [AnyFunctionBox] = [
+
+    static let functions: [AnyFunctionBox] = [
         TodoFunctions.createTodoList,
         TodoFunctions.addTodoItem,
         TodoFunctions.finishTodoItem

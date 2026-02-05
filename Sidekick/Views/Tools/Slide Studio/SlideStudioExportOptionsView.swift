@@ -202,7 +202,9 @@ struct SlideStudioExportOptionsView: View {
 		) { _ in
 			// Check if export is complete
 			if outputUrl.fileExists {
-				self.finishExport()
+				MainActor.assumeIsolated {
+					self.finishExport()
+				}
 			}
 		}
 	}

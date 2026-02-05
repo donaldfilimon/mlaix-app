@@ -21,21 +21,21 @@ public class EntityExtractor {
     public typealias ProgressCallback = @Sendable (Int, Int, String, Int) -> Void
     
     /// Result from entity extraction
-    public struct ExtractionResult {
+    public struct ExtractionResult: Sendable {
         public var entities: [EntityData]
         public var relationships: [RelationshipData]
     }
-    
+
     /// Intermediate entity data
-    public struct EntityData: Codable {
+    public struct EntityData: Codable, Sendable {
         public var name: String
         public var type: String
         public var description: String
         public var sourceChunks: [Int]
     }
-    
+
     /// Intermediate relationship data
-    public struct RelationshipData: Codable {
+    public struct RelationshipData: Codable, Sendable {
         public var sourceEntity: String
         public var targetEntity: String
         public var relationshipType: String
@@ -44,18 +44,18 @@ public class EntityExtractor {
     }
     
     /// JSON structure for LLM response
-    private struct LLMResponse: Codable {
+    private struct LLMResponse: Codable, Sendable {
         var entities: [LLMEntity]?
         var relationships: [LLMRelationship]?
     }
-    
-    private struct LLMEntity: Codable {
+
+    private struct LLMEntity: Codable, Sendable {
         var name: String
         var type: String
         var description: String
     }
-    
-    private struct LLMRelationship: Codable {
+
+    private struct LLMRelationship: Codable, Sendable {
         var source: String
         var target: String
         var type: String
@@ -195,18 +195,15 @@ Extract entities and relationships from the following text:
         }
         
         // Get response from worker model
-        var responseText = ""
         let response = try await Model.shared.listenThinkRespond(
             messages: [systemMessage, userMessage],
             modelType: .worker,
             mode: .default,
             handleResponseUpdate: { _, _ in },
-            handleResponseFinish: { fullMessage, _, _ in
-                responseText = fullMessage
-            }
+            handleResponseFinish: { _, _, _ in }
         )
-        
-        responseText = response.text
+
+        let responseText = response.text
         
         // Restore previous status
         await MainActor.run {
@@ -329,7 +326,7 @@ Extract entities and relationships from the following text:
     }
     
     /// Error types
-    public enum ExtractionError: Error {
+    public enum ExtractionError: Error, Sendable {
         case invalidJSON(String)
         case extractionFailed(String)
     }

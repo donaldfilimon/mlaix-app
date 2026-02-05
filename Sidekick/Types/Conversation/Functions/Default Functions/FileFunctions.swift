@@ -9,9 +9,9 @@ import ExtractKit_macOS
 import Foundation
 import FSKit_macOS
 
-public class FileFunctions {
-    
-    static var functions: [AnyFunctionBox] = [
+public final class FileFunctions: Sendable {
+
+    static let functions: [AnyFunctionBox] = [
         FileFunctions.listDirectory,
         FileFunctions.extractFileText,
         FileFunctions.writePlaintextToFile,

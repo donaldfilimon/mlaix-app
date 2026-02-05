@@ -113,7 +113,7 @@ private struct MarkdownImageView: View {
                 name: url.lastPathComponent,
                 type: .fileURL
             ) { destUrl in
-                await FileManager.copyItem(from: url, to: destUrl)
+                FileManager.copyItem(from: url, to: destUrl)
             },
             preview: NSImage(contentsOf: url) ?? NSImage(named: "questionmark.app.fill")!
         )

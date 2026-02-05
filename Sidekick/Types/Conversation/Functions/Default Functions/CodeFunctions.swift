@@ -7,9 +7,9 @@
 
 import Foundation
 
-public class CodeFunctions {
-    
-    static var functions: [AnyFunctionBox] = {
+public final class CodeFunctions: Sendable {
+
+    static let functions: [AnyFunctionBox] = {
         var baseFunctions: [AnyFunctionBox] = [
             CodeFunctions.runJavaScript,
             CodeFunctions.runCommand

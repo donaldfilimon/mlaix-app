@@ -11,7 +11,7 @@ import FSKit_macOS
 import SwiftUI
 import UniformTypeIdentifiers
 
-public struct ReferencedURL: Codable, Equatable, Hashable {
+public struct ReferencedURL: Codable, Equatable, Hashable, Sendable {
 	
 	/// URL referenced in a response
 	public var url: URL

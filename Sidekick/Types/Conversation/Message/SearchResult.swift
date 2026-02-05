@@ -8,7 +8,7 @@
 import Foundation
 import SimilaritySearchKit
 
-public struct SearchResult: Identifiable, Codable {
+public struct SearchResult: Identifiable, Codable, Sendable {
 	
 	init(
 		searchResult: SimilaritySearchKit.SearchResult

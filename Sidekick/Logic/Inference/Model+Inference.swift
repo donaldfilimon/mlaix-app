@@ -81,9 +81,10 @@ extension Model {
             type: modelType,
             usingRemoteModel: useServer
         )
-        let messagesWithSources: [Message.MessageSubset] = await messages
-            .enumerated()
-            .asyncMap { @Sendable index, message in
+        // Convert enumerated sequence to array for Sendable compliance
+        let indexedMessages: [(Int, Message)] = Array(messages.enumerated())
+        let messagesWithSources: [Message.MessageSubset] = await indexedMessages
+            .asyncMap { @Sendable (index, message) in
                 return await Message.MessageSubset(
                     modelType: modelType,
                     usingRemoteModel: useServer,
@@ -289,8 +290,9 @@ extension Model {
             useFunctions: useFunctions,
             functions: functions,
             expert: expert,
-            updateStatusHandler: { [weak self] status in
-                await MainActor.run {
+            updateStatusHandler: { @Sendable [weak self] status in
+                guard let self else { return }
+                await MainActor.run { [weak self] in
                     self?.updateStatus(status)
                 }
             },
@@ -537,15 +539,19 @@ Call another tool to obtain more information or execute more actions. Try breaki
                 self.pendingMessage?.text = ""
 
                 do {
+                    // Capture messages and functions as local constants for Sendable compliance
+                    let capturedMessages = messages
+                    let capturedFunctions = functions
                     response = try await self.mainModelServer.getChatCompletion(
                         mode: .chat,
                         canReachRemoteServer: canReachRemoteServer,
-                        messages: messages,
+                        messages: capturedMessages,
                         useWebSearch: useWebSearch,
                         useFunctions: true,
-                        functions: functions,
-                        updateStatusHandler: { [weak self] status in
-                            await MainActor.run {
+                        functions: capturedFunctions,
+                        updateStatusHandler: { @Sendable [weak self] status in
+                            guard let self else { return }
+                            await MainActor.run { [weak self] in
                                 self?.updateStatus(status)
                             }
                         },
@@ -667,11 +673,13 @@ Please try rephrasing your request or contact support if the issue persists.
             // Declare variable for incremental update
             let fallbackAccumulator = SendableAccumulator()
             self.pendingMessage?.text = ""
+            // Capture messages as local constant for Sendable compliance
+            let capturedMessages = messages
             // Get response
             var response: LlamaServer.CompleteResponse = try await self.mainModelServer.getChatCompletion(
                 mode: .default,
                 canReachRemoteServer: canReachRemoteServer,
-                messages: messages,
+                messages: capturedMessages,
                 progressHandler: { [weak self, fallbackAccumulator] partialResponse in
                     Task { @MainActor in
                         guard let self = self else { return }
@@ -734,6 +742,8 @@ Respond with YES if ALL 3 criteria above have been met. Respond with YES or NO o
         // Add to messages
         var messages: [Message.MessageSubset] = messages
         messages.append(messageSubset)
+        // Capture messages for Sendable compliance
+        let capturedMessages = messages
         // Check with model for a maximum of 3 tries
         for _ in 0..<3 {
             do {
@@ -744,7 +754,7 @@ Respond with YES if ALL 3 criteria above have been met. Respond with YES or NO o
                             try await self.mainModelServer.getChatCompletion(
                                 mode: .`default`,
                                 canReachRemoteServer: canReachRemoteServer,
-                                messages: messages,
+                                messages: capturedMessages,
                                 useWebSearch: false,
                                 useFunctions: true
                             )
@@ -752,7 +762,7 @@ Respond with YES if ALL 3 criteria above have been met. Respond with YES or NO o
                             try await self.workerModelServer.getChatCompletion(
                                 mode: .`default`,
                                 canReachRemoteServer: canReachRemoteServer,
-                                messages: messages,
+                                messages: capturedMessages,
                                 useWebSearch: false,
                                 useFunctions: true
                             )

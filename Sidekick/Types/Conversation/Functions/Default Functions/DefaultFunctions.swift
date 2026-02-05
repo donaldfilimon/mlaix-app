@@ -10,26 +10,26 @@ import Contacts
 import Foundation
 import FSKit_macOS
 
-public protocol FunctionParams: Codable, Hashable {}
+public protocol FunctionParams: Codable, Hashable, Sendable {}
 
 struct BlankParams: FunctionParams {}
 
-public class DefaultFunctions {
-    
+public final class DefaultFunctions: Sendable {
+
     /// An list of all functions available (unfiltered)
-    static var allFunctions: [AnyFunctionBox] = [
+    static let allFunctions: [AnyFunctionBox] = [
         DefaultFunctions.chatFunctions
     ].flatMap { $0 }
-    
+
     /// An sorted list of all functions available (unfiltered)
     static var sortedFunctions: [AnyFunctionBox] {
         return DefaultFunctions.allFunctions.sorted(by: {
             $0.params.count > $1.params.count
         })
     }
-    
+
     /// An list of functions available in chat (unfiltered)
-    static var chatFunctions: [AnyFunctionBox] = [
+    static let chatFunctions: [AnyFunctionBox] = [
         ArithmeticFunctions.functions,
         CalendarFunctions.functions,
         CodeFunctions.functions,

@@ -10,7 +10,7 @@ import SQLite
 import OSLog
 
 /// A knowledge graph containing entities, relationships, and hierarchical communities
-public class KnowledgeGraph: Codable {
+public final class KnowledgeGraph: Codable, @unchecked Sendable {
 	
 	/// A `Logger` object for ``KnowledgeGraph`` objects
 	private static let logger: Logger = .init(
