@@ -50,7 +50,7 @@ public class MermaidRenderer: @unchecked Sendable {
     
     /// A `Logger` object for the `DiagrammerViewController` object
     private static let logger: Logger = .init(
-        subsystem: Bundle.main.bundleIdentifier!,
+        subsystem: Bundle.main.logSubsystem,
         category: String(describing: MermaidRenderer.self)
     )
     

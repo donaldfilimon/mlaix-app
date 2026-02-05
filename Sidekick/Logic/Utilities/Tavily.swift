@@ -12,7 +12,7 @@ public class Tavily {
 	
 	/// A `Logger` object for the `Tavily` object
 	private static let logger: Logger = .init(
-		subsystem: Bundle.main.bundleIdentifier!,
+		subsystem: Bundle.main.logSubsystem,
 		category: String(describing: Tavily.self)
 	)
 	

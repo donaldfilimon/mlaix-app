@@ -18,7 +18,7 @@ public class Model: ObservableObject {
     // MARK: - Logging
     
     static let logger: Logger = .init(
-        subsystem: Bundle.main.bundleIdentifier!,
+        subsystem: Bundle.main.logSubsystem,
         category: String(describing: Model.self)
     )
     

@@ -13,7 +13,7 @@ struct ChatParameters: Codable {
     
     /// A `Logger` object for the ``ChatParameters`` object
     private static let logger: Logger = .init(
-        subsystem: Bundle.main.bundleIdentifier!,
+        subsystem: Bundle.main.logSubsystem,
         category: String(describing: ChatParameters.self)
     )
     

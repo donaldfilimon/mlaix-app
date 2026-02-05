@@ -14,7 +14,7 @@ public class GraphRetriever {
     
     /// A `Logger` object for ``GraphRetriever``
     private static let logger: Logger = .init(
-        subsystem: Bundle.main.bundleIdentifier!,
+        subsystem: Bundle.main.logSubsystem,
         category: String(describing: GraphRetriever.self)
     )
     

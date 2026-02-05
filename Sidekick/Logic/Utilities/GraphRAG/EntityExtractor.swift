@@ -13,7 +13,7 @@ public class EntityExtractor {
     
     /// A `Logger` object for ``EntityExtractor``
     private static let logger: Logger = .init(
-        subsystem: Bundle.main.bundleIdentifier!,
+        subsystem: Bundle.main.logSubsystem,
         category: String(describing: EntityExtractor.self)
     )
     

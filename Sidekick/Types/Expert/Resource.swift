@@ -16,7 +16,7 @@ public struct Resource: Identifiable, Codable, Hashable, Sendable {
     
     /// A `Logger` object for ``Resource`` objects
     private static let logger: Logger = .init(
-        subsystem: Bundle.main.bundleIdentifier!,
+        subsystem: Bundle.main.logSubsystem,
         category: String(describing: Resource.self)
     )
     

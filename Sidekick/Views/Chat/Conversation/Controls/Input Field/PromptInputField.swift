@@ -15,7 +15,7 @@ struct PromptInputField: View {
     
     /// A `Logger` object for the `PromptInputField` object
     private static let logger: Logger = .init(
-        subsystem: Bundle.main.bundleIdentifier!,
+        subsystem: Bundle.main.logSubsystem,
         category: String(describing: PromptInputField.self)
     )
     
