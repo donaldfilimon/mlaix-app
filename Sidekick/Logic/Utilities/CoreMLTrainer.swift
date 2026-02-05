@@ -9,6 +9,7 @@ import Foundation
 
 #if canImport(CreateML)
 import CreateML
+import TabularData
 #endif
 
 enum CoreMLTrainingError: LocalizedError {
@@ -34,16 +35,29 @@ enum CoreMLTrainer {
     static func trainPromptClassifier(from datasetUrl: URL) async throws -> URL {
         #if canImport(CreateML)
         do {
-            let table = try MLDataTable(contentsOf: datasetUrl)
-            let columns = Set(table.columnNames)
-            guard columns.contains("text"), columns.contains("label") else {
-                throw CoreMLTrainingError.invalidDataset
+            let classifier: MLTextClassifier
+            if #available(macOS 13.0, *) {
+                let dataFrame = try DataFrame(contentsOfCSVFile: datasetUrl)
+                guard dataFrame.containsColumn("text"), dataFrame.containsColumn("label") else {
+                    throw CoreMLTrainingError.invalidDataset
+                }
+                classifier = try MLTextClassifier(
+                    trainingData: dataFrame,
+                    textColumn: "text",
+                    labelColumn: "label"
+                )
+            } else {
+                let table = try MLDataTable(contentsOf: datasetUrl)
+                let columns = Set(table.columnNames)
+                guard columns.contains("text"), columns.contains("label") else {
+                    throw CoreMLTrainingError.invalidDataset
+                }
+                classifier = try MLTextClassifier(
+                    trainingData: table,
+                    textColumn: "text",
+                    labelColumn: "label"
+                )
             }
-            let classifier = try MLTextClassifier(
-                trainingData: table,
-                textColumn: "text",
-                labelColumn: "label"
-            )
             let outputDir = Settings.containerUrl.appendingPathComponent(
                 "CoreML"
             )
