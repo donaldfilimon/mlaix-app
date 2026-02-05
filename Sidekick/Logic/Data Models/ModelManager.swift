@@ -1,6 +1,6 @@
 //
 //  ModelManager.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by Bean John on 11/8/24.
 //
@@ -9,7 +9,6 @@ import Foundation
 import FSKit_macOS
 import os.log
 import SwiftUI
-import UniformTypeIdentifiers
 
 @MainActor
 public class ModelManager: ObservableObject {
@@ -21,9 +20,6 @@ public class ModelManager: ObservableObject {
 	
 	/// Static constant for the global ``ModelManager`` object
 	static public let shared: ModelManager = .init()
-	
-	/// Static constant for the `gguf` UniformTypeIdentifier
-	static private let ggufType: UTType = UTType("com.npc-pet.Chats.gguf") ?? .data
 	
 	@Published var models: [ModelFile] = [] {
 		didSet {
@@ -38,14 +34,21 @@ public class ModelManager: ObservableObject {
 			dialogTitle: String(
 				localized: "Select a Model"
 			),
-			canSelectDirectories: false,
-			allowedContentTypes: [Self.ggufType],
+			canSelectDirectories: true,
+			allowedContentTypes: Settings.modelContentTypes,
 			allowMultipleSelection: false,
 			persistPermissions: true
 		) {
 			guard let modelUrl = modelUrls.first else {
 				return false
 			}
+            guard Settings.isSupportedModelURL(modelUrl) else {
+                Dialogs.showAlert(
+                    title: String(localized: "Unsupported Model"),
+                    message: String(localized: "Select a .gguf file or an MLX model folder.")
+                )
+                return false
+            }
 			// Add to model list
 			ModelManager.shared.add(modelUrl)
 			return true

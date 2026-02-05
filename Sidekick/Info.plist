@@ -2,6 +2,14 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>CFBundleDisplayName</key>
+	<string>MLAI</string>
+	<key>CFBundleExecutable</key>
+	<string>MLAI</string>
+	<key>CFBundleIdentifier</key>
+	<string>com.donaldfilimon.mlaix</string>
+	<key>CFBundleName</key>
+	<string>MLAI</string>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
@@ -11,20 +19,34 @@
 			<string></string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>sidekick</string>
+				<string>mlai</string>
 			</array>
 		</dict>
 	</array>
+	<key>NSCalendarsUsageDescription</key>
+	<string>MLAI needs to access your calendar.</string>
+	<key>NSContactsUsageDescription</key>
+	<string>MLAI needs to access your contacts.</string>
 	<key>NSAccessibilityUsageDescription</key>
-	<string>Sidekick can perform operations on selected text such as fixing grammar, extending texts as well as custom commands.</string>
+	<string>MLAI can perform operations on selected text such as fixing grammar, extending texts as well as custom commands.</string>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsArbitraryLoads</key>
 		<true/>
 	</dict>
-	<key>SUFeedURL</key>
-	<string>https://johnbean393.github.io/Sidekick/appcast.xml</string>
-	<key>SUPublicEDKey</key>
-	<string>jrJEixL9VTAptOmKf2JJ8aLoiMVV0bNcSNA1covfmtw=</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>MLAI needs to access your location.</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>MLAI needs to access your location.</string>
+	<key>NSLocationUsageDescription</key>
+	<string>MLAI needs to access your location.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>MLAI needs to access your location.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>MLAI needs access to the microphone for transcription.</string>
+	<key>NSRemindersUsageDescription</key>
+	<string>MLAI needs to access your reminders.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>MLAI needs access to speech recognition services for transcription.</string>
 </dict>
 </plist>

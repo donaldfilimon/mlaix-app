@@ -1,6 +1,6 @@
 //
 //  CommandButton.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by Bean John on 11/18/24.
 //

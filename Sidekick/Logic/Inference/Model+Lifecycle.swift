@@ -1,6 +1,6 @@
 //
 //  Model+Lifecycle.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by Bean John on 9/22/24.
 //
@@ -17,6 +17,11 @@ extension Model {
     ) async {
         self.systemPrompt = systemPrompt
         await self.mainModelServer.setSystemPrompt(systemPrompt)
+        #if canImport(FoundationModels)
+        if #available(macOS 26.0, *) {
+            FoundationModelsClient.shared.updateSystemPrompt(systemPrompt)
+        }
+        #endif
     }
     
     public func refreshModel() async {
@@ -29,6 +34,11 @@ extension Model {
         self.workerModelServer = LlamaServer(
             modelType: .worker
         )
+        #if canImport(FoundationModels)
+        if #available(macOS 26.0, *) {
+            FoundationModelsClient.shared.resetSession(systemPrompt: self.systemPrompt)
+        }
+        #endif
         let canReachRemoteServer: Bool = await self.remoteServerIsReachable()
         self.wasRemoteServerAccessible = canReachRemoteServer
     }
@@ -127,5 +137,4 @@ extension Model {
     }
     
 }
-
 

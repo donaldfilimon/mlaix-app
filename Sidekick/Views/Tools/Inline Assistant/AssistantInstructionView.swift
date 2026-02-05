@@ -1,6 +1,6 @@
 //
 //  AssistantInstructionView.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by John Bean on 2/20/25.
 //
@@ -12,7 +12,7 @@ struct AssistantInstructionView: View {
 	
 	var instruction: String {
 		return [
-			String(localized: "Sidekick's Inline Writing Assistant is enabled by default."),
+			String(localized: "MLAI's Inline Writing Assistant is enabled by default."),
 			commandsInstructions,
 			completionsInstructions,
 			changeShortcutInstructions

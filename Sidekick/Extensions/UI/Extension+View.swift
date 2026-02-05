@@ -1,6 +1,6 @@
 //
 //  Extension+View.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by Bean John on 10/10/24.
 //
@@ -141,5 +141,68 @@ extension View {
 			return self
 		}
 	}
+    
+    public func liquidGlassWindow() -> some View {
+        modifier(LiquidGlassWindowModifier())
+    }
+    
+    public func liquidGlassPanel(cornerRadius: CGFloat? = nil) -> some View {
+        modifier(LiquidGlassPanelModifier(cornerRadius: cornerRadius))
+    }
 	
+}
+
+private struct LiquidGlassWindowModifier: ViewModifier {
+    @Environment(\.liquidGlassStyle) private var style
+    
+    func body(content: Content) -> some View {
+        if #available(macOS 15, *), style.isEnabled {
+            content
+                .containerBackground(style.material, for: .window)
+                .background(
+                    LinearGradient(
+                        colors: [
+                            style.tintColor.opacity(style.opacity),
+                            style.highlightColor.opacity(style.opacity * 0.6)
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+        } else {
+            content
+        }
+    }
+}
+
+private struct LiquidGlassPanelModifier: ViewModifier {
+    @Environment(\.liquidGlassStyle) private var style
+    let cornerRadius: CGFloat?
+    
+    func body(content: Content) -> some View {
+        let radius = cornerRadius ?? style.cornerRadius
+        if #available(macOS 15, *), style.isEnabled {
+            content
+                .background(
+                    RoundedRectangle(cornerRadius: radius, style: .continuous)
+                        .fill(style.material)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: radius, style: .continuous)
+                                .stroke(style.highlightColor.opacity(0.3), lineWidth: 0.6)
+                        )
+                        .overlay(
+                            LinearGradient(
+                                colors: [
+                                    style.tintColor.opacity(style.opacity),
+                                    style.highlightColor.opacity(style.opacity * 0.8)
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                )
+        } else {
+            content
+        }
+    }
 }

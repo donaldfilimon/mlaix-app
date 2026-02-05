@@ -1,6 +1,6 @@
 //
 //  DeepResearchFunctions.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by John Bean on 5/14/25.
 //
@@ -19,7 +19,7 @@ public final class DeepResearchFunctions: Sendable {
         ) ?? .duckDuckGo
         if provider == .tavily {
             functions.append(
-                WebFunctions.tavilyWebSearch(searchDepth: .advanced)
+                WebFunctions.tavilyWebSearch(searchDepth: tavilySearchDepth)
             )
         } else {
             functions.append(WebFunctions.standardWebSearch)
@@ -31,6 +31,17 @@ public final class DeepResearchFunctions: Sendable {
         // Add vector search functions
         functions += ExpertFunctions.functions
         return functions
+    }
+    
+    private static var tavilySearchDepth: Tavily.SearchRequest.SearchDepth {
+        switch DeepResearchSettings.depth {
+            case .fast:
+                return .basic
+            case .balanced:
+                return .basic
+            case .thorough:
+                return .advanced
+        }
     }
     
     /// A function to get the content of a website via its url

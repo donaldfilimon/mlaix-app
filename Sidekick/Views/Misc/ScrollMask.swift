@@ -1,6 +1,6 @@
 //
 //  ScrollMask.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by Bean John on 10/24/24.
 //

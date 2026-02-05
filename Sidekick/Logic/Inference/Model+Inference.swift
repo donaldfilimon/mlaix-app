@@ -1,6 +1,6 @@
 //
 //  Model+Inference.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by Bean John on 9/22/24.
 //
@@ -35,6 +35,73 @@ private final class SendableAccumulator: @unchecked Sendable {
 }
 
 extension Model {
+
+    private func shouldUseFoundationModels(
+        mode: Model.Mode,
+        modelType: ModelType,
+        useWebSearch: Bool,
+        useFunctions: Bool,
+        temporaryResources: [TemporaryResource]
+    ) -> Bool {
+        guard InferenceSettings.useFoundationModels else { return false }
+        guard FoundationModelsSupport.isAvailable else { return false }
+        guard modelType == .regular else { return false }
+        guard mode == .chat else { return false }
+        guard !useWebSearch, !useFunctions else { return false }
+        let hasImageResources = temporaryResources.contains { $0.isImage }
+        return !hasImageResources
+    }
+
+    private func foundationModelsPrompt(
+        from messages: [Message]
+    ) -> String {
+        let formatted: [String] = messages.map { message in
+            let sender = message.getSender()
+            let roleLabel: String = {
+                switch sender {
+                    case .user:
+                        return "User"
+                    case .assistant:
+                        return "Assistant"
+                    case .system:
+                        return "System"
+                }
+            }()
+            let content: String = sender == .assistant ? message.responseText : message.text
+            return "\(roleLabel): \(content)"
+        }
+        return formatted.joined(separator: "\n\n")
+    }
+
+    private func getFoundationModelsResponse(
+        messages: [Message],
+        showPreview: Bool,
+        handleResponseUpdate: @escaping @Sendable (String, String) -> Void
+    ) async throws -> LlamaServer.CompleteResponse {
+        #if canImport(FoundationModels)
+        if #available(macOS 26.0, *) {
+            let start: CFAbsoluteTime = CFAbsoluteTimeGetCurrent()
+            let prompt = foundationModelsPrompt(from: messages)
+            let responseText = try await FoundationModelsClient.shared.respond(to: prompt)
+            if showPreview {
+                self.handleCompletionProgress(
+                    showPreview: showPreview,
+                    partialResponse: responseText,
+                    handleResponseUpdate: handleResponseUpdate
+                )
+            }
+            return LlamaServer.CompleteResponse(
+                text: responseText,
+                responseStartSeconds: start,
+                predictedPerSecond: nil,
+                modelName: "Apple Foundation Model",
+                usage: nil,
+                usedServer: false
+            )
+        }
+        #endif
+        throw LlamaServerError.modelError
+    }
     
     /// Function for the main loop
     /// Listen -> respond -> update mental model and save checkpoint
@@ -71,6 +138,42 @@ extension Model {
         if preQueryStatus.isForegroundTask {
             let isDeepResearching: Bool = self.status == .deepResearch
             self.status = (mode.isAgent || isDeepResearching) ? .deepResearch : .querying
+        }
+        if shouldUseFoundationModels(
+            mode: mode,
+            modelType: modelType,
+            useWebSearch: useWebSearch,
+            useFunctions: useFunctions,
+            temporaryResources: temporaryResources
+        ) {
+            do {
+                if self.status.isForegroundTask && self.status != .deepResearch {
+                    if preQueryStatus == .cold {
+                        self.status = .coldProcessing
+                    } else {
+                        self.status = .processing
+                    }
+                }
+                let response = try await getFoundationModelsResponse(
+                    messages: messages,
+                    showPreview: showPreview,
+                    handleResponseUpdate: handleResponseUpdate
+                )
+                handleResponseFinish(
+                    response.text,
+                    self.pendingMessage?.text ?? "",
+                    response.usage?.total_tokens
+                )
+                if showPreview {
+                    self.pendingMessage = nil
+                    self.status = .ready
+                }
+                return response
+            } catch {
+                Self.logger.warning(
+                    "Foundation Models failed, falling back to local/remote model. Error: \(String(describing: error), privacy: .public)"
+                )
+            }
         }
         // Check if remote server is reachable
         let canReachRemoteServer: Bool = await self.remoteServerIsReachable()

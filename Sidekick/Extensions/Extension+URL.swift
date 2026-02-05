@@ -1,6 +1,6 @@
 //
 //  Extension+URL.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by Bean John on 10/4/24.
 //

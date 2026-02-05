@@ -1,6 +1,6 @@
 //
 //  FunctionCallsView.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by John Bean on 4/9/25.
 //

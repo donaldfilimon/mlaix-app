@@ -1,6 +1,6 @@
 //
 //  LlamaServerError.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by Bean John on 10/9/24.
 //
@@ -25,15 +25,15 @@ enum LlamaServerError: LocalizedError {
     var recoverySuggestion: String {
         switch self {
             case .modelError:
-                return String(localized: "The local AI model couldn't be found, and Sidekick could not connect to a remote server. Please verify that the local and server models are configured correctly in Settings.")
+                return String(localized: "The local AI model couldn't be found, and MLAI could not connect to a remote server. Please verify that the local and server models are configured correctly in Settings.")
             case .errorResponse(let message):
                 return String(localized: "Fix the error according to the server's error message below, then try again.\n\n\(message)")
             case .networkError(let message):
                 return String(localized: "The network connection was lost. The request will be automatically retried.\n\n\(message)")
             case .contextWindowExceeded(let message):
-                return String(localized: "The context window was exceeded. Sidekick will automatically compress tool results and retry.\n\n\(message)")
+                return String(localized: "The context window was exceeded. MLAI will automatically compress tool results and retry.\n\n\(message)")
             default:
-                return String(localized: "Restart Sidekick")
+                return String(localized: "Restart MLAI")
         }
     }
     

@@ -1,6 +1,6 @@
 //
 //  ModelNameFormatterTests.swift
-//  SidekickTests
+//  MLAITests
 //
 //  Tests for model name formatting and search matching utilities.
 //

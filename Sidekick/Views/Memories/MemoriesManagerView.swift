@@ -1,6 +1,6 @@
 //
 //  MemoriesManagerView.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by John Bean on 4/22/25.
 //
@@ -58,7 +58,7 @@ struct MemoriesManagerView: View {
                             .font(.title2)
                             .bold()
                             .padding(.bottom, 5)
-                        Text("Sidekick remembers useful details about you and")
+                        Text("MLAI remembers useful details about you and")
                         Text("your preferences so it can be more helpful.")
                     }
                     .padding()

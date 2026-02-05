@@ -1,6 +1,6 @@
 //
 //  ActiveApplicationInspector.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by John Bean on 3/24/25.
 //
@@ -194,8 +194,8 @@ enum ActiveApplicationInspector {
 			print("Error: Could not retrieve the focused UI element.")
 			return
 		}
-		// Convert the focused element to AXUIElement using unsafeBitCast.
-		let element = unsafeBitCast(focused, to: AXUIElement.self)
+		// Convert the focused element to AXUIElement.
+		let element = unsafeDowncast(focused, to: AXUIElement.self)
 		// Access the font attributes. Note that not all apps expose these.
 		var fontFamilyValue: CFTypeRef?
 		let familyResult = AXUIElementCopyAttributeValue(element,

@@ -1,6 +1,6 @@
 //
 //  DetectorEntitySentencesView.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by John Bean on 2/25/25.
 //

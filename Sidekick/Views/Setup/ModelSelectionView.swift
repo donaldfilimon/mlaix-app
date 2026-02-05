@@ -1,6 +1,6 @@
 //
 //  ModelSelectionView.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by Bean John on 9/23/24.
 //
@@ -16,9 +16,13 @@ struct ModelSelectionView: View {
 	@State private var showServerModelSetup: Bool = false
 	@State private var didPressDownload: Bool = false
 	
-    var body: some View {
+	var body: some View {
 		VStack {
 			welcome
+            if FoundationModelsSupport.isAvailable {
+                foundationModelsButton
+                    .padding(.top, 8)
+            }
 			downloadButton
 				.padding(.top, 5)
 			downloadManager.progressView
@@ -44,7 +48,7 @@ struct ModelSelectionView: View {
 					.opacity(0.7)
 				self.appIconImage
 			}
-			Text("Welcome to Sidekick")
+			Text("Welcome to MLAI")
 				.foregroundStyle(.primary)
 				.font(.largeTitle)
 				.fontWeight(.heavy)
@@ -54,6 +58,19 @@ struct ModelSelectionView: View {
 		}
 	}
 	
+    var foundationModelsButton: some View {
+        Button {
+            InferenceSettings.useFoundationModels = true
+            InferenceSettings.useServer = false
+            selectedModel = true
+        } label: {
+            Text("Use Apple Foundation Models")
+                .padding(.horizontal, 20)
+        }
+        .controlSize(.large)
+        .frame(minWidth: 220)
+    }
+
 	var appIconImage: some View {
 		Image("appIcon")
 			.resizable()
@@ -98,7 +115,7 @@ struct ModelSelectionView: View {
 			// After selection, move to next screen
 			selectedModel = didSelect
 		} label: {
-			Text("Use GGUF model")
+			Text("Use GGUF or MLX model")
 		}
 		.buttonStyle(.link)
 	}

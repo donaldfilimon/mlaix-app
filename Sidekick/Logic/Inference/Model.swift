@@ -1,6 +1,6 @@
 //
 //  Model.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by Bean John on 9/22/24.
 //
@@ -76,6 +76,9 @@ public class Model: ObservableObject {
     // MARK: - Model Selection
     
     public var selectedModelName: String? {
+        if InferenceSettings.useFoundationModels && FoundationModelsSupport.isAvailable {
+            return "Apple Foundation Model"
+        }
         // Check if remote model is accessible
         let useServer: Bool = InferenceSettings.useServer && self.wasRemoteServerAccessible
         // If using remote

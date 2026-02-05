@@ -1,6 +1,6 @@
 //
 //  ModelListView.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by Bean John on 11/8/24.
 //

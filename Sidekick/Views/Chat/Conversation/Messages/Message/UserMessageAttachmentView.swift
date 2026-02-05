@@ -1,6 +1,6 @@
 //
 //  UserMessageAttachmentView.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by Bean John on 11/11/25.
 //

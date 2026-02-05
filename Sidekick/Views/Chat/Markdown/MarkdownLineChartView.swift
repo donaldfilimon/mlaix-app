@@ -1,6 +1,6 @@
 //
 //  MarkdownLineChartView.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by Bean John on 11/6/24.
 //

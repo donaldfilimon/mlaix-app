@@ -1,6 +1,6 @@
 //
 //  Extension+NSAttributedString.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by John Bean on 3/16/25.
 //

@@ -1,6 +1,6 @@
 //
 //  ArithmeticFunctions.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by John Bean on 4/14/25.
 //

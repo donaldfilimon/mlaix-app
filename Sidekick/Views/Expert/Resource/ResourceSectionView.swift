@@ -1,6 +1,6 @@
 //
 //  ResourceSectionView.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by Bean John on 10/11/24.
 //

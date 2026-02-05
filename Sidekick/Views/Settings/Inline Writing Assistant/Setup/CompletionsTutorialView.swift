@@ -1,6 +1,6 @@
 //
 //  CompletionsTutorialView.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by John Bean on 3/25/25.
 //

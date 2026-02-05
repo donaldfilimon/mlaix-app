@@ -1,6 +1,6 @@
 //
 //  TextOutputFormat.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by Bean John on 10/8/24.
 //
@@ -27,7 +27,7 @@ extension TextOutputFormat {
 	struct Builder: OutputBuilder {
 		
 		private let theme: Theme
-		private var accumulatedText: [Text]
+		private var accumulatedText: [AttributedString]
 		
 		fileprivate init(theme: Theme) {
 			self.theme = theme
@@ -36,21 +36,26 @@ extension TextOutputFormat {
 		
 		mutating func addToken(_ token: String, ofType type: TokenType) {
 			let color = self.theme.tokenColors[type] ?? self.theme.plainTextColor
-			self.accumulatedText.append(Text(token).foregroundColor(.init(color)))
+			var attributed = AttributedString(token)
+			attributed.foregroundColor = Color(color)
+			self.accumulatedText.append(attributed)
 		}
 		
 		mutating func addPlainText(_ text: String) {
-			self.accumulatedText.append(
-				Text(text).foregroundColor(.init(self.theme.plainTextColor))
-			)
+			var attributed = AttributedString(text)
+			attributed.foregroundColor = Color(self.theme.plainTextColor)
+			self.accumulatedText.append(attributed)
 		}
 		
 		mutating func addWhitespace(_ whitespace: String) {
-			self.accumulatedText.append(Text(whitespace))
+			self.accumulatedText.append(AttributedString(whitespace))
 		}
 		
 		func build() -> Text {
-			self.accumulatedText.reduce(Text(""), +)
+			let combined = self.accumulatedText.reduce(AttributedString()) { partialResult, next in
+				partialResult + next
+			}
+			return Text(combined)
 		}
 		
 	}

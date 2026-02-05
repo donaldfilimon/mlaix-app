@@ -1,6 +1,6 @@
 //
 //  DetectorViewController.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by John Bean on 2/23/25.
 //
@@ -279,9 +279,9 @@ public class DetectorViewController: ObservableObject {
 		
 		/// The user is currently inputting or editing the text
 		case input
-		/// Sidekick is evaluating the text for AI use
+		/// MLAI is evaluating the text for AI use
 		case evaluating
-		/// Sidekick's evaluation results are displayed to the user
+		/// MLAI's evaluation results are displayed to the user
 		case result
 		
 	}

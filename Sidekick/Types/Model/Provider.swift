@@ -1,6 +1,6 @@
 //
 //  Provider.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by John Bean on 4/15/25.
 //
@@ -21,6 +21,7 @@ public struct Provider: Identifiable, Sendable {
     
     /// A list of popular providers
     public static let popularProviders: [Provider] = [
+        Provider.huggingFaceRouter,
         Provider(
             name: "Aliyun Bailian (China)",
             endpointUrl: URL(string: "https://dashscope.aliyuncs.com/compatible-mode/v1")!,
@@ -80,4 +81,10 @@ public struct Provider: Identifiable, Sendable {
             supportsToolCalling: true
         ),
     ]
+
+    /// Hugging Face router (OpenAI-compatible)
+    public static let huggingFaceRouter: Provider = Provider(
+        name: "Hugging Face (Inference Providers)",
+        endpointUrl: URL(string: "https://router.huggingface.co/v1")!
+    )
 }

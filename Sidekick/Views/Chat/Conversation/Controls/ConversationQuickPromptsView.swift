@@ -1,6 +1,6 @@
 //
 //  ConversationQuickPromptsView.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by Bean John on 10/10/24.
 //

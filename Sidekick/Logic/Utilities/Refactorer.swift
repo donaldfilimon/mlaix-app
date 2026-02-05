@@ -1,6 +1,6 @@
 //
 //  Refactorer.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by John Bean on 2/23/25.
 //
@@ -38,8 +38,8 @@ public class Refactorer {
         if didRefactor.contains(true) {
             defaults.set(Self.currentMigrationVersion, forKey: Self.migrationDefaultsKey)
             Dialogs.showAlert(
-                title: String(localized: "Restart Sidekick"),
-                message: String(localized: "To properly load your content, please restart Sidekick.")
+                title: String(localized: "Restart MLAI"),
+                message: String(localized: "To properly load your content, please restart MLAI.")
             )
             NSApplication.shared.terminate(nil)
         } else {
@@ -88,7 +88,7 @@ public class Refactorer {
             let newSettingsLocation: URL = URL
                 .libraryDirectory
                 .appendingPathComponent("Preferences")
-                .appendingPathComponent("com.pattonium.Sidekick.plist")
+                .appendingPathComponent("com.donaldfilimon.mlaix.plist")
             FileManager.moveItem(
                 from: settingsLocation,
                 to: newSettingsLocation
@@ -175,7 +175,7 @@ public class Refactorer {
                     title: String(localized: "Endpoint Error"),
                     message: String(
                         localized: """
-Sidekick has adopted OpenAI's API endpoint format. Please navigate to `Settings` -> `Inference` and update your endpoint to end with `/v1`.
+MLAI has adopted OpenAI's API endpoint format. Please navigate to `Settings` -> `Inference` and update your endpoint to end with `/v1`.
 """
                     )
                 )

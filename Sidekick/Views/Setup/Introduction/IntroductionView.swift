@@ -1,6 +1,6 @@
 //
 //  IntroductionView.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by Bean John on 9/23/24.
 //
@@ -21,7 +21,7 @@ struct IntroductionView: View {
             switch introductionViewController.page {
                 case .done:
                     SetupCompleteView(
-                        description: String(localized: "Sidekick is ready to use.")
+                        description: String(localized: "MLAI is ready to use.")
                     ) {
                         Settings.finishSetup()
                         self.showSetup = false

@@ -1,6 +1,6 @@
 //
-//  SidekickApp.swift
-//  Sidekick
+//  MLAIApp.swift
+//  MLAI
 //
 //  Created by Bean John on 10/4/24.
 //
@@ -8,12 +8,11 @@
 import AppKit
 import Foundation
 import FSKit_macOS
-import Sparkle
 import SwiftUI
 import TipKit
 
 @main
-struct SidekickApp: App {
+struct MLAIApp: App {
     
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     
@@ -30,13 +29,25 @@ struct SidekickApp: App {
     @StateObject private var serverArgumentsManager: ServerArgumentsManager = .shared
     @StateObject private var inlineAssistantController: InlineAssistantController = .shared
     @StateObject private var model: Model = .shared
-    
-    /// Updater object for Sparkle
-    private let updaterController: SPUStandardUpdaterController = .init(
-        startingUpdater: true,
-        updaterDelegate: nil,
-        userDriverDelegate: nil
-    )
+
+    @AppStorage("appearanceLiquidGlassEnabled") private var liquidGlassEnabled: Bool = LiquidGlassStyle.default.isEnabled
+    @AppStorage("appearanceGlassMaterial") private var glassMaterialRaw: String = LiquidGlassStyle.default.materialStyle.rawValue
+    @AppStorage("appearanceTintHex") private var tintHex: String = LiquidGlassStyle.default.tintHex
+    @AppStorage("appearanceHighlightHex") private var highlightHex: String = LiquidGlassStyle.default.highlightHex
+    @AppStorage("appearanceGlassOpacity") private var glassOpacity: Double = LiquidGlassStyle.default.opacity
+    @AppStorage("appearanceGlassCornerRadius") private var glassCornerRadius: Double = LiquidGlassStyle.default.cornerRadius
+
+    private var liquidGlassStyle: LiquidGlassStyle {
+        let materialStyle = LiquidGlassStyle.MaterialStyle(rawValue: glassMaterialRaw) ?? .ultraThin
+        return LiquidGlassStyle(
+            isEnabled: liquidGlassEnabled,
+            materialStyle: materialStyle,
+            tintHex: tintHex,
+            highlightHex: highlightHex,
+            opacity: glassOpacity,
+            cornerRadius: glassCornerRadius
+        )
+    }
     
     init() {
         // Hide all tips for now
@@ -67,7 +78,8 @@ struct SidekickApp: App {
                 .environmentObject(inlineAssistantController)
                 .environmentObject(model)
                 .environmentObject(commandManager)
-                .applyWindowMaterial()
+                .environment(\.liquidGlassStyle, liquidGlassStyle)
+                .liquidGlassWindow()
         }
         .windowToolbarStyle(.unified)
         .commands {
@@ -83,10 +95,6 @@ struct SidekickApp: App {
             DebugCommands.commands
             // Commands to obtain help and report problems
             HelpCommands.commands
-            // Command to check for update
-            CommandGroup(after: .appInfo) {
-                CheckForUpdatesView(updater: updaterController.updater)
-            }
         }
         
         // Window for managing memories

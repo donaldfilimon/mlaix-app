@@ -1,6 +1,6 @@
 //
 //  ConversationManagerView.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by Bean John on 10/8/24.
 //
@@ -194,6 +194,9 @@ struct ConversationManagerView: View {
             ConversationSidebarButtons()
         }
         .padding(.vertical, 7)
+        .padding(.horizontal, 8)
+        .liquidGlassPanel(cornerRadius: 16)
+        .padding(.leading, 6)
     }
     
     var conversationView: some View {
@@ -227,6 +230,8 @@ struct ConversationManagerView: View {
             }
             Text("to start a conversation.")
         }
+        .liquidGlassPanel(cornerRadius: 16)
+        .padding()
     }
     
     var canvasToggle: some View {
