@@ -52,7 +52,7 @@ public struct Snapshot: Identifiable, Codable, Equatable, Hashable, Sendable {
 
 		/// A `Logger` object for the ``Site`` object
 		private static let logger: Logger = .init(
-			subsystem: Bundle.main.bundleIdentifier!,
+			subsystem: Bundle.main.logSubsystem,
 			category: String(describing: Site.self)
 		)
 		

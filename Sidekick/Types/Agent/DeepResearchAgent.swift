@@ -14,7 +14,7 @@ public class DeepResearchAgent: Agent {
     
     /// A `Logger` object for the ``DeepResearchAgent`` object
     private static let logger: Logger = .init(
-        subsystem: Bundle.main.bundleIdentifier!,
+        subsystem: Bundle.main.logSubsystem,
         category: String(describing: DeepResearchAgent.self)
     )
     

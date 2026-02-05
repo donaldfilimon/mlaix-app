@@ -195,7 +195,7 @@ class PromptingTextView: NSTextView {
     var shouldPreserveScrollPosition: Bool = false
     
     private static let logger: Logger = .init(
-        subsystem: Bundle.main.bundleIdentifier!,
+        subsystem: Bundle.main.logSubsystem,
         category: String(describing: PromptingTextView.self)
     )
     

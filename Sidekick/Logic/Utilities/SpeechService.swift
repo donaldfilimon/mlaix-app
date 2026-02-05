@@ -33,7 +33,7 @@ final class SpeechSynthesizer: NSObject, ObservableObject {
 	
 	/// A `Logger` object for the ``SpeechSynthesizer`` object
 	private static let logger: Logger = .init(
-		subsystem: Bundle.main.bundleIdentifier!,
+		subsystem: Bundle.main.logSubsystem,
 		category: String(describing: SpeechSynthesizer.self)
 	)
 	

@@ -14,7 +14,7 @@ public final class KnowledgeGraph: Codable, @unchecked Sendable {
 	
 	/// A `Logger` object for ``KnowledgeGraph`` objects
 	private static let logger: Logger = .init(
-		subsystem: Bundle.main.bundleIdentifier!,
+		subsystem: Bundle.main.logSubsystem,
 		category: String(describing: KnowledgeGraph.self)
 	)
 	

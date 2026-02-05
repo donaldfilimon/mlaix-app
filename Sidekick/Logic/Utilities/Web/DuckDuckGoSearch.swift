@@ -12,7 +12,7 @@ public class DuckDuckGoSearch {
     
     /// A `Logger` object for the `DuckDuckGoSearch` object
     private static let logger: Logger = .init(
-        subsystem: Bundle.main.bundleIdentifier!,
+        subsystem: Bundle.main.logSubsystem,
         category: String(describing: DuckDuckGoSearch.self)
     )
     

@@ -14,7 +14,7 @@ public class FunctionSelectionManager: ObservableObject {
     
     /// Logger for the manager
     private static let logger: Logger = .init(
-        subsystem: Bundle.main.bundleIdentifier!,
+        subsystem: Bundle.main.logSubsystem,
         category: String(describing: FunctionSelectionManager.self)
     )
     

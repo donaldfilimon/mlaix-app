@@ -15,7 +15,7 @@ public class ConversationManager: ObservableObject {
     
     /// A `Logger` object for the `ConversationManager` object
     private static let logger: Logger = .init(
-        subsystem: Bundle.main.bundleIdentifier!,
+        subsystem: Bundle.main.logSubsystem,
         category: String(describing: ConversationManager.self)
     )
     

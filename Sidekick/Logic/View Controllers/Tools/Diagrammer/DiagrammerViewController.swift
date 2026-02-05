@@ -16,7 +16,7 @@ public class DiagrammerViewController: ObservableObject {
 	
 	/// A `Logger` object for the `DiagrammerViewController` object
 	private static let logger: Logger = .init(
-		subsystem: Bundle.main.bundleIdentifier!,
+		subsystem: Bundle.main.logSubsystem,
 		category: String(describing: DiagrammerViewController.self)
 	)
 	

@@ -14,7 +14,7 @@ public class GraphDatabase {
 	
 	/// A `Logger` object for ``GraphDatabase``
 	private static let logger: Logger = .init(
-		subsystem: Bundle.main.bundleIdentifier!,
+		subsystem: Bundle.main.logSubsystem,
 		category: String(describing: GraphDatabase.self)
 	)
 	
