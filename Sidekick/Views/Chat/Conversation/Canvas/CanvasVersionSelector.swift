@@ -50,6 +50,7 @@ struct CanvasVersionSelector: View {
 	
 	var body: some View {
 		Picker(
+			"",
 			selection: self.$canvasController.selectedMessageId.animation(.linear)
 		) {
 			ForEach(versions) { version in
@@ -58,6 +59,7 @@ struct CanvasVersionSelector: View {
 					.tag(version.messageId)
 			}
 		}
+		.labelsHidden()
 		.pickerStyle(.segmented)
 		.fixedSize()
 	}

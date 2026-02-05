@@ -8,7 +8,8 @@
 import MarkdownUI
 import SwiftUI
 
-struct MarkdownTableView: View, Equatable {
+@MainActor
+struct MarkdownTableView: View {
     
     var configuration: BlockConfiguration
     
@@ -20,13 +21,8 @@ struct MarkdownTableView: View, Equatable {
             )
     }
     
-    // Equatable conformance for performance optimization
-    static func == (lhs: MarkdownTableView, rhs: MarkdownTableView) -> Bool {
-        // Compare based on the rendered markdown content
-        return lhs.configuration.content.renderMarkdown() == rhs.configuration.content.renderMarkdown()
-    }
-    
 }
+
 
 extension Color {
     

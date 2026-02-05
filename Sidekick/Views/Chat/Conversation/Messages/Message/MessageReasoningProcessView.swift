@@ -82,7 +82,7 @@ struct MessageReasoningProcessView: View {
 					Image(systemName: "chevron.up")
 						.fontWeight(.semibold)
 						.rotationEffect(
-							self.showReasoning ? .zero : .degrees(180)
+							self.showReasoning ? .zero : .degrees(180.0)
 						)
                         .foregroundStyle(.secondary.opacity(0.8))
 				}

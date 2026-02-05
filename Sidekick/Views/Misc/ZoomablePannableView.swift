@@ -74,7 +74,7 @@ struct ZoomablePannableView<Content: View>: View {
                     }
                 }
         }
-        .rotationEffect(.degrees(45))
+        .rotationEffect(.degrees(45.0))
         .frame(maxWidth: 30, maxHeight: 30)
     }
     

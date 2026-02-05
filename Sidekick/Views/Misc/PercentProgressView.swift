@@ -34,7 +34,7 @@ struct PercentProgressView: View {
                         lineCap: .round
                     )
                 )
-                .rotationEffect(.degrees(-90))
+                .rotationEffect(.degrees(-90.0))
                 .animation(.linear(duration: 0.3), value: progress)
             
             // Percentage text

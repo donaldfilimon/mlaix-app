@@ -139,6 +139,7 @@ struct MarkdownDataView: View {
 	
 	var visualizationPicker: some View {
 		Picker(
+			"",
 			selection: $controller.selectedVisualization.animation(
 				.linear
 			)
@@ -149,6 +150,7 @@ struct MarkdownDataView: View {
 					.tag(type)
 			}
 		}
+		.labelsHidden()
 		.pickerStyle(.segmented)
 	}
 	

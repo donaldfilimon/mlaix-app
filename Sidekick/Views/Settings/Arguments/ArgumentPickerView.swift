@@ -26,6 +26,7 @@ struct ArgumentPickerView: View {
     
     public var body: some View {
         Picker(
+            "",
             selection: $stringValue
         ) {
             ForEach(
@@ -36,6 +37,7 @@ struct ArgumentPickerView: View {
                     .tag(option)
             }
         }
+        .labelsHidden()
         .pickerStyle(.menu)
         .padding(.vertical, 2)
     }

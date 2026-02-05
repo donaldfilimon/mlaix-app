@@ -35,15 +35,14 @@ struct ToggleLaTeXButton: View {
 				Text("Toggle LaTeX")
 					.padding(.leading, 9)
 					.offset(x: 4)
-					.transition {
-						.scale
-						.combined(
+					.transition(
+						.scale.combined(
 							with: .opacity
 						)
-					}
+					)
 			}
 			operators
-				.rotationEffect(isHovering ? .degrees(45) : .degrees(0))
+				.rotationEffect(isHovering ? .degrees(45.0) : .degrees(0.0))
 				.scaleEffect(0.5)
 				.fontWeight(.heavy)
 				.padding(.vertical, 1.25)
@@ -73,7 +72,7 @@ struct ToggleLaTeXButton: View {
 					Image(systemName: "plus")
 					Image(systemName: "minus")
 				}
-				.rotationEffect(isHovering ? .degrees(-45) : .degrees(0))
+				.rotationEffect(isHovering ? .degrees(-45.0) : .degrees(0.0))
 			}
 			HStack(
 				spacing: 0
@@ -82,7 +81,7 @@ struct ToggleLaTeXButton: View {
 					Image(systemName: "multiply")
 					Image(systemName: "divide")
 				}
-				.rotationEffect(isHovering ? .degrees(-45) : .degrees(0))
+				.rotationEffect(isHovering ? .degrees(-45.0) : .degrees(0.0))
 			}
 		}
 	}

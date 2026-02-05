@@ -279,7 +279,6 @@ extension Model {
         handleResponseUpdate: @escaping @Sendable (String, String) -> Void,
         increment: Int
     ) async throws -> LlamaServer.CompleteResponse {
-        let canReachRemoteServer: Bool = await self.remoteServerIsReachable()
         // Use a sendable accumulator for thread-safe partial response accumulation
         let accumulator = SendableAccumulator()
         return try await self.mainModelServer.getChatCompletion(
@@ -807,4 +806,3 @@ Respond with YES if ALL 3 criteria above have been met. Respond with YES or NO o
     }
     
 }
-

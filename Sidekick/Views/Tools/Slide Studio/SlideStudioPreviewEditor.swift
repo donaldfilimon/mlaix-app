@@ -5,7 +5,7 @@
 //  Created by John Bean on 2/28/25.
 //
 
-import CodeEditorView
+@preconcurrency import CodeEditorView
 import LanguageSupport
 import SwiftUI
 
@@ -36,7 +36,8 @@ struct SlideStudioPreviewEditor: View {
 			ZStack {
 				Rectangle()
 					.fill(Color.clear)
-					.frame(width: 1, height: .greedy)
+					.frame(width: 1)
+					.frame(maxHeight: .infinity)
 				self.slideStudioViewController.preview
 					.overlay(alignment: .topTrailing) {
 						refreshButton

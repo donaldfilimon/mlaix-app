@@ -167,6 +167,7 @@ struct InlineWritingAssistantSettingsView: View {
             }
             Spacer()
             Picker(
+                "",
                 selection: $completionSuggestionThreshold.animation(.linear)
             ) {
                 ForEach(
@@ -177,6 +178,7 @@ struct InlineWritingAssistantSettingsView: View {
                         .tag(mode.rawValue)
                 }
             }
+            .labelsHidden()
             .pickerStyle(.menu)
         }
     }

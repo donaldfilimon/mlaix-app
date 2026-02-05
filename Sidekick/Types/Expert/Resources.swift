@@ -199,8 +199,43 @@ public struct Resources: Identifiable, Codable, Hashable, Sendable {
         // Update for each file
         var resources: [Resource] = self.resources
         let indexUrl: URL = self.indexUrl
-        var totalEntities: Int = 0
         var allGraphsSucceeded = true
+
+        final class GraphProgressState: @unchecked Sendable {
+            private let lock = NSLock()
+            private var _totalEntities: Int = 0
+            private var _latestProgress: GraphProgress?
+
+            init(latestProgress: GraphProgress?) {
+                _latestProgress = latestProgress
+            }
+
+            func updateEntities(_ entities: Int) {
+                lock.lock()
+                defer { lock.unlock() }
+                _totalEntities = entities
+            }
+
+            func updateLatest(_ progress: GraphProgress) {
+                lock.lock()
+                defer { lock.unlock() }
+                _latestProgress = progress
+            }
+
+            var totalEntities: Int {
+                lock.lock()
+                defer { lock.unlock() }
+                return _totalEntities
+            }
+
+            var latestProgress: GraphProgress? {
+                lock.lock()
+                defer { lock.unlock() }
+                return _latestProgress
+            }
+        }
+
+        let progressState = GraphProgressState(latestProgress: self.graphProgress)
         
         let totalResourceCount = max(resources.count, 1)
         var resourceWorkUnits: [Int] = []
@@ -212,8 +247,6 @@ public struct Resources: Identifiable, Codable, Hashable, Sendable {
         }
         let totalWorkUnits = max(resourceWorkUnits.reduce(0, +), 1)
         var completedWorkUnits: Double = 0
-        
-        var latestProgress: GraphProgress? = self.graphProgress
         
         for index in resources.indices {
             let resourceUnits = Double(resourceWorkUnits[index])
@@ -234,24 +267,28 @@ public struct Resources: Identifiable, Codable, Hashable, Sendable {
                 self.graphStatus = .building
                 self.graphProgress = progress
                 progressUpdate?(progress)
-                latestProgress = progress
+                progressState.updateLatest(progress)
             }
-            
+
+            let baseCompletedWorkUnits = completedWorkUnits
+            let resourceIndex = index
+            let totalResources = totalResourceCount
+            let totalUnits = totalWorkUnits
             let success = await resources[index].updateIndex(
                 resourcesDirUrl: indexUrl,
                 useGraphRAG: useGraphRAG,
                 progressCallback: { update in
-                    totalEntities = update.entities
+                    progressState.updateEntities(update.entities)
                     guard useGraphRAG else { return }
                     
                     let resourceFraction = max(0.0, min(update.fractionComplete, 1.0))
                     let overallProgress = (
-                        completedWorkUnits + (resourceUnits * resourceFraction)
-                    ) / Double(totalWorkUnits)
+                        baseCompletedWorkUnits + (resourceUnits * resourceFraction)
+                    ) / Double(totalUnits)
                     let clampedOverall = max(0.0, min(overallProgress, 1.0))
                     
                     let stageDescription = update.stage.isEmpty ? String(
-                        localized: "Processing resource \(index + 1) of \(totalResourceCount)"
+                        localized: "Processing resource \(resourceIndex + 1) of \(totalResources)"
                     ) : update.stage
                     let stageIdentifier = stageDescription.graphStageIdentifier(
                         fallback: String(localized: "Processing resource")
@@ -265,7 +302,7 @@ public struct Resources: Identifiable, Codable, Hashable, Sendable {
                         stage: stageDescription,
                         stageIdentifier: stageIdentifier
                     )
-                    latestProgress = progressValue
+                    progressState.updateLatest(progressValue)
                     progressUpdate?(progressValue)
                 }
             )
@@ -279,7 +316,7 @@ public struct Resources: Identifiable, Codable, Hashable, Sendable {
                 completedWorkUnits += resourceUnits
             }
             
-            if useGraphRAG, let latest = latestProgress {
+            if useGraphRAG, let latest = progressState.latestProgress {
                 self.graphProgress = latest
             }
         }
@@ -311,7 +348,7 @@ public struct Resources: Identifiable, Codable, Hashable, Sendable {
         Self.logger.notice("Updated index for resources in expert \"\(expertName, privacy: .public)\"")
         if self.useGraphRAG {
             if allGraphsSucceeded {
-                Self.logger.notice("Built knowledge graph with \(totalEntities) entities")
+                Self.logger.notice("Built knowledge graph with \(progressState.totalEntities) entities")
             } else {
                 Self.logger.error("Some knowledge graphs failed to build")
             }

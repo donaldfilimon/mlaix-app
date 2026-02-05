@@ -45,9 +45,9 @@ struct LengthyTasksButton: View {
 		PopoverButton(
 			arrowEdge: .trailing
 		) {
-			Label(
-				String(localized: "Notifications")
-			) {
+			Label {
+				Text(String(localized: "Notifications"))
+			} icon: {
 				Image(systemName: symbolName)
 					.symbolRenderingMode(.multicolor)
 			}

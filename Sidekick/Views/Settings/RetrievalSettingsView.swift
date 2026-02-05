@@ -109,6 +109,7 @@ struct RetrievalSettingsView: View {
             }
             Spacer()
             Picker(
+                "",
                 selection: $defaultSearchProvider.animation(.linear)
             ) {
                 Text("DuckDuckGo")
@@ -118,6 +119,7 @@ struct RetrievalSettingsView: View {
                 Text("Google")
                     .tag(2)
             }
+            .labelsHidden()
             .pickerStyle(.menu)
         }
     }
@@ -199,7 +201,7 @@ struct RetrievalSettingsView: View {
             }
             .frame(minWidth: 250)
             Spacer()
-            Picker(selection: $searchResultsMultiplier) {
+            Picker("", selection: $searchResultsMultiplier) {
                 Text("Less")
                     .tag(2)
                 Text("Default")
@@ -209,6 +211,7 @@ struct RetrievalSettingsView: View {
                 Text("Most")
                     .tag(6)
             }
+            .labelsHidden()
             .pickerStyle(.segmented)
         }
     }

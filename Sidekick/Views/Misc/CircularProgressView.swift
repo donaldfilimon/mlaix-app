@@ -59,7 +59,7 @@ struct CircularProgressView: View {
 					lineCap: .round
 				)
 			)
-			.rotationEffect(.degrees(-90))
+			.rotationEffect(.degrees(-90.0))
 			.animation(.easeOut, value: progress)
 	}
 	

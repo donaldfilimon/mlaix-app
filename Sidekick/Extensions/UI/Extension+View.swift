@@ -9,7 +9,7 @@ import SwiftUI
 
 extension View {
 
-	@ViewBuilder public func `if`<Content: View>(_ conditional: Bool, content: (Self) -> Content) -> some View {
+	@ViewBuilder nonisolated public func `if`<Content: View>(_ conditional: Bool, content: (Self) -> Content) -> some View {
 		if conditional {
 			content(self)
 		} else {
@@ -17,7 +17,7 @@ extension View {
 		}
 	}
 	
-	@ViewBuilder public func ifSequoia<Content: View>(content: (Self) -> Content) -> some View {
+	@ViewBuilder nonisolated public func ifSequoia<Content: View>(content: (Self) -> Content) -> some View {
 		if #available(macOS 15, *) {
 			content(self)
 		} else {
@@ -25,7 +25,7 @@ extension View {
 		}
 	}
 	
-	@ViewBuilder public func ifSonoma<Content: View>(content: (Self) -> Content) -> some View {
+	@ViewBuilder nonisolated public func ifSonoma<Content: View>(content: (Self) -> Content) -> some View {
 		if #available(macOS 15, *) {
 			self
 		} else {
@@ -83,7 +83,8 @@ extension View {
 			)
 			return nil
 		}
-		return Image(cgImage: cgImage)
+		let nsImage = NSImage(cgImage: cgImage, size: .zero)
+		return Image(nsImage: nsImage)
 	}
 	
 	/// Function to generate and save conversation as an image

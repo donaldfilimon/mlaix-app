@@ -5,7 +5,7 @@
 //  Created by John Bean on 3/20/25.
 //
 
-import CodeEditorView
+@preconcurrency import CodeEditorView
 import LanguageSupport
 import SwiftUI
 

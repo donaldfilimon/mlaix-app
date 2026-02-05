@@ -5,6 +5,7 @@
 //  Created by Bean John on 11/18/24.
 //
 
+import Foundation
 import SwiftUI
 
 struct InlineAssistantView: View {
@@ -111,10 +112,8 @@ struct InlineAssistantView: View {
 			sender: .user
 		)
 		// Process completion
-		Task.detached { @MainActor in
-			// Initialize stop variable
-			var didExit: Bool = false
-			// Get response
+		Task { @MainActor in
+			let exitFlag = InlineAssistantExitFlag()
 			let _ = try await self.model.listenThinkRespond(
 				messages: [
 					systemPromptMessage,
@@ -123,23 +122,28 @@ struct InlineAssistantView: View {
 				modelType: .worker,
                 mode: .default,
 				handleResponseUpdate: { pendingMessage, partialResponse in
-					if !didExit {
-						didExit = !self.handleResponseUpdate(
+					Task { @MainActor in
+						if exitFlag.isExited {
+							await self.model.interrupt()
+							return
+						}
+						let shouldContinue = self.handleResponseUpdate(
 							pendingMessage: pendingMessage,
 							partialResponse: partialResponse
 						)
-					} else {
-						Task { @MainActor in
-							await self.model.interrupt()
+						if !shouldContinue {
+							exitFlag.markExited()
 						}
 					}
 				},
 				handleResponseFinish: { fullMessage, pendingMessage, _ in
-					if !didExit {
-						self.handleResponseFinish(
-							fullMessage: fullMessage,
-							pendingMessage: pendingMessage
-						)
+					Task { @MainActor in
+						if !exitFlag.isExited {
+							self.handleResponseFinish(
+								fullMessage: fullMessage,
+								pendingMessage: pendingMessage
+							)
+						}
 					}
 				}
 			)
@@ -156,7 +160,7 @@ struct InlineAssistantView: View {
 		return Accessibility.shared.simulateTyping(for: partialResponse)
 	}
 	
-	private func handleResponseFinish(
+private func handleResponseFinish(
 		fullMessage: String,
 		pendingMessage: String
 	) {
@@ -171,6 +175,23 @@ struct InlineAssistantView: View {
 		}
 	}
 
+}
+
+private final class InlineAssistantExitFlag: @unchecked Sendable {
+	private let lock = NSLock()
+	private var exited: Bool = false
+
+	var isExited: Bool {
+		lock.lock()
+		defer { lock.unlock() }
+		return exited
+	}
+
+	func markExited() {
+		lock.lock()
+		defer { lock.unlock() }
+		exited = true
+	}
 }
 
 #Preview {

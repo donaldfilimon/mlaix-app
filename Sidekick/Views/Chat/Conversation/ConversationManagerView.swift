@@ -220,8 +220,10 @@ struct ConversationManagerView: View {
     var noSelectedConversation: some View {
         HStack {
             Text("Hit")
-            Button("Command ⌘ + N") {
+            Button {
                 self.conversationState.newConversation()
+            } label: {
+                Text("Command ⌘ + N")
             }
             Text("to start a conversation.")
         }
@@ -309,4 +311,3 @@ struct ConversationManagerView: View {
     }
     
 }
-

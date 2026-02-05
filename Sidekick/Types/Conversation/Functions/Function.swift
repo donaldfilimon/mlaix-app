@@ -74,7 +74,7 @@ protocol FunctionProtocol: Identifiable {
 }
 
 // MARK: - Generic Function Implementation
-public struct Function<Parameter: FunctionParams, Result: Codable>: FunctionProtocol, AnyFunctionBox, @unchecked Sendable {
+public struct Function<Parameter: FunctionParams, Result: Codable & Sendable>: FunctionProtocol, AnyFunctionBox, @unchecked Sendable {
 
     public var id: String { return name }
 

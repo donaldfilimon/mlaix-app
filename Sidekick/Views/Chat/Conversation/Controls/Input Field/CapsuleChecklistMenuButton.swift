@@ -241,30 +241,23 @@ struct ChecklistMenuIcon: NSViewRepresentable {
             return menu
         }
         
-        @objc private func handleToggleCategory(_ sender: NSMenuItem) {
+        @MainActor @objc private func handleToggleCategory(_ sender: NSMenuItem) {
             guard let category = sender.representedObject as? FunctionCategory else {
                 return
             }
-            
-            Task { @MainActor in
-                functionSelectionManager.toggleCategory(category)
-            }
+
+            functionSelectionManager.toggleCategory(category)
         }
         
-        @objc private func handleSelectAll() {
-            Task { @MainActor in
-                functionSelectionManager.enableAll()
-            }
+        @MainActor @objc private func handleSelectAll() {
+            functionSelectionManager.enableAll()
         }
         
-        @objc private func handleDeselectAll() {
-            Task { @MainActor in
-                functionSelectionManager.disableAll()
-            }
+        @MainActor @objc private func handleDeselectAll() {
+            functionSelectionManager.disableAll()
         }
     }
 }
-
 
 
 

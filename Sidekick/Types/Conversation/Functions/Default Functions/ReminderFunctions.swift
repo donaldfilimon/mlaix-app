@@ -18,7 +18,7 @@ public final class RemindersFunctions: Sendable {
     ]
     
     /// An object representing a ``Reminder``
-    public struct Reminder: Identifiable, Codable {
+    public struct Reminder: Identifiable, Codable, Sendable {
         
         init(
             reminder: EKReminder
@@ -146,26 +146,30 @@ public final class RemindersFunctions: Sendable {
                 predicate = eventStore.predicateForReminders(in: calendars)
             }
             
-            // Fetch reminders (async API)
-            let reminders = try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<[EKReminder], Error>) in
+            let completedFilter = params.completed
+            let remindersJson = try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<String, Error>) in
                 eventStore.fetchReminders(matching: predicate) { reminders in
-                    continuation.resume(returning: reminders ?? [])
+                    let fetchedReminders = reminders ?? []
+                    let filteredReminders: [Reminder]
+                    if let completed = completedFilter {
+                        filteredReminders = fetchedReminders
+                            .filter { $0.isCompleted == completed }
+                            .map { Reminder(reminder: $0) }
+                    } else {
+                        filteredReminders = fetchedReminders.map { Reminder(reminder: $0) }
+                    }
+                    let jsonEncoder: JSONEncoder = JSONEncoder()
+                    jsonEncoder.outputFormatting = [.prettyPrinted]
+                    do {
+                        let jsonData: Data = try jsonEncoder.encode(filteredReminders)
+                        let result = String(data: jsonData, encoding: .utf8) ?? "[]"
+                        continuation.resume(returning: result)
+                    } catch {
+                        continuation.resume(throwing: error)
+                    }
                 }
             }
-            
-            let filteredReminders: [Reminder]
-            if let completed = params.completed {
-                filteredReminders = reminders
-                    .filter { $0.isCompleted == completed }
-                    .map { Reminder(reminder: $0) }
-            } else {
-                filteredReminders = reminders.map { Reminder(reminder: $0) }
-            }
-            
-            let jsonEncoder: JSONEncoder = JSONEncoder()
-            jsonEncoder.outputFormatting = [.prettyPrinted]
-            let jsonData: Data = try jsonEncoder.encode(filteredReminders)
-            return String(data: jsonData, encoding: .utf8)!
+            return remindersJson
         }
     )
     struct GetRemindersParams: FunctionParams {
@@ -272,26 +276,27 @@ public final class RemindersFunctions: Sendable {
             let eventStore = EKEventStore()
             let calendars = eventStore.calendars(for: .reminder)
             let predicate = eventStore.predicateForReminders(in: calendars)
-            let reminders = try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<[EKReminder], Error>) in
+            let reminderIdentifier = params.reminderIdentifier
+            let resultMessage = try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<String, Error>) in
                 eventStore.fetchReminders(matching: predicate) { reminders in
-                    continuation.resume(returning: reminders ?? [])
+                    let fetchedReminders = reminders ?? []
+                    guard let reminder = fetchedReminders.first(where: { $0.calendarItemIdentifier == reminderIdentifier }) else {
+                        continuation.resume(throwing: RemindersFunctionsError.reminderNotFound(reminderIdentifier))
+                        return
+                    }
+                    var successMessage: String = "The reminder was removed successfully"
+                    if let name = reminder.title {
+                        successMessage = "The reminder `\(name)` was removed successfully"
+                    }
+                    do {
+                        try eventStore.remove(reminder, commit: true)
+                        continuation.resume(returning: successMessage)
+                    } catch {
+                        continuation.resume(throwing: RemindersFunctionsError.failedToSaveReminder(error))
+                    }
                 }
             }
-            guard let reminder = reminders.first(where: { $0.calendarItemIdentifier == params.reminderIdentifier }) else {
-                throw RemindersFunctionsError.reminderNotFound(params.reminderIdentifier)
-            }
-            // Formulate success message
-            var successMessage: String = "The reminder was removed successfully"
-            if let name = reminder.title {
-                successMessage = "The reminder `\(name)` was removed successfully"
-            }
-            // Remove reminder
-            do {
-                try eventStore.remove(reminder, commit: true)
-            } catch {
-                throw RemindersFunctionsError.failedToSaveReminder(error)
-            }
-            return successMessage
+            return resultMessage
         }
     )
     struct RemoveReminderParams: FunctionParams {
@@ -350,51 +355,50 @@ public final class RemindersFunctions: Sendable {
             let eventStore = EKEventStore()
             let calendars = eventStore.calendars(for: .reminder)
             let predicate = eventStore.predicateForReminders(in: calendars)
-            let reminders = try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<[EKReminder], Error>) in
+            let reminderIdentifier = params.reminderIdentifier
+            let updatedReminderJson = try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<String, Error>) in
                 eventStore.fetchReminders(matching: predicate) { reminders in
-                    continuation.resume(returning: reminders ?? [])
+                    let fetchedReminders = reminders ?? []
+                    guard let reminder = fetchedReminders.first(where: { $0.calendarItemIdentifier == reminderIdentifier }) else {
+                        continuation.resume(throwing: RemindersFunctionsError.reminderNotFound(reminderIdentifier))
+                        return
+                    }
+                    do {
+                        if let title = params.title {
+                            reminder.title = title
+                        }
+                        if let dueDateString = params.dueDate {
+                            let dueDate = try RemindersFunctions.convertStringToDate(dueDateString)
+                            reminder.dueDateComponents = Calendar.current.dateComponents(
+                                [.year, .month, .day, .hour, .minute, .second],
+                                from: dueDate
+                            )
+                        }
+                        if let notes = params.notes {
+                            reminder.notes = notes
+                        }
+                        if let isCompleted = params.isCompleted {
+                            reminder.isCompleted = isCompleted
+                            reminder.completionDate = isCompleted ? Date() : nil
+                        }
+                        if let priority = params.priority {
+                            reminder.priority = priority
+                        }
+                        try eventStore.save(reminder, commit: true)
+                        let updatedReminder = RemindersFunctions.Reminder(reminder: reminder)
+                        let jsonEncoder = JSONEncoder()
+                        jsonEncoder.outputFormatting = [.prettyPrinted]
+                        let jsonData = try jsonEncoder.encode(updatedReminder)
+                        let result = String(data: jsonData, encoding: .utf8) ?? "{}"
+                        continuation.resume(returning: result)
+                    } catch let error as RemindersFunctionsError {
+                        continuation.resume(throwing: error)
+                    } catch {
+                        continuation.resume(throwing: RemindersFunctionsError.failedToSaveReminder(error))
+                    }
                 }
             }
-            guard let reminder = reminders.first(where: { $0.calendarItemIdentifier == params.reminderIdentifier }) else {
-                throw RemindersFunctionsError.reminderNotFound(params.reminderIdentifier)
-            }
-            // Update fields if provided
-            if let title = params.title {
-                reminder.title = title
-            }
-            if let dueDateString = params.dueDate {
-                let dueDate = try RemindersFunctions.convertStringToDate(dueDateString)
-                reminder.dueDateComponents = Calendar.current.dateComponents(
-                    [.year, .month, .day, .hour, .minute, .second],
-                    from: dueDate
-                )
-            }
-            if let notes = params.notes {
-                reminder.notes = notes
-            }
-            if let isCompleted = params.isCompleted {
-                reminder.isCompleted = isCompleted
-                if isCompleted {
-                    reminder.completionDate = Date()
-                } else {
-                    reminder.completionDate = nil
-                }
-            }
-            if let priority = params.priority {
-                reminder.priority = priority
-            }
-            // Save changes
-            do {
-                try eventStore.save(reminder, commit: true)
-            } catch {
-                throw RemindersFunctions.RemindersFunctionsError.failedToSaveReminder(error)
-            }
-            // Return the updated reminder as JSON
-            let updatedReminder = RemindersFunctions.Reminder(reminder: reminder)
-            let jsonEncoder = JSONEncoder()
-            jsonEncoder.outputFormatting = [.prettyPrinted]
-            let jsonData = try jsonEncoder.encode(updatedReminder)
-            return String(data: jsonData, encoding: .utf8)!
+            return updatedReminderJson
         }
     )
     struct EditReminderParams: FunctionParams {

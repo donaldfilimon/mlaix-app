@@ -264,36 +264,16 @@ public extension AXUIElement {
             kAXValueAttribute as CFString,
             &rawValue
         )
-        guard error == .success,
-              let axValue = castCF(rawValue, to: AXValue.self) else {
+        guard error == .success else {
             return nil
         }
-        // Assuming the AXValue is a string, retrieve its length
-        var valueRef: AnyObject?
-        if AXValueGetValue(axValue, .cgPoint, &valueRef) { // This might need adjustment
-            if let stringValue = valueRef as? String {
-                return stringValue.count
-            }
+        if let stringValue = rawValue as? String {
+            return stringValue.count
         }
-        // Alternative approach: Retrieve the AXTextAttribute for the focused element
-        var textValue: CFTypeRef?
-        let textError = AXUIElementCopyAttributeValue(
-            self,
-            kAXValueAttribute as CFString,
-            &textValue
-        )
-        guard textError == .success,
-              let textCF = castCF(textValue, to: AXValue.self) else {
-            return nil
+        if let attributedString = rawValue as? NSAttributedString {
+            return attributedString.string.count
         }
-        // Attempt to extract the string from AXValue
-        var stringRef: AnyObject?
-        if AXValueGetValue(textCF, .cfRange, &stringRef) {
-            if let string = stringRef as? String {
-                return string.count
-            }
-        }
-		return nil
+        return nil
     }
     
     /// Retrieves a CGRect attribute from the AXUIElement.
