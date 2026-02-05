@@ -1,6 +1,6 @@
 //
 //  Model+Status.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by Bean John on 9/22/24.
 //

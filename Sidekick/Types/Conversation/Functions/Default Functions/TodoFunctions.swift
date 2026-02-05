@@ -1,6 +1,6 @@
 //
 //  TodoFunctions.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by John Bean on 11/6/25.
 //

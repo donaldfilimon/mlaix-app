@@ -1,6 +1,6 @@
 //
 //  GeneralSettingsView.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by Bean John on 10/14/24.
 //
@@ -59,7 +59,7 @@ struct GeneralSettingsView: View {
 				Text("Launch at Login")
 					.font(.title3)
 					.bold()
-				Text("Controls whether Sidekick launches automatically at login.")
+				Text("Controls whether MLAI launches automatically at login.")
 					.font(.caption)
 			}
 			Spacer()
@@ -74,7 +74,7 @@ struct GeneralSettingsView: View {
 				Text("Username")
 					.font(.title3)
 					.bold()
-				Text("Sidekick will refer to you by this username.")
+				Text("MLAI will refer to you by this username.")
 					.font(.caption)
 			}
 			Spacer()

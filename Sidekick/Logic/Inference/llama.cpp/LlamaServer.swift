@@ -1,6 +1,6 @@
 //
 //  LlamaServer.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by Bean John on 10/9/24.
 //

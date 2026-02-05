@@ -1,6 +1,6 @@
 //
 //  KnownModel.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by John Bean on 4/8/25.
 //

@@ -1,6 +1,6 @@
 //
 //  Extension+SimilarityIndex.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by Bean John on 10/12/24.
 //

@@ -1,6 +1,6 @@
 //
 //  Extension+AVSpeechSynthesisVoice.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by John Bean on 3/22/25.
 //

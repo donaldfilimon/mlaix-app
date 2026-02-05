@@ -1,6 +1,6 @@
 //
 //  ModelsView.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by John Bean on 2/18/25.
 //
@@ -12,7 +12,7 @@ struct ModelExplorerView: View {
 	
 	@StateObject private var modelExplorerViewController: ModelExplorerViewController = .init()
 	
-	@State private var modelDownloadUrl: String = "https://huggingface.co/models?sort=trending&search=GGUF"
+	@State private var modelDownloadUrl: String = "https://huggingface.co/models?sort=trending&search=GGUF%20MLX"
 
 	let columns = [
 		GridItem(.adaptive(minimum: 210))

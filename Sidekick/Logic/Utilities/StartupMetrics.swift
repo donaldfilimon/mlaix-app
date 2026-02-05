@@ -1,6 +1,6 @@
 //
 //  StartupMetrics.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by John Bean on 11/12/25.
 //
@@ -10,7 +10,7 @@ import OSLog
 
 enum StartupMetrics {
     
-    private static let subsystem: String = Bundle.main.bundleIdentifier ?? "com.pattonium.Sidekick"
+    private static let subsystem: String = Bundle.main.bundleIdentifier ?? "com.donaldfilimon.mlaix"
     static let log = OSLog(subsystem: subsystem, category: "Startup")
     
     @discardableResult
@@ -29,4 +29,3 @@ enum StartupMetrics {
     }
     
 }
-

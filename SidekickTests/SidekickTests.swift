@@ -1,6 +1,6 @@
 //
-//  SidekickTests.swift
-//  SidekickTests
+//  MLAITests.swift
+//  MLAITests
 //
 //  Created by Bean John on 10/4/24.
 //
@@ -10,7 +10,7 @@ import Testing
 import DefaultModels
 @testable import MLAI
 
-struct SidekickTests {
+struct MLAITests {
 	
 	/// Test to check model reccomendations on different hardware
 	@Test func checkModelReccomendations() async throws {

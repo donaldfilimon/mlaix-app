@@ -1,6 +1,6 @@
 //
 //  HelpCommands.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by John Bean on 3/13/25.
 //
@@ -30,7 +30,7 @@ public class HelpCommands {
         ) {
             Button {
                 let _ = NSWorkspace.shared.open(
-                    URL(string: "https://johnbean393.github.io/Sidekick/")!
+                    URL(string: "https://johnbean393.github.io/MLAI/")!
                 )
             } label: {
                 Text("Help")
@@ -41,7 +41,7 @@ public class HelpCommands {
 	
 	/// Function to open page to file an issue on Github
 	private static func fileAnIssue() {
-		let url: URL = URL(string: "https://github.com/johnbean393/Sidekick/issues/new")!
+		let url: URL = URL(string: "https://github.com/johnbean393/MLAI/issues/new")!
 		let _ = NSWorkspace.shared.open(url)
 	}
 	

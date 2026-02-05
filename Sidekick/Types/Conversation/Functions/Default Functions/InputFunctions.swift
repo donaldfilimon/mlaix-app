@@ -1,6 +1,6 @@
 //
 //  InputFunctions.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by John Bean on 4/18/25.
 //

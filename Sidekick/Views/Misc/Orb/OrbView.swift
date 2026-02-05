@@ -1,6 +1,6 @@
 //
 //  OrbView.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by John Bean on 3/6/25.
 //

@@ -1,6 +1,6 @@
 //
 //  CanvasController.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by John Bean on 3/19/25.
 //

@@ -1,6 +1,6 @@
 //
 //  Tavily.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by Bean John on 10/16/24.
 //

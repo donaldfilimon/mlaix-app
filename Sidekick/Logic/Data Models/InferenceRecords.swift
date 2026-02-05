@@ -1,6 +1,6 @@
 //
 //  InferenceRecords.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by John Bean on 5/20/25.
 //

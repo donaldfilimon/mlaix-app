@@ -1,6 +1,6 @@
 //
 //  SettingsView.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by Bean John on 10/14/24.
 //
@@ -31,6 +31,18 @@ struct SettingsView: View {
 					) {
 						InferenceSettingsView()
 					}
+					Tab(
+						"Appearance",
+						systemImage: "paintbrush.fill"
+					) {
+						AppearanceSettingsView()
+					}
+					Tab(
+						"Deep Research",
+						systemImage: "binoculars"
+					) {
+						DeepResearchSettingsView()
+					}
 				}
 			} else {
 				TabView {
@@ -55,10 +67,26 @@ struct SettingsView: View {
 								systemImage: "brain.fill"
 							)
 						}
+					AppearanceSettingsView()
+						.tabItem {
+							Label(
+								"Appearance",
+								systemImage: "paintbrush.fill"
+							)
+						}
+					DeepResearchSettingsView()
+						.tabItem {
+							Label(
+								"Deep Research",
+								systemImage: "binoculars"
+							)
+						}
 				}
 			}
 		}
 		.frame(maxWidth: 600)
+		.liquidGlassPanel(cornerRadius: 18)
+		.padding()
     }
 	
 }

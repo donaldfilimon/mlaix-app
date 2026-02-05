@@ -1,6 +1,6 @@
 //
 //  ExportButton.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by Bean John on 11/5/24.
 //

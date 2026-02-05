@@ -1,6 +1,6 @@
 //
 //  Function.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by John Bean on 4/7/25.
 //
@@ -169,7 +169,7 @@ public struct Function<Parameter: FunctionParams, Result: Codable & Sendable>: F
         )
         // Ask for permissions if needed
         let requestDescription: String = String(localized: """
-Sidekick wants to run the function `\(self.name)` to complete your request with the parameters below.
+MLAI wants to run the function `\(self.name)` to complete your request with the parameters below.
 
 \(String(data: data, encoding: .utf8)!)
 

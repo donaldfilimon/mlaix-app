@@ -1,6 +1,6 @@
 //
 //  FunctionCallResult.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by John Bean on 5/5/25.
 //

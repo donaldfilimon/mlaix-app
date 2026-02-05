@@ -1,6 +1,6 @@
 //
 //  ModelSelectorDropdown.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by John Bean on 11/5/25.
 //
@@ -362,8 +362,12 @@ struct ModelSelectorDropdown: View {
         var cleanedName = modelName
         
         // Remove file extensions (for local models)
-        if cleanedName.hasSuffix(".gguf") {
-            cleanedName = String(cleanedName.dropLast(5))
+        let supportedExtensions = [".gguf", ".mlx"]
+        for fileExtension in supportedExtensions {
+            if cleanedName.lowercased().hasSuffix(fileExtension) {
+                cleanedName = String(cleanedName.dropLast(fileExtension.count))
+                break
+            }
         }
         
         // Remove quantization suffixes (e.g., Q4_K_M, Q8_0, etc.)

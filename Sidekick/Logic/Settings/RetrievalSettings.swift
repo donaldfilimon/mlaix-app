@@ -1,6 +1,6 @@
 //
 //  RetrievalSettings.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by Bean John on 10/16/24.
 //
@@ -114,7 +114,7 @@ public class RetrievalSettings {
             UserDefaults.standard.set(newValue, forKey: "defaultSearchProvider")
         }
     }
-    /// Search providers supported by Sidekick
+    /// Search providers supported by MLAI
     public enum SearchProvider: Int, CaseIterable {
         
         case duckDuckGo = 0

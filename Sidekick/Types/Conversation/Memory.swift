@@ -1,6 +1,6 @@
 //
 //  Memory.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by John Bean on 4/22/25.
 //

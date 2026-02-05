@@ -1,6 +1,6 @@
 //
 //  MultilineTextEditor.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by John Bean on 4/20/25.
 //
