@@ -71,18 +71,24 @@ public class PromptController: ObservableObject, DropDelegate {
     }
     
     private func checkPermissionsAndStartRecording() {
-        SFSpeechRecognizer.requestAuthorization { authStatus in
+        SFSpeechRecognizer.requestAuthorization { [weak self] authStatus in
             switch authStatus {
                 case .authorized:
-                    AVCaptureDevice.requestAccess(for: .audio) { granted in
+                    AVCaptureDevice.requestAccess(for: .audio) { [weak self] granted in
                         if granted {
-                            self.startRecording()
+                            Task { @MainActor [weak self] in
+                                self?.startRecording()
+                            }
                         } else {
-                            Self.logger.warning("Microphone access denied")
+                            Task { @MainActor in
+                                Self.logger.warning("Microphone access denied")
+                            }
                         }
                     }
                 default:
-                    Self.logger.warning("Speech recognition not authorized")
+                    Task { @MainActor in
+                        Self.logger.warning("Speech recognition not authorized")
+                    }
             }
         }
     }
@@ -202,15 +208,17 @@ public class PromptController: ObservableObject, DropDelegate {
     // MARK: - Permission requests
     
     fileprivate func requestSpeechRecognitionAccess() {
-        SFSpeechRecognizer.requestAuthorization { authStatus in
-            switch authStatus {
-                case .authorized:
-                    Self.logger.info("Speech recognition access granted.")
-                case .denied, .restricted, .notDetermined:
-                    Self.logger.info("Speech recognition access is \(authStatus.rawValue,privacy: .public).")
-                    self.stopAudioEngine()
-                @unknown default:
-                    fatalError("Unknown authorization status")
+        SFSpeechRecognizer.requestAuthorization { [weak self] authStatus in
+            Task { @MainActor [weak self] in
+                switch authStatus {
+                    case .authorized:
+                        Self.logger.info("Speech recognition access granted.")
+                    case .denied, .restricted, .notDetermined:
+                        Self.logger.info("Speech recognition access is \(authStatus.rawValue,privacy: .public).")
+                        self?.stopAudioEngine()
+                    @unknown default:
+                        fatalError("Unknown authorization status")
+                }
             }
         }
     }
@@ -218,11 +226,13 @@ public class PromptController: ObservableObject, DropDelegate {
     fileprivate func requestMicrophoneAccess() {
         AVCaptureDevice.requestAccess(
             for: .audio
-        ) { granted in
-            if granted {
-                Self.logger.notice("Microphone access granted.")
-            } else {
-                self.stopRecording()
+        ) { [weak self] granted in
+            Task { @MainActor [weak self] in
+                if granted {
+                    Self.logger.notice("Microphone access granted.")
+                } else {
+                    self?.stopRecording()
+                }
             }
         }
     }
@@ -316,17 +326,17 @@ public class PromptController: ObservableObject, DropDelegate {
             provider.hasItemConformingToTypeIdentifier(identifier)
         } ?? UTType.image.identifier
         
-        provider.loadDataRepresentation(forTypeIdentifier: typeIdentifier) { data, error in
-            if let error {
-                Self.logger.error("Failed to load dropped image data: \(error.localizedDescription, privacy: .public)")
-                return
-            }
-            guard let data else {
-                Self.logger.error("Dropped image provider returned no data.")
-                return
-            }
-            Task { @MainActor in
-                await self.handleDroppedImageData(data)
+        provider.loadDataRepresentation(forTypeIdentifier: typeIdentifier) { [weak self] data, error in
+            Task { @MainActor [weak self] in
+                if let error {
+                    Self.logger.error("Failed to load dropped image data: \(error.localizedDescription, privacy: .public)")
+                    return
+                }
+                guard let data else {
+                    Self.logger.error("Dropped image provider returned no data.")
+                    return
+                }
+                await self?.handleDroppedImageData(data)
             }
         }
     }

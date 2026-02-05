@@ -19,9 +19,10 @@ struct CircleData: Identifiable {
 }
 
 struct LiquidView: View {
-	
+
 	@State private var circles: [CircleData] = []
-	
+	@State private var animationTimer: Timer? = nil
+
 	var movementRange: CGFloat = 10
 	let animationInterval: TimeInterval = 0.02
 	let circleCount = 20
@@ -54,6 +55,10 @@ struct LiquidView: View {
 			setupCircles()
 			startAnimation()
 		}
+		.onDisappear {
+			animationTimer?.invalidate()
+			animationTimer = nil
+		}
 	}
 	
 	func setupCircles() {
@@ -69,7 +74,7 @@ struct LiquidView: View {
 	}
 	
 	func startAnimation() {
-		Timer.scheduledTimer(withTimeInterval: animationInterval, repeats: true) { _ in
+		animationTimer = Timer.scheduledTimer(withTimeInterval: animationInterval, repeats: true) { _ in
 			DispatchQueue.main.async {
 				circles.indices.forEach { index in
 					circles[index].xOffset += circles[index].xSpeed

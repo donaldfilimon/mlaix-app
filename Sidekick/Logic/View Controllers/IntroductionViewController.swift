@@ -8,6 +8,7 @@
 import Foundation
 import SwiftUI
 
+@MainActor
 public class IntroductionViewController: ObservableObject {
 	
 	@Published var page: IntroductionPage = IntroductionPage.allCases.first!
@@ -15,8 +16,9 @@ public class IntroductionViewController: ObservableObject {
 	public var progress: some View {
 		HStack {
 			ForEach(
-				IntroductionPage.allCases.indices
-			) { index in
+				Array(IntroductionPage.allCases.enumerated()),
+				id: \.offset
+			) { index, _ in
 				Circle()
 					.frame(width: 7.5)
 					.foregroundColor({

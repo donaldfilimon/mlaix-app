@@ -95,7 +95,7 @@ public extension CGKeyCode {
 	static let kVK_ANSI_Keypad9              : CGKeyCode = 0x5C
 	
 	/// Static property containing all key codes
-	static var allKeys: [CGKeyCode] = [
+	static let allKeys: [CGKeyCode] = [
 		kVK_Command,
 		kVK_Control,
 		kVK_Shift,

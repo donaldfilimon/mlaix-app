@@ -250,9 +250,6 @@ struct MessageShareMenu: View {
         let renderer = ImageRenderer(content: renderView)
         renderer.scale = 2.0
         
-        // Get the actual size needed for the content
-        let proposedSize = renderer.proposedSize
-        
         // Set renderer to use the full size without constraints
         renderer.proposedSize = ProposedViewSize(width: 800, height: .infinity)
         

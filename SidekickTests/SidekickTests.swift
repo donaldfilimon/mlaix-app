@@ -8,7 +8,7 @@
 import Foundation
 import Testing
 import DefaultModels
-@testable import Sidekick
+@testable import MLAI
 
 struct SidekickTests {
 	

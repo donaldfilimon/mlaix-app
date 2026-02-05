@@ -8,7 +8,7 @@
 import Foundation
 
 /// Represents a tool call that failed to parse
-public struct MalformedToolCall {
+public struct MalformedToolCall: Sendable {
     
     var index: Int
     var name: String?

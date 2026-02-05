@@ -21,7 +21,7 @@ struct ModelListView: View {
     var modelType: ModelType
 	
 	@Binding var isPresented: Bool
-	@StateObject private var modelManager: ModelManager = .shared
+	@EnvironmentObject private var modelManager: ModelManager
 	
 	@Environment(\.openWindow) var openWindow
 	

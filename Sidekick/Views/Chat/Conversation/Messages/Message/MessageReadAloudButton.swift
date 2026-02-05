@@ -9,7 +9,7 @@ import SwiftUI
 
 struct MessageReadAloudButton: View {
 	
-	@StateObject private var speechSynthesizer: SpeechSynthesizer = .shared
+	@EnvironmentObject private var speechSynthesizer: SpeechSynthesizer
 	
 	var message: Message
 	

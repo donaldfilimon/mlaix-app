@@ -97,6 +97,11 @@ You recall the following information about the user from prior interactions:
     
     /// Static constant for the default temperature
     private static let defaultTemperature: Double = 0.6
+
+    /// The maximum consecutive malformed tool call attempts before breaking.
+    public static var maxConsecutiveMalformedToolCalls: Int {
+        return 3
+    }
     
     /// A `String` representing the first instruction given to an LLM
     public static var systemPrompt: String {

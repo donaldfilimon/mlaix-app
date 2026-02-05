@@ -8,11 +8,12 @@
 import Foundation
 import KeyboardShortcuts
 
+@MainActor
 public class ShortcutController {
-	
+
 	/// Static constant for the global ``ShortcutController`` object
 	static public let shared: ShortcutController = .init()
-	
+
 	/// A `Bool` indicating if completion shortcuts are registered
 	public var completionsShortcutsEnabled: Bool = true
 	

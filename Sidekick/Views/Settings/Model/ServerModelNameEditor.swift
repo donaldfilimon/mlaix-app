@@ -39,7 +39,7 @@ struct ServerModelNameEditor: View {
             Spacer()
             ModelNameMenu(
                 modelType: modelType,
-                modelTypes: [.remote],
+                modelTypes: [ModelNameMenu.ModelSource.remote],
                 serverModelName: self.$serverModelName
             )
             .frame(maxWidth: 150)

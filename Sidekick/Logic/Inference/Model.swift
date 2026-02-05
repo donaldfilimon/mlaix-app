@@ -149,7 +149,7 @@ public class Model: ObservableObject {
     
     // MARK: - Modes
     
-    public enum Mode: String {
+    public enum Mode: String, Sendable {
         
         /// Indicates the LLM is used as a chatbot, with extra features like resource lookup and code interpreter
         case chat

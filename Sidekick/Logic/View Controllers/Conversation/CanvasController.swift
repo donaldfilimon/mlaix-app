@@ -9,6 +9,7 @@ import CodeEditorView
 import Foundation
 import SwiftUI
 
+@MainActor
 public class CanvasController: ObservableObject {
 	
 	@Published public var selectedMessageId: UUID? = nil

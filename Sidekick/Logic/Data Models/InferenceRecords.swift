@@ -12,6 +12,7 @@ import os.log
 import SwiftUI
 import UniformTypeIdentifiers
 
+@MainActor
 public class InferenceRecords: ObservableObject {
     
     init() {
@@ -21,7 +22,10 @@ public class InferenceRecords: ObservableObject {
     
     /// Static constant for the global ``InferenceRecords`` object
     static public let shared: InferenceRecords = .init()
-    
+
+    /// Maximum number of records to retain to prevent unbounded memory growth
+    private static let maxRecords: Int = 10000
+
     @Published var records: [InferenceRecord] = [] {
         didSet {
             self.save()
@@ -275,6 +279,10 @@ public class InferenceRecords: ObservableObject {
         withAnimation(.linear) {
             self.records.append(record)
             self.records.sort(by: { $0.startTime > $1.startTime })
+            // Prune to prevent unbounded memory growth
+            if self.records.count > Self.maxRecords {
+                self.records = Array(self.records.prefix(Self.maxRecords))
+            }
         }
     }
     

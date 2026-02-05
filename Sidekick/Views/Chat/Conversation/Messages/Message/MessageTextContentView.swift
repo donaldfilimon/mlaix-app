@@ -76,9 +76,12 @@ struct MessageTextContentView: View {
             updateCachedMarkdown(with: converted)
         } else {
             throttleTimer?.invalidate()
-            throttleTimer = Timer.scheduledTimer(withTimeInterval: throttleInterval - timeSinceLast, repeats: false) { _ in
-                lastUpdate = Date()
-                updateCachedMarkdown(with: converted)
+            let interval = throttleInterval - timeSinceLast
+            throttleTimer = Timer.scheduledTimer(withTimeInterval: interval, repeats: false) { [self] _ in
+                Task { @MainActor in
+                    self.lastUpdate = Date()
+                    self.updateCachedMarkdown(with: converted)
+                }
             }
         }
     }
@@ -86,16 +89,22 @@ struct MessageTextContentView: View {
     private func updateCachedMarkdown(
         with text: String
     ) {
-        DispatchQueue.global(qos: .userInitiated).async {
-            let rendered = AnyView(
-                Markdown(MarkdownContent(text))
-                    .markdownTheme(.gitHub)
-                    .markdownCodeSyntaxHighlighter(.splash(theme: self.theme))
-                    .markdownImageProvider(MarkdownImageProvider(scaleFactor: self.imageScaleFactor))
-                    .markdownInlineImageProvider(MarkdownInlineImageProvider(scaleFactor: self.imageScaleFactor))
-                    .textSelection(.enabled)
-            )
-            DispatchQueue.main.async {
+        // Capture MainActor-isolated values before background work
+        let currentTheme = self.theme
+        let scaleFactor = self.imageScaleFactor
+
+        Task.detached(priority: .userInitiated) {
+            let rendered = await MainActor.run {
+                AnyView(
+                    Markdown(MarkdownContent(text))
+                        .markdownTheme(.gitHub)
+                        .markdownCodeSyntaxHighlighter(.splash(theme: currentTheme))
+                        .markdownImageProvider(MarkdownImageProvider(scaleFactor: scaleFactor))
+                        .markdownInlineImageProvider(MarkdownInlineImageProvider(scaleFactor: scaleFactor))
+                        .textSelection(.enabled)
+                )
+            }
+            await MainActor.run {
                 self.cachedMarkdown = rendered
             }
         }

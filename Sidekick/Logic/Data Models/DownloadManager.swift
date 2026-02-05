@@ -63,24 +63,17 @@ public class DownloadManager: NSObject, ObservableObject {
 		url: URL
 	) async {
 		// Check if accessible
-		URL.verifyURL(
-			url: url
-		) { isValid in
-			if isValid {
-				// If accessible
-				self.startDownload(
-					url: url
-				)
-			} else {
-				// If not accessible
-				let mirrorUrlString: String = url.absoluteString.replacingOccurrences(
-					of: "huggingface.co",
-					with: "hf-mirror.com"
-				)
-				self.startDownload(
-					url: URL(string: mirrorUrlString)!
-				)
-			}
+		let isValid = await URL.verifyURL(url: url)
+		if isValid {
+			// If accessible
+			self.startDownload(url: url)
+		} else {
+			// If not accessible, try mirror
+			let mirrorUrlString: String = url.absoluteString.replacingOccurrences(
+				of: "huggingface.co",
+				with: "hf-mirror.com"
+			)
+			self.startDownload(url: URL(string: mirrorUrlString)!)
 		}
 		// Add lengthy task
 		LengthyTasksController.shared.addTask(
@@ -132,16 +125,15 @@ public class DownloadManager: NSObject, ObservableObject {
 			return
 		}
 		let task: URLSessionTask = urlSession.downloadTask(with: url)
-		DispatchQueue.main.async {
-			self.tasks.append(task)
-		}
+		self.tasks.append(task)
 		task.resume()
 	}
 	
 	@MainActor
 	private func updateTasks() {
-		self.urlSession.getAllTasks { tasks in
-			DispatchQueue.main.async {
+		self.urlSession.getAllTasks { [weak self] tasks in
+			Task { @MainActor in
+				guard let self else { return }
 				self.tasks = tasks
 				self.lastUpdatedAt = Date()
 			}
@@ -158,7 +150,8 @@ extension DownloadManager: URLSessionDelegate, URLSessionDownloadDelegate {
 		totalBytesWritten _: Int64,
 		totalBytesExpectedToWrite _: Int64
 	) {
-		DispatchQueue.main.async {
+		Task { @MainActor [weak self] in
+			guard let self else { return }
 			let now: Date = Date()
 			if self.lastUpdatedAt.timeIntervalSince(now) > 10 {
 				self.lastUpdatedAt = now
@@ -176,9 +169,10 @@ extension DownloadManager: URLSessionDelegate, URLSessionDownloadDelegate {
 		} else {
 			os_log("Task finished: %@", type: .info, task)
 		}
-		
+
 		let taskId = task.taskIdentifier
-		DispatchQueue.main.async {
+		Task { @MainActor [weak self] in
+			guard let self else { return }
 			self.tasks.removeAll(where: { $0.taskIdentifier == taskId })
 		}
 	}
@@ -224,9 +218,11 @@ extension DownloadManager: URLSessionDelegate, URLSessionDownloadDelegate {
 			os_log("FileManager copy error at %@ to %@ error: %@", type: .error, location.absoluteString, destinationURL.absoluteString, error.localizedDescription)
 			return
 		}
-		// Remove lengthy task
-		LengthyTasksController.shared.tasks = LengthyTasksController.shared.tasks.filter {
-			$0.name != "Downloading model \(fileName)"
+		// Remove lengthy task on main actor
+		Task { @MainActor in
+			LengthyTasksController.shared.tasks = LengthyTasksController.shared.tasks.filter {
+				$0.name != "Downloading model \(fileName)"
+			}
 		}
 	}
 	

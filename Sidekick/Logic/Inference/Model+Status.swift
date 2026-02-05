@@ -148,7 +148,7 @@ extension Model {
 
 extension Model {
     
-    public enum Status: String {
+    public enum Status: String, Sendable {
         
         /// The inference server is inactive
         case cold

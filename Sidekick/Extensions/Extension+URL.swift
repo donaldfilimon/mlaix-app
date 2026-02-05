@@ -68,29 +68,38 @@ public extension URL {
         return files
     }
 	
-	/// Function to verify if url is reachable
+	/// Function to verify if url is reachable (async version)
 	static func verifyURL(
 		url: URL,
-		timeoutInterval: Double = 3,
-		completion: @escaping (_ isValid: Bool) ->()
-	) {
+		timeoutInterval: Double = 3
+	) async -> Bool {
 		var request = URLRequest(
 			url: url,
 			timeoutInterval: timeoutInterval
 		)
 		request.httpMethod = "HEAD"
-		let task = URLSession.shared.dataTask(
-			with: request
-		) { _, response, error in
+		do {
+			let (_, response) = try await URLSession.shared.data(for: request)
 			if let httpResponse = response as? HTTPURLResponse {
-				if httpResponse.statusCode == 200 {
-					completion(true)
-				}
-			} else {
-				completion(false)
+				return httpResponse.statusCode == 200
 			}
+			return false
+		} catch {
+			return false
 		}
-		task.resume()
+	}
+	
+	/// Function to verify if url is reachable (callback version for compatibility)
+	@available(*, deprecated, message: "Use async version instead")
+	static func verifyURL(
+		url: URL,
+		timeoutInterval: Double = 3,
+		completion: @escaping @MainActor @Sendable (_ isValid: Bool) -> Void
+	) {
+		Task { @MainActor in
+			let isValid = await verifyURL(url: url, timeoutInterval: timeoutInterval)
+			completion(isValid)
+		}
 	}
 	
 	/// Function to check if a url is reachable

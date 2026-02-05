@@ -11,10 +11,9 @@ struct InlineAssistantView: View {
 	
 	var selectedText: String
 	
-	@StateObject private var model: Model = .shared
-	
-	@StateObject private var commandManager: CommandManager = .shared
-	@StateObject private var inlineAssistantController: InlineAssistantController = .shared
+	@EnvironmentObject private var model: Model
+	@EnvironmentObject private var commandManager: CommandManager
+	@EnvironmentObject private var inlineAssistantController: InlineAssistantController
 	
 	@State private var didSelectCommand: Bool = false
 	@State private var isAddingCommand: Bool = false

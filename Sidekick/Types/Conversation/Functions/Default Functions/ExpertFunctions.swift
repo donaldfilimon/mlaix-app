@@ -17,16 +17,7 @@ public class ExpertFunctions {
     /// A function to query a expert vector database
     static let queryVectorDatabase = Function<QueryVectorDatabaseParams, String>(
         name: "query_database",
-        description: {
-            let expertNames: String = ExpertManager.shared.experts.map { expert in
-                return expert.name
-            }.joined(separator: "\n")
-            return """
-"Query a vector database. The databases available are listed below:"
-
-\(expertNames)
-"""
-        }(),
+        description: "Query a vector database. Available databases correspond to configured experts in the app.",
         params: [
             FunctionParameter(
                 label: "database",
@@ -57,7 +48,7 @@ RAG query: "the average apple weighs 100 grams"
         ],
         run: { params in
             // Get expert
-            let experts: [Expert] = ExpertManager.shared.experts
+            let experts: [Expert] = await MainActor.run { ExpertManager.shared.experts }
             guard let expert: Expert = experts.filter(
                 { $0.name.lowercased() == params.database.lowercased()
                 }).first else {

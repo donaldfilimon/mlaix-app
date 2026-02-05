@@ -11,6 +11,7 @@ import os.log
 import SwiftUI
 import UniformTypeIdentifiers
 
+@MainActor
 public class ModelManager: ObservableObject {
 	
 	init() {

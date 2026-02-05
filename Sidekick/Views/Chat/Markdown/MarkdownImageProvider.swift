@@ -14,70 +14,65 @@ import WebKit
 import WebViewKit
 
 struct MarkdownImageProvider: ImageProvider {
-	
+
 	let scaleFactor: CGFloat
-    
-	public func makeImage(
+
+    public func makeImage(
 		url: URL?
 	) -> some View {
-        return Group {
-            if let url: URL = url {
+        MarkdownImageView(url: url, scaleFactor: scaleFactor)
+	}
+
+}
+
+/// Internal view that handles the actual image rendering on MainActor
+private struct MarkdownImageView: View {
+    let url: URL?
+    let scaleFactor: CGFloat
+
+    var body: some View {
+        Group {
+            if let url = url {
                 if url.isWebURL {
-                    // If network image
-                    self.networkImage(url: url)
+                    networkImage(url: url)
                 } else if url.isFileURL {
-                    // If file image
-                    self.fileImage(url: url)
+                    fileImage(url: url)
                 } else if url.absoluteString.hasPrefix("latex://"),
                           let latexStr = url.withoutSchema.removingPercentEncoding {
-                    // If url is LaTeX
                     LaTeX(latexStr)
                         .blockMode(.blockViews)
                         .errorMode(.original)
                         .renderingStyle(.original)
                 } else {
-                    // Try converting to absolute path
-                    let fileUrl: URL = URL(
-                        fileURLWithPath: url.posixPath
-                    )
-                    // If file image
-                    self.fileImage(url: fileUrl)
+                    let fileUrl = URL(fileURLWithPath: url.posixPath)
+                    fileImage(url: fileUrl)
                 }
             } else {
                 imageLoadError
             }
         }
-	}
-	
-	private func networkImage(
-		url: URL
-	) -> some View {
-		AsyncImage(
-			url: url
-		) { phase in
-			switch phase {
-				case .empty, .failure:
-					imageLoadError
-				case .success(let image):
-					image
-						.renderingMode(.template)
-						.resizable()
-						.aspectRatio(contentMode: .fit)
-						.draggable(
-							image
-						)
-						.padding(.leading, 1)
-				@unknown default:
-					imageLoadError
-			}
-		}
-	}
-    
-    private func fileImage(
-        url: URL
-    ) -> some View {
-        var url: URL = url
-        // Try to correct url
+    }
+
+    private func networkImage(url: URL) -> some View {
+        AsyncImage(url: url) { phase in
+            switch phase {
+            case .empty, .failure:
+                imageLoadError
+            case .success(let image):
+                image
+                    .renderingMode(.template)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .draggable(image)
+                    .padding(.leading, 1)
+            @unknown default:
+                imageLoadError
+            }
+        }
+    }
+
+    private func fileImage(url: URL) -> some View {
+        var url = url
         if !url.fileExists && url.pathComponents.count <= 2 {
             url = Settings
                 .containerUrl
@@ -85,60 +80,50 @@ struct MarkdownImageProvider: ImageProvider {
                 .appendingPathComponent(url.lastPathComponent)
         }
         return Group {
-            if let nsImage: NSImage = NSImage(
-                contentsOf: url
-            ) {
+            if let nsImage = NSImage(contentsOf: url) {
                 if url.pathExtension == "svg" {
-                    ScrollView(
-                        .horizontal
-                    ) {
-                        WebView(
-                            url: url
-                        ) { view in
-                            view.setValue(false, forKeyPath: "drawsBackground")
-                        }
-                        .frame(
-                            width: nsImage.size.width * 0.5,
-                            height: nsImage.size.height * 0.5
-                        )
-                        .allowsHitTesting(false)
-                    }
-                    .padding(.horizontal, 5)
-                    .draggable(
-                        FilePromise(
-                            name: url.lastPathComponent,
-                            type: .fileURL
-                        ) { destUrl in
-                            await FileManager.copyItem(
-                                from: url,
-                                to: destUrl
-                            )
-                        },
-                        preview: NSImage(contentsOf: url) ?? NSImage(named: "questionmark.app.fill")!
-                    )
+                    svgImage(url: url, nsImage: nsImage)
                 } else {
                     Image(nsImage: nsImage)
                         .resizable()
                         .aspectRatio(contentMode: .fit)
-                        .draggable(
-                            nsImage
-                        )
+                        .draggable(nsImage)
                         .padding(.leading, 1)
                 }
             } else {
-                self.imageLoadError
+                imageLoadError
             }
         }
     }
-	
-	var imageLoadError: some View {
-		Label(
-			"Error loading image",
-			systemImage: "exclamationmark.square.fill"
-		)
-		.foregroundColor(.red)
-	}
-	
+
+    private func svgImage(url: URL, nsImage: NSImage) -> some View {
+        ScrollView(.horizontal) {
+            WebView(url: url) { view in
+                view.setValue(false, forKeyPath: "drawsBackground")
+            }
+            .frame(
+                width: nsImage.size.width * 0.5,
+                height: nsImage.size.height * 0.5
+            )
+            .allowsHitTesting(false)
+        }
+        .padding(.horizontal, 5)
+        .draggable(
+            FilePromise(
+                name: url.lastPathComponent,
+                type: .fileURL
+            ) { destUrl in
+                await FileManager.copyItem(from: url, to: destUrl)
+            },
+            preview: NSImage(contentsOf: url) ?? NSImage(named: "questionmark.app.fill")!
+        )
+    }
+
+    private var imageLoadError: some View {
+        Label("Error loading image", systemImage: "exclamationmark.square.fill")
+            .foregroundColor(.red)
+    }
+
 }
 
 struct MarkdownInlineImageProvider: InlineImageProvider {

@@ -18,7 +18,11 @@ public class Accessibility {
 	
 	/// Check if Sidekick has the right permissions
 	public static func checkAccessibility() -> Bool {
-		let checkOptionPrompt: String = kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String
+		// Access the global constant - this is safe as it's a constant CFString
+		let checkOptionPrompt: String = unsafeBitCast(
+			kAXTrustedCheckOptionPrompt,
+			to: CFString.self
+		) as String
 		let options = [checkOptionPrompt: false]
 		let isTrusted: Bool = AXIsProcessTrustedWithOptions(
 			options as CFDictionary

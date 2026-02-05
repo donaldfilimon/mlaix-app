@@ -9,6 +9,7 @@ import Foundation
 import os.log
 import SwiftUI
 
+@MainActor
 public class CommandManager: ObservableObject {
     
     init() {
@@ -94,7 +95,7 @@ public class CommandManager: ObservableObject {
             do {
                 rawData = try Data(contentsOf: targetUrl)
             } catch {
-                await MainActor.run {
+                await MainActor.run { @MainActor @Sendable in
                     guard let self else { return }
                     self.newDatastore()
                     self.isLoaded = true
@@ -104,7 +105,7 @@ public class CommandManager: ObservableObject {
             }
             let decoder: JSONDecoder = JSONDecoder()
             let commands = (try? decoder.decode([Command].self, from: rawData)) ?? []
-            await MainActor.run {
+            await MainActor.run { @MainActor @Sendable in
                 guard let self else { return }
                 self.commands = commands
                 self.isLoaded = true

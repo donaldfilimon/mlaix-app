@@ -26,7 +26,7 @@ struct ModelSelectorDropdown: View {
     @State private var localModelsListId: UUID = UUID()
     @State private var remoteServerReachable: Bool = false
     
-    @StateObject private var modelManager: ModelManager = .shared
+    @EnvironmentObject private var modelManager: ModelManager
     @EnvironmentObject private var model: Model
     
     // Scroll to active model

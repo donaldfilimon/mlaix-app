@@ -8,7 +8,6 @@
 import Foundation
 import OSLog
 import SimilaritySearchKit
-import SimilaritySearchKitDistilbert
 import SwiftUI
 
 @MainActor
@@ -67,7 +66,7 @@ public class Memories: ObservableObject {
         }
         let signpost = StartupMetrics.begin("Memories.initSimilarityIndex")
         self.similarityIndex = await SimilarityIndex(
-            model: DistilbertEmbeddings(),
+            model: NativeEmbeddings(),
             metric: CosineSimilarity()
         )
         StartupMetrics.end("Memories.initSimilarityIndex", signpost)
@@ -89,28 +88,25 @@ public class Memories: ObservableObject {
             return
         }
         let targetUrl: URL = Self.datastoreUrl
-        self.loadTask = Task.detached(priority: .userInitiated) { [weak self] in
+        self.loadTask = Task(priority: .userInitiated) { [weak self] in
+            guard let self else { return }
             let signpost = StartupMetrics.begin("Memories.loadDatastore")
             defer { StartupMetrics.end("Memories.loadDatastore", signpost) }
             let rawData: Data
             do {
-                rawData = try Data(contentsOf: targetUrl)
+                rawData = try await Task.detached {
+                    try Data(contentsOf: targetUrl)
+                }.value
             } catch {
-                await MainActor.run {
-                    guard let self else { return }
-                    self.newDatastore()
-                    self.loadTask = nil
-                }
+                self.newDatastore()
+                self.loadTask = nil
                 return
             }
             let decoder: JSONDecoder = JSONDecoder()
             let memories = (try? decoder.decode([Memory].self, from: rawData)) ?? []
-            await MainActor.run {
-                guard let self else { return }
-                self.memories = memories
-                self.isLoaded = true
-                self.loadTask = nil
-            }
+            self.memories = memories
+            self.isLoaded = true
+            self.loadTask = nil
         }
     }
     

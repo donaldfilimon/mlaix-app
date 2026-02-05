@@ -7,6 +7,7 @@
 
 import Foundation
 
+@MainActor
 public class LengthyTasksController: ObservableObject {
 	
 	static let shared: LengthyTasksController = .init()

@@ -32,11 +32,12 @@ public actor LlamaServer {
     var scheme: String = "http"
     
     // MARK: - Process State
-    
+
     var isStartingServer: Bool = false
     var monitor: Process = Process()
     var process: Process = Process()
-    
+    var heartbeatTimer: DispatchSourceTimer? = nil
+
     /// Tracks request-scoped streaming resources so multiple in-flight calls can run concurrently.
     var activeRequests: [UUID: ActiveRequestContext] = [:]
     var pendingCancellationForAllRequests: Bool = false

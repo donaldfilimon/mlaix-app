@@ -11,6 +11,7 @@ import SwiftUI
 import WebViewKit
 import WebKit
 
+@MainActor
 public class SlideStudioViewController: ObservableObject, DropDelegate {
 	
 	/// The current step in the slide generation process, of type `SlideStudioStep`
@@ -232,7 +233,7 @@ You are about to create a presentation about the content above. List 1-2 word ti
 		let searchResults: [ImageSearchResult] = await withTaskGroup(
 			of: (
 				title: String,
-				image: [ImageSearch.CommonsImage]
+				imageUrls: [URL]
 			)?.self,
 			returning: [ImageSearchResult].self
 		) { taskGroup in
@@ -240,7 +241,7 @@ You are about to create a presentation about the content above. List 1-2 word ti
 			for title in imageTitles {
 				taskGroup.addTask {
 					do {
-						let commonsImages: [ImageSearch.CommonsImage].SubSequence = try await ImageSearch
+						let imageUrls: [URL] = try await ImageSearch
 							.searchCommonsImages(
 								searchTerm: title.lowercased(),
 								count: 10
@@ -259,7 +260,8 @@ You are about to create a presentation about the content above. List 1-2 word ti
 								}.contains(true)
 							}
 							.prefix(2)
-						return (title, Array(commonsImages))
+							.map(\.url)
+						return (title, imageUrls)
 					} catch {
 						return nil
 					}
@@ -271,7 +273,7 @@ You are about to create a presentation about the content above. List 1-2 word ti
 				guard let result = result else { continue }
 				let searchResult: ImageSearchResult = ImageSearchResult(
 					description: result.title,
-					imageUrls: result.image.map(\.url)
+					imageUrls: result.imageUrls
 				)
 				searchResults.append(searchResult)
 			}

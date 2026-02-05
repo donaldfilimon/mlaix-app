@@ -76,7 +76,7 @@ public struct Expert: Identifiable, Codable, Hashable, Sendable {
     
     /// A `Bool` representing whether the expert is the default expert
     public var isDefault: Bool {
-        return self == ExpertManager.shared.default
+        return self.name == String(localized: "Default")
     }
     
     /// The `default` expert of type ``Expert``
