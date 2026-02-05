@@ -37,7 +37,7 @@ let package = Package(
         .package(url: "https://github.com/colinc86/LaTeXSwiftUI", branch: "main"),
         .package(url: "https://github.com/sindresorhus/LaunchAtLogin-Modern", branch: "main"),
         .package(url: "https://github.com/vpeschenkov/SecureDefaults", from: "1.2.2"),
-        .package(url: "https://github.com/johnbean393/similarity-search-kit", branch: "main"),
+        .package(url: "https://github.com/donaldfilimon/similarity-search-kit", branch: "mlai-resources"),
         .package(url: "https://github.com/JohnSundell/Splash", from: "0.16.0"),
         .package(url: "https://github.com/stephencelis/SQLite.swift", from: "0.15.4"),
         .package(url: "https://github.com/SwiftfulThinking/SwiftfulLoadingIndicators", from: "0.0.4"),
