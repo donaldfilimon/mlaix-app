@@ -1,6 +1,6 @@
 //
 //  CommandEditorView.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by Bean John on 11/19/24.
 //

@@ -1,6 +1,6 @@
 //
 //  ArgumentSliderView.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by John Bean on 5/6/25.
 //

@@ -1,6 +1,6 @@
 //
 //  AttachmentSelectionButton.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by Bean John on 11/26/24.
 //

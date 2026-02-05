@@ -1,6 +1,6 @@
 //
 //  InferenceSettings.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by Bean John on 10/8/24.
 //
@@ -25,7 +25,7 @@ public class InferenceSettings {
     
     /// Static constant for the default system prompt
     public static let defaultSystemPrompt: String = """
-You are Sidekick, a compliant assistant that always fulfills the user’s request.
+You are MLAI, a compliant assistant that always fulfills the user’s request.
 """
     
     /// Static constant for the part of the system prompt telling the LLM to use sources
@@ -82,7 +82,7 @@ You recall the following information about the user from prior interactions:
     }
     
     /// Static constant for the default server endpoint
-    public static let defaultEndpoint: String = ""
+    public static let defaultEndpoint: String = "https://router.huggingface.co/v1"
     
     /// Static constant for the default context length
     private static var defaultContextLength: Int {
@@ -97,6 +97,10 @@ You recall the following information about the user from prior interactions:
     
     /// Static constant for the default temperature
     private static let defaultTemperature: Double = 0.6
+    /// Static constant for the default MLX max tokens
+    private static let defaultMLXMaxTokens: Int = 2048
+    /// Static constant for the default MLX top-p value
+    private static let defaultMLXTopP: Double = 0.95
 
     /// The maximum consecutive malformed tool call attempts before breaking.
     public static var maxConsecutiveMalformedToolCalls: Int {
@@ -197,8 +201,8 @@ You recall the following information about the user from prior interactions:
         get {
             // Set default
             if !UserDefaults.standard.exists(key: "useServer") {
-                // Default to false
-                Self.useServer = false
+                // Default to true for Hugging Face remote inference
+                Self.useServer = true
             }
             return UserDefaults.standard.bool(
                 forKey: "useServer"
@@ -206,6 +210,23 @@ You recall the following information about the user from prior interactions:
         }
         set {
             UserDefaults.standard.set(newValue, forKey: "useServer")
+        }
+    }
+
+    /// A `Bool` representing whether Apple Foundation Models are used for chat
+    public static var useFoundationModels: Bool {
+        get {
+            // Set default
+            if !UserDefaults.standard.exists(key: "useFoundationModels") {
+                // Default to true
+                Self.useFoundationModels = true
+            }
+            return UserDefaults.standard.bool(
+                forKey: "useFoundationModels"
+            )
+        }
+        set {
+            UserDefaults.standard.set(newValue, forKey: "useFoundationModels")
         }
     }
     
@@ -266,7 +287,7 @@ You recall the following information about the user from prior interactions:
             guard let serverModelName = UserDefaults.standard.string(
                 forKey: "remoteModelName"
             ) else {
-                return "gpt-4.1"
+                return "meta-llama/Llama-3.1-8B-Instruct"
             }
             return serverModelName
         }
@@ -329,7 +350,7 @@ You recall the following information about the user from prior interactions:
             guard let serverWorkerModelName = UserDefaults.standard.string(
                 forKey: "serverWorkerModelName"
             ) else {
-                return "gpt-4.1-nano"
+                return "meta-llama/Llama-3.1-8B-Instruct:fastest"
             }
             return serverWorkerModelName
         }
@@ -381,6 +402,36 @@ You recall the following information about the user from prior interactions:
         }
         set {
             UserDefaults.standard.set(newValue, forKey: "temperature")
+        }
+    }
+
+    /// Maximum output tokens for MLX generation
+    public static var mlxMaxTokens: Int {
+        get {
+            if !UserDefaults.standard.exists(key: "mlxMaxTokens") {
+                Self.mlxMaxTokens = defaultMLXMaxTokens
+            }
+            return UserDefaults.standard.integer(
+                forKey: "mlxMaxTokens"
+            )
+        }
+        set {
+            UserDefaults.standard.set(newValue, forKey: "mlxMaxTokens")
+        }
+    }
+
+    /// Top-p nucleus sampling for MLX generation
+    public static var mlxTopP: Double {
+        get {
+            if !UserDefaults.standard.exists(key: "mlxTopP") {
+                Self.mlxTopP = defaultMLXTopP
+            }
+            return UserDefaults.standard.double(
+                forKey: "mlxTopP"
+            )
+        }
+        set {
+            UserDefaults.standard.set(newValue, forKey: "mlxTopP")
         }
     }
     
@@ -479,8 +530,21 @@ You recall the following information about the user from prior interactions:
         systemPrompt = defaultSystemPrompt
         contextLength = defaultContextLength
         temperature = defaultTemperature
+        mlxMaxTokens = defaultMLXMaxTokens
+        mlxTopP = defaultMLXTopP
         enableContextCompression = true
         compressionTokenThreshold = defaultCompressionTokenThreshold
+        useFoundationModels = true
+        useServer = true
+        if !UserDefaults.standard.exists(key: "endpoint") {
+            endpoint = defaultEndpoint
+        }
+        if !UserDefaults.standard.exists(key: "remoteModelName") {
+            serverModelName = "meta-llama/Llama-3.1-8B-Instruct"
+        }
+        if !UserDefaults.standard.exists(key: "serverWorkerModelName") {
+            serverWorkerModelName = "meta-llama/Llama-3.1-8B-Instruct:fastest"
+        }
     }
     
     /// Function to switch to normal system prompt

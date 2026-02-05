@@ -1,6 +1,6 @@
 //
 //  WebsiteRowView.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by John Bean on 5/15/25.
 //

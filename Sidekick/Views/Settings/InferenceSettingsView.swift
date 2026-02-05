@@ -1,6 +1,6 @@
 //
 //  InferenceSettingsView.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by Bean John on 10/14/24.
 //
@@ -22,9 +22,14 @@ struct InferenceSettingsView: View {
     @State private var isSelectingModel: Bool = false
     @State private var isSelectingWorkerModel: Bool = false
     @State private var isSelectingSpeculativeDecodingModel: Bool = false
+    @State private var isSelectingCoreMLClassifier: Bool = false
+    @State private var isTrainingCoreMLClassifier: Bool = false
+    @State private var mlxAvailability: MLXRunner.Availability? = nil
+    @State private var isCheckingMLXAvailability: Bool = false
     
     @State private var isConfiguringServerArguments: Bool = false
     
+    @AppStorage("useFoundationModels") private var useFoundationModels: Bool = InferenceSettings.useFoundationModels
     @AppStorage("temperature") private var temperature: Double = InferenceSettings.temperature
     @AppStorage("useGPUAcceleration") private var useGPUAcceleration: Bool = InferenceSettings.useGPUAcceleration
     @AppStorage("useSpeculativeDecoding") private var useSpeculativeDecoding: Bool = InferenceSettings.useSpeculativeDecoding
@@ -34,10 +39,14 @@ struct InferenceSettingsView: View {
     @AppStorage("contextLength") private var contextLength: Int = InferenceSettings.contextLength
     @AppStorage("enableContextCompression") private var enableContextCompression: Bool = InferenceSettings.enableContextCompression
     @AppStorage("compressionTokenThreshold") private var compressionTokenThreshold: Int = InferenceSettings.compressionTokenThreshold
+    @AppStorage("promptClassifierUrl") private var promptClassifierUrl: URL?
+    @AppStorage("mlxMaxTokens") private var mlxMaxTokens: Int = InferenceSettings.mlxMaxTokens
+    @AppStorage("mlxTopP") private var mlxTopP: Double = InferenceSettings.mlxTopP
     
     var body: some View {
         Form {
             Section {
+                foundationModels
                 model
                 workerModel
                 speculativeDecoding
@@ -54,10 +63,24 @@ struct InferenceSettingsView: View {
             } header: {
                 Text("Parameters")
             }
+            Section {
+                mlxStatus
+                mlxParameters
+            } header: {
+                Text("MLX")
+            }
+            Section {
+                coreMLClassifier
+            } header: {
+                Text("Core ML")
+            }
             ServerModelSettingsView()
         }
         .formStyle(.grouped)
         .scrollIndicators(.never)
+        .task {
+            await refreshMLXAvailability()
+        }
         .sheet(isPresented: $isEditingSystemPrompt) {
             SystemPromptEditor(
                 isEditingSystemPrompt: $isEditingSystemPrompt
@@ -65,14 +88,35 @@ struct InferenceSettingsView: View {
             .frame(maxHeight: 700)
         }
     }
+
+    private var isUsingMLXModel: Bool {
+        guard let modelUrl else { return false }
+        return Settings.isMLXModelURL(modelUrl)
+    }
+
+    @MainActor
+    private func refreshMLXAvailability() async {
+        guard !isCheckingMLXAvailability else { return }
+        isCheckingMLXAvailability = true
+        let availability = await MLXRunner.checkAvailability()
+        mlxAvailability = availability
+        isCheckingMLXAvailability = false
+    }
     
     var model: some View {
-        HStack(alignment: .center) {
+        let isUsingFoundationModels = useFoundationModels && FoundationModelsSupport.isAvailable
+        let modelName: String = isUsingFoundationModels
+        ? "Apple Foundation Model"
+        : (modelUrl?.lastPathComponent ?? String(localized: "No Model Selected"))
+        let modelDescription: String = isUsingFoundationModels
+        ? "This is the default model used for chat when Apple Intelligence is available."
+        : "This is the default local model used."
+        return HStack(alignment: .center) {
             VStack(alignment: .leading) {
-                Text("Model: \(modelUrl?.lastPathComponent ?? String(localized: "No Model Selected"))")
+                Text("Model: \(modelName)")
                     .font(.title3)
                     .bold()
-                Text("This is the default local model used.")
+                Text(modelDescription)
                     .font(.caption)
             }
             Spacer()
@@ -96,6 +140,35 @@ struct InferenceSettingsView: View {
                 modelType: .regular
             )
             .frame(minWidth: 450, maxHeight: 600)
+        }
+    }
+
+    var foundationModels: some View {
+        let statusText = FoundationModelsSupport.availabilityDescription
+        let isAvailable = FoundationModelsSupport.isAvailable
+        return HStack(alignment: .top) {
+            VStack(alignment: .leading) {
+                Text("Use Apple Foundation Models")
+                    .font(.title3)
+                    .bold()
+                Text("Defaults to Apple Intelligence models for chat when available. Falls back to local or remote models for tools, web search, or deep research.")
+                    .font(.caption)
+                Text(statusText)
+                    .font(.caption)
+                    .foregroundStyle(isAvailable ? .green : .secondary)
+            }
+            Spacer()
+            Toggle(
+                "",
+                isOn: $useFoundationModels.animation(.linear)
+            )
+            .disabled(!isAvailable)
+        }
+        .onChange(of: useFoundationModels) {
+            NotificationCenter.default.post(
+                name: Notifications.changedInferenceConfig.name,
+                object: nil
+            )
         }
     }
     
@@ -142,6 +215,60 @@ struct InferenceSettingsView: View {
             if useSpeculativeDecoding {
                 speculativeDecodingModel
             }
+        }
+    }
+
+    var coreMLClassifier: some View {
+        HStack(alignment: .center) {
+            VStack(alignment: .leading) {
+                Text("Prompt Classifier")
+                    .font(.title3)
+                    .bold()
+                Text("Optional Core ML model to classify prompt intent (text vs image). Use a custom model trained with your own data.")
+                    .font(.caption)
+                if let promptClassifierUrl {
+                    Text(promptClassifierUrl.lastPathComponent)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                } else {
+                    Text("Using built-in classifier")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+            Spacer()
+            HStack {
+                Button {
+                    self.isSelectingCoreMLClassifier.toggle()
+                } label: {
+                    Text("Select")
+                }
+                Button {
+                    self.isTrainingCoreMLClassifier.toggle()
+                } label: {
+                    Text("Train")
+                }
+                Button {
+                    promptClassifierUrl = nil
+                } label: {
+                    Text("Reset")
+                }
+                .disabled(promptClassifierUrl == nil)
+            }
+        }
+        .sheet(isPresented: $isSelectingCoreMLClassifier) {
+            CoreMLClassifierPickerView(
+                isPresented: $isSelectingCoreMLClassifier,
+                promptClassifierUrl: $promptClassifierUrl
+            )
+            .frame(minWidth: 450, maxHeight: 400)
+        }
+        .sheet(isPresented: $isTrainingCoreMLClassifier) {
+            CoreMLTrainingView(
+                isPresented: $isTrainingCoreMLClassifier,
+                promptClassifierUrl: $promptClassifierUrl
+            )
+            .frame(minWidth: 450, maxHeight: 400)
         }
     }
     
@@ -258,7 +385,7 @@ struct InferenceSettingsView: View {
                 if let url = try? FileManager.selectFile(
                     dialogTitle: String(localized: "Select a Model"),
                     canSelectDirectories: false,
-                    allowedContentTypes: [Settings.ggufType]
+                    allowedContentTypes: Settings.modelContentTypes
                 ).first {
                     self.projectorModelUrl = url
                 }
@@ -287,6 +414,94 @@ struct InferenceSettingsView: View {
             contextCompressionThresholdEditor
             useGPUAccelerationToggle
             advancedParameters
+        }
+    }
+
+    var mlxStatus: some View {
+        HStack(alignment: .top) {
+            VStack(alignment: .leading) {
+                Text("MLX Runtime")
+                    .font(.title3)
+                    .bold()
+                Text(isUsingMLXModel ? "MLX is used for local MLX models." : "Select an MLX model to enable MLX inference.")
+                    .font(.caption)
+                if let availability = mlxAvailability {
+                    Text(availability.pythonAvailable ? "Python: Available" : "Python: Not Found")
+                        .font(.caption)
+                        .foregroundStyle(availability.pythonAvailable ? .green : .secondary)
+                    Text(availability.mlxAvailable ? "mlx-lm: Available" : "mlx-lm: Not Found")
+                        .font(.caption)
+                        .foregroundStyle(availability.mlxAvailable ? .green : .secondary)
+                    if availability.mlxAvailable, let version = availability.mlxVersion, !version.isEmpty {
+                        Text("mlx-lm version: \(version)")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    } else if availability.pythonAvailable && !availability.mlxAvailable {
+                        Text("Install `mlx-lm` with `pip install mlx-lm`.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    } else if !availability.pythonAvailable {
+                        Text("Install Python 3 to enable MLX inference.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                } else {
+                    Text("Checking MLX availability...")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+            Spacer()
+            Button {
+                Task { await refreshMLXAvailability() }
+            } label: {
+                Text(isCheckingMLXAvailability ? "Checking..." : "Check")
+            }
+            .disabled(isCheckingMLXAvailability)
+        }
+    }
+
+    var mlxParameters: some View {
+        VStack(spacing: 12) {
+            HStack(alignment: .top) {
+                VStack(alignment: .leading) {
+                    Text("Max Output Tokens")
+                        .font(.title3)
+                        .bold()
+                    Text("Caps the number of tokens MLX can generate for local MLX models.")
+                        .font(.caption)
+                }
+                Spacer()
+                TextField(
+                    "",
+                    value: $mlxMaxTokens,
+                    formatter: NumberFormatter()
+                )
+                .textFieldStyle(.plain)
+                .frame(width: 100)
+            }
+            HStack(alignment: .center) {
+                VStack(alignment: .leading) {
+                    Text("Top-p")
+                        .font(.title3)
+                        .bold()
+                    Text("Nucleus sampling for MLX generation.")
+                        .font(.caption)
+                }
+                Spacer()
+                Slider(
+                    value: $mlxTopP,
+                    in: 0.05...1.0,
+                    step: 0.05
+                )
+                .frame(minWidth: 260)
+                .overlay(alignment: .leading) {
+                    Text(String(format: "%g", self.mlxTopP))
+                        .font(.body)
+                        .foregroundStyle(.secondary)
+                        .padding(.leading, 80)
+                }
+            }
         }
     }
     

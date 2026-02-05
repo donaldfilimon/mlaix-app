@@ -1,6 +1,6 @@
 //
 //  ConversationControlsView.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by Bean John on 10/8/24.
 //
@@ -110,6 +110,9 @@ struct ConversationControlsView: View {
             }
         }
         .padding(.leading)
+        .padding(.trailing, 10)
+        .liquidGlassPanel(cornerRadius: 18)
+        .padding(.bottom, 12)
         .onDrop(
             of: ["public.file-url"],
             delegate: promptController

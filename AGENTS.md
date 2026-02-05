@@ -1,17 +1,16 @@
 # Repository Guidelines
 
 ## Project Structure & Module Organization
-- `Sidekick/`: main macOS app source (Swift/SwiftUI). Key subfolders include `Logic/`, `Views/`, `Types/`, `Extensions/`, plus assets in `Sidekick/Assets.xcassets` and resources in `Sidekick/Resources`.
+- `Sidekick/`: main macOS app source (Swift/SwiftUI) for the MLAI app. Key subfolders include `Logic/`, `Views/`, `Types/`, `Extensions/`, plus assets in `Sidekick/Assets.xcassets` and resources in `Sidekick/Resources`.
 - `SidekickTests/`: unit tests using Swift Testing.
-- `SidekickUITests/`: UI tests (run from Xcode).
 - `Docs Images/`, `Markdown/`, `Features/`, `About/`: documentation and site content.
 - `scripts/` and `setup.sh`: local setup helpers (signing, tooling).
 
 ## Build, Test, and Development Commands
 - `swift build`: build the SwiftPM target (`MLAI`).
+- `swift run MLAI`: run the MLAI app via SwiftPM.
 - `swift test`: run unit tests in `SidekickTests/`.
-- `xcodebuild -project Sidekick.xcodeproj -scheme Sidekick build`: build with Xcode tooling (use Xcode to run the GUI app).
-- `./setup.sh <TEAM_ID> <CODE_SIGNING_IDENTITY>`: configure signing and download/sign Marp.
+- `./setup.sh <CODE_SIGNING_IDENTITY>`: download/sign Marp.
 
 ## Coding Style & Naming Conventions
 - Use standard Xcode formatting (4-space indentation, braces on the same line).
@@ -22,7 +21,6 @@
 ## Testing Guidelines
 - Unit tests use Swift Testing (`import Testing`) and `@Test` functions.
 - Keep tests in `SidekickTests/` and name them descriptively (e.g., `checkModelReccomendations()`).
-- UI tests live in `SidekickUITests/` and should be run via Xcode.
 
 ## Commit & Pull Request Guidelines
 - Commit messages follow Conventional Commits style (`feat:`, `fix:`, `chore:`), per recent history.
@@ -30,4 +28,3 @@
 
 ## Configuration Notes
 - The SwiftPM module name is `MLAI` (use `@testable import MLAI` in tests).
-- The Xcode project lives at `Sidekick.xcodeproj` and is the preferred way to run the app locally.

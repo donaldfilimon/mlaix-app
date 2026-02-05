@@ -1,6 +1,6 @@
 //
 //  ServerModelSettingsView.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by John Bean on 3/12/25.
 //

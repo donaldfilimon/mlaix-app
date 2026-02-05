@@ -1,6 +1,6 @@
 //
 //  DragModifier.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by John Bean on 5/19/25.
 //
@@ -14,9 +14,10 @@ struct FileDragProvider: NSViewRepresentable {
     
     var preview: NSImage
     
+    @MainActor
     class NSViewType: NSView, NSFilePromiseProviderDelegate, NSDraggingSource {
         
-        var filePromise: FilePromise
+        nonisolated(unsafe) var filePromise: FilePromise
         var preview: NSImage
         
         @available(*, unavailable)
@@ -64,13 +65,11 @@ struct FileDragProvider: NSViewRepresentable {
         }
         
         func filePromiseProvider(_ filePromiseProvider: NSFilePromiseProvider, writePromiseTo url: URL, completionHandler: @escaping (Error?) -> Void) {
-            Task.detached { [filePromise] in
-                do {
-                    try await filePromise.writeToURL(url)
-                    completionHandler(nil)
-                } catch let error {
-                    completionHandler(error)
-                }
+            do {
+                try filePromise.writeToURL(url)
+                completionHandler(nil)
+            } catch let error {
+                completionHandler(error)
             }
         }
         
@@ -107,6 +106,6 @@ struct FilePromise {
     
     var name: String
     var type: UTType
-    var writeToURL: (URL) async throws -> Void
+    var writeToURL: (URL) throws -> Void
     
 }

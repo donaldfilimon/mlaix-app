@@ -1,6 +1,6 @@
 //
 //  Accessibility.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by Bean John on 11/18/24.
 //
@@ -16,7 +16,7 @@ public class Accessibility {
 	/// The shared singleton ``Accessibility`` object
 	@MainActor public static let shared = Accessibility()
 	
-	/// Check if Sidekick has the right permissions
+	/// Check if MLAI has the right permissions
 	public static func checkAccessibility() -> Bool {
 		// Access the global constant - this is safe as it's a constant CFString
 		// Use nonisolated(unsafe) to silence warning for this platform constant

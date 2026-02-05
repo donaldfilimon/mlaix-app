@@ -1,8 +1,8 @@
 //
 //  CoreTypeTests.swift
-//  SidekickTests
+//  MLAITests
 //
-//  Comprehensive unit tests for core Sidekick types.
+//  Comprehensive unit tests for core MLAI types.
 //
 
 import Foundation

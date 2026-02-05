@@ -1,6 +1,6 @@
 //
 //  PerformanceGaugeView.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by Bean John on 11/9/24.
 //

@@ -1,6 +1,6 @@
 //
 //  ContextCompressor.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by John Bean on 10/9/25.
 //
@@ -12,7 +12,7 @@ import OSLog
 enum ContextCompressor {
     
     private static let logger = Logger(
-        subsystem: Bundle.main.bundleIdentifier ?? "Sidekick",
+        subsystem: Bundle.main.bundleIdentifier ?? "MLAI",
         category: "ContextCompressor"
     )
     
@@ -68,7 +68,7 @@ enum ContextCompressor {
         threshold: Int
     ) async throws -> String {
         let prompt = """
-You are Sidekick's compression worker. Summarise the tool result below preserving every critical fact, figure, and citation.
+You are MLAI's compression worker. Summarise the tool result below preserving every critical fact, figure, and citation.
 
 Tool call schema:
 \(call)

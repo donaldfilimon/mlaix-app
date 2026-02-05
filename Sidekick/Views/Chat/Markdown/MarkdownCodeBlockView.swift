@@ -1,6 +1,6 @@
 //
 //  MarkdownCodeBlockView.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by Bean John on 11/7/24.
 //

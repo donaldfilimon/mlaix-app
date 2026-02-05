@@ -1,6 +1,6 @@
 //
 //  MessageBackgroundView.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by Bean John on 10/23/24.
 //
@@ -9,20 +9,27 @@ import SwiftUI
 
 struct MessageBackgroundView: View {
 	
+	@Environment(\.liquidGlassStyle) private var liquidGlassStyle
 	private let cornerRadius: CGFloat = 13
 	private let borderWidth: CGFloat = 0.5
 	
 	var body: some View {
-		unevenRoundedRectangle(cornerRadius)
-			.fill(
-				Color(nsColor: .textBackgroundColor)
-			)
-			.padding(borderWidth)
-			.background {
-				unevenRoundedRectangle(cornerRadius + borderWidth)
-					.fill(Color.secondary)
-					.opacity(0.5)
-			}
+		if liquidGlassStyle.isEnabled {
+			unevenRoundedRectangle(cornerRadius)
+				.fill(Color.clear)
+				.liquidGlassPanel(cornerRadius: cornerRadius)
+		} else {
+			unevenRoundedRectangle(cornerRadius)
+				.fill(
+					Color(nsColor: .textBackgroundColor)
+				)
+				.padding(borderWidth)
+				.background {
+					unevenRoundedRectangle(cornerRadius + borderWidth)
+						.fill(Color.secondary)
+						.opacity(0.5)
+				}
+		}
 	}
 	
 	private func unevenRoundedRectangle(

@@ -1,6 +1,6 @@
 //
 //  SnapshotExportButton.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by John Bean on 3/20/25.
 //

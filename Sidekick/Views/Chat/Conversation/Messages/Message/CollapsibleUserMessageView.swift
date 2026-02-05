@@ -1,6 +1,6 @@
 //
 //  CollapsibleUserMessageView.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by Assistant on 11/6/25.
 //

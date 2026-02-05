@@ -1,6 +1,6 @@
 //
 //  PromptController.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by Bean John on 10/19/24.
 //
@@ -18,7 +18,7 @@ import UniformTypeIdentifiers
 public class PromptController: ObservableObject, DropDelegate {
     
     /// A `Logger` object for the `PromptController` object
-    private static let logger: Logger = .init(
+    nonisolated private static let logger: Logger = .init(
         subsystem: Bundle.main.logSubsystem,
         category: String(describing: PromptController.self)
     )
@@ -103,9 +103,7 @@ public class PromptController: ObservableObject, DropDelegate {
         createRecognitionRequest()
         setupRecognitionTask()
         startAudioEngine()
-        withAnimation(.linear) {
-            self.isRecording = true
-        }
+        self.isRecording = true
     }
     
     public func stopRecording() {
@@ -116,9 +114,7 @@ public class PromptController: ObservableObject, DropDelegate {
         audioEngine.inputNode.removeTap(onBus: 0)
         recognitionRequest?.endAudio()
         recognitionTask?.cancel()
-        withAnimation(.linear) {
-            self.isRecording = false
-        }
+        self.isRecording = false
     }
     
     // MARK: - Speech recognition tasks (reset, create, setup & handle recognition results)

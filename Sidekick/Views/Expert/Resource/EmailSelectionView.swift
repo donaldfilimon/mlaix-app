@@ -1,6 +1,6 @@
 //
 //  EmailSelectionView.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by John Bean on 3/17/25.
 //
@@ -45,7 +45,7 @@ struct EmailSelectionView: View {
 	
 	var permissionsView: some View {
 		VStack {
-			Text("Sidekick needs permission to read your emails in Apple Mail. Please click the button below and press \"Open\".")
+			Text("MLAI needs permission to read your emails in Apple Mail. Please click the button below and press \"Open\".")
 				.font(.title3)
 			Button {
 				if self.getPermission() {

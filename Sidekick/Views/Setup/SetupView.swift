@@ -1,6 +1,6 @@
 //
 //  SetupView.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by Bean John on 9/22/24.
 //
@@ -28,6 +28,8 @@ struct SetupView: View {
                     .padding(.vertical)
 			}
 		}
+		.liquidGlassPanel(cornerRadius: 20)
+		.padding()
 		.interactiveDismissDisabled(true)
     }
 	

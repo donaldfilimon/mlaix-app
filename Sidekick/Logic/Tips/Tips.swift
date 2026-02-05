@@ -1,6 +1,6 @@
 //
 //  Tips.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by Bean John on 10/23/24.
 //
@@ -70,7 +70,7 @@ struct TryToolsTip: Tip {
 	}
 	
 	var message: Text? {
-		Text("Leverage Sidekick's built-in tools to quickly generate and check content.")
+		Text("Leverage MLAI's built-in tools to quickly generate and check content.")
 	}
 	
 	var image: Image? {

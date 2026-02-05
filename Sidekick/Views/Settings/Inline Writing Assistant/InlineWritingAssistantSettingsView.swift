@@ -1,6 +1,6 @@
 //
 //  InlineWritingAssistantSettingsView.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by John Bean on 3/25/25.
 //
@@ -133,7 +133,7 @@ struct InlineWritingAssistantSettingsView: View {
                     rootUrl: self.completionsModelUrl?.deletingLastPathComponent(),
                     dialogTitle: String(localized: "Select a Base Model"),
                     canSelectDirectories: false,
-                    allowedContentTypes: [Settings.ggufType]
+                    allowedContentTypes: Settings.modelContentTypes
                 ).first {
                     self.completionsModelUrl = url
                     // Reload model

@@ -1,6 +1,6 @@
 //
 //  PromptAnalyzer.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by John Bean on 12/19/24.
 //
@@ -28,12 +28,33 @@ public class PromptAnalyzer {
         // Else, init classifier model
         let mlModelConfig = MLModelConfiguration()
         mlModelConfig.computeUnits = .all
+        let bundledModelUrl: URL? = Bundle.main.url(
+            forResource: "UserRequestClassifier",
+            withExtension: "mlmodelc"
+        )
+        let customModelUrl: URL? = {
+            guard let url = Settings.promptClassifierUrl else {
+                return nil
+            }
+            let fileExists = FileManager.default.fileExists(atPath: url.path)
+            return fileExists ? url : nil
+        }()
+        let classifierUrl: URL? = customModelUrl ?? bundledModelUrl
+        guard let classifierUrl else {
+            return .text
+        }
+        let compiledUrl: URL? = {
+            if classifierUrl.pathExtension == "mlmodel" {
+                return try? MLModel.compileModel(at: classifierUrl)
+            }
+            return classifierUrl
+        }()
+        guard let compiledUrl else {
+            return .text
+        }
         guard let promptClassifier: NLModel = try? NLModel(
             mlModel: MLModel(
-                contentsOf: Bundle.main.url(
-                    forResource: "UserRequestClassifier",
-                    withExtension: "mlmodelc"
-                )!
+                contentsOf: compiledUrl
             )
         ) else {
             return .text
@@ -65,7 +86,7 @@ public class PromptAnalyzer {
 			// Prompt user
 			let _ = Dialogs.dichotomy(
 				title: String(localized: "Response"),
-				message: String(localized: "What do you want Sidekick to respond with?"),
+				message: String(localized: "What do you want MLAI to respond with?"),
 				option1: String(localized: "Text"),
 				option2: String(localized: "Image")
 			) {

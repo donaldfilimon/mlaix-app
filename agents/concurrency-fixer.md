@@ -29,7 +29,7 @@ You are an expert Swift 6 concurrency specialist. Your job is to fix StrictConcu
 ## Project Context
 
 - **Swift Version**: 6.2 with StrictConcurrency enabled
-- **Module Name**: MLAI (SwiftPM), Sidekick (Xcode)
+- **Module Name**: MLAI (SwiftPM)
 - **Build Command**: `swift build`
 - **Current State**: ~55 warnings remaining after major modernization
 

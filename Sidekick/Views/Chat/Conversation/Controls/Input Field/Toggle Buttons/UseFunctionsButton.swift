@@ -1,6 +1,6 @@
 //
 //  UseFunctionsButton.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by John Bean on 4/14/25.
 //
@@ -34,6 +34,22 @@ struct UseFunctionsButton: View {
     private func onToggle(
         newValue: Bool
     ) {
+        let hasLocalModel = Settings.modelUrl?.fileExists ?? false
+        let hasRemoteModel = InferenceSettings.useServer
+        if newValue,
+           InferenceSettings.useFoundationModels,
+           FoundationModelsSupport.isAvailable,
+           !hasLocalModel,
+           !hasRemoteModel {
+            self.useFunctions = false
+            Dialogs.showAlert(
+                title: String(localized: "Functions Unavailable"),
+                message: String(
+                    localized: "Functions require a local or remote model. Configure one in Settings or disable Apple Foundation Models."
+                )
+            )
+            return
+        }
         // Check if functions is configured
         if !Settings.useFunctions {
             // If not, show error and return

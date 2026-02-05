@@ -1,6 +1,6 @@
 //
 //  RetrievalSettingsView.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by Bean John on 10/16/24.
 //
@@ -70,7 +70,7 @@ struct RetrievalSettingsView: View {
                         .bold()
                     StatusLabelView.experimental
                 }
-                Text("Controls whether Sidekick remembers information about you to provide more customized, personal responses in the future.")
+                Text("Controls whether MLAI remembers information about you to provide more customized, personal responses in the future.")
                     .font(.caption)
             }
             Spacer()
@@ -86,7 +86,7 @@ struct RetrievalSettingsView: View {
                 Text("Memories")
                     .font(.title3)
                     .bold()
-                Text("Mange Sidekick's memories.")
+                Text("Mange MLAI's memories.")
                     .font(.caption)
             }
             Spacer()

@@ -1,6 +1,6 @@
 //
 //  ReferencedURL.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by Bean John on 10/13/24.
 //

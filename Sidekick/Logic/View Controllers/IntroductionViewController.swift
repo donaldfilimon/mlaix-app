@@ -1,6 +1,6 @@
 //
 //  IntroductionViewController.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by Bean John on 12/15/24.
 //
