@@ -1,3 +1,1 @@
-MLAIX/Logic/View Controllers/Tools/Slide Studio/Resources/bin/marp filter=lfs diff=lfs merge=lfs -text
-MLAIX/Logic/View Controllers/Tools/Slide Studio/Resources/bin filter=lfs diff=lfs merge=lfs -text
-MLAIX/Logic/View Controllers/Tools/Slide Studio/Resources/bin/marp filter=lfs diff=lfs merge=lfs -text
+"MLAIX/Logic/View Controllers/Tools/Slide Studio/Resources/bin/**" filter=lfs diff=lfs merge=lfs -text
