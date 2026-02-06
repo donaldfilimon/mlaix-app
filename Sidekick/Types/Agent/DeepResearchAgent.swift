@@ -1,6 +1,6 @@
 //
 //  DeepResearchAgent.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by John Bean on 5/8/25.
 //
@@ -103,6 +103,10 @@ public class DeepResearchAgent: Agent {
         self.messages.removeAll()
         // Split into sections
         self.sections = try await self.splitIntoSections()
+        let maxSections: Int = DeepResearchSettings.maxSections
+        if self.sections.count > maxSections {
+            self.sections = Array(self.sections.prefix(maxSections))
+        }
         let sectionsDescription: String = self.sections.enumerated().map { (index, section) in
             return section.getPromptDescription(sectionNumber: index + 1)
         }.joined(separator: "\n\n")
@@ -360,6 +364,9 @@ Respond with the array of JSON objects ONLY.
         let keyFindings: String = self.sections.map(
             keyPath: \.keyFinding
         ).compactMap({ $0 }).joined(separator: "\n")
+        let minSources: Int = DeepResearchSettings.minSources
+        let maxSources: Int = DeepResearchSettings.maxSources
+        let minToolCalls: Int = DeepResearchSettings.minToolCalls
         let researchPrompt: Message = Message(
             text: """
 You are researching information for a section of a research report. This was the user's instruction regarding the overall report.
@@ -380,7 +387,7 @@ Here are prior key findings for earlier sections of the report.
 \(keyFindings)
 ```
 
-Call tools in a loop, reading and researching in websites and vector databases, until you have 7-10 sources for this section of the report. Do not stop until AT LEAST 7 tool calls are made.
+Call tools in a loop, reading and researching in websites and vector databases, until you have \(minSources)-\(maxSources) sources for this section of the report. Do not stop until AT LEAST \(minToolCalls) tool calls are made.
 
 When research is complete, respond with a list of relevant useful sources in the format below:
 
@@ -1011,4 +1018,3 @@ Description: \(self.description)
     }
     
 }
-

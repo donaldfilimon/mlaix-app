@@ -1,6 +1,6 @@
 //
 //  ModelNameMenu.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by John Bean on 3/21/25.
 //

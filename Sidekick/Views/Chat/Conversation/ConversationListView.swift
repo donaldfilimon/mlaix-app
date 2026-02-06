@@ -1,6 +1,6 @@
 //
 //  ConversationNavigationListView.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by Bean John on 10/8/24.
 //

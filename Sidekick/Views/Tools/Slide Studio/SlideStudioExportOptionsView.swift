@@ -1,6 +1,6 @@
 //
 //  SlideStudioExportOptionsView.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by John Bean on 3/1/25.
 //

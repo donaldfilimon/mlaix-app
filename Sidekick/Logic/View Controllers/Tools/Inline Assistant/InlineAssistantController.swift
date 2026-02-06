@@ -1,6 +1,6 @@
 //
 //  InlineAssistantController.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by Bean John on 11/18/24.
 //
@@ -41,7 +41,7 @@ public class InlineAssistantController: ObservableObject {
 			// If no text is selected, show alert, then exit
 			Dialogs.showAlert(
 				title: String(localized: "No Text Selected"),
-				message: String(localized: "Please select text before invoking Sidekick's Inline Writing Assistant")
+				message: String(localized: "Please select text before invoking MLAI's Inline Writing Assistant")
 			)
 			return
 		}

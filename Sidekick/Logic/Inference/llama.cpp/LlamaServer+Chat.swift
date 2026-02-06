@@ -1,6 +1,6 @@
 //
 //  LlamaServer+Chat.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by Bean John on 10/9/24.
 //
@@ -117,17 +117,6 @@ extension LlamaServer {
             openAiCompatiblePath: true,
             canReachRemoteServer: canReachRemoteServer
         )
-        // Start server if remote server is not used & local server is inactive
-        if !rawUrl.usingRemoteServer {
-            Self.logger.info("Using local model for inference...")
-            try await self.startServer(
-                canReachRemoteServer: canReachRemoteServer
-            )
-        } else {
-            Self.logger.info("Using remote model for inference...")
-        }
-        // Get start time
-        let start: CFAbsoluteTime = CFAbsoluteTimeGetCurrent()
         // Capture actor-isolated properties before async let
         let capturedModelType = self.modelType
         let capturedSystemPrompt = self.systemPrompt
@@ -169,6 +158,27 @@ extension LlamaServer {
                     )
             }
         }()
+        // Use MLX for local MLX models instead of llama-server
+        if !rawUrl.usingRemoteServer,
+           let modelUrl = self.modelUrl,
+           Settings.isMLXModelURL(modelUrl) {
+            Self.logger.info("Using MLX model for inference...")
+            return try await self.getMLXChatCompletion(
+                params: params,
+                progressHandler: progressHandler
+            )
+        }
+        // Start server if remote server is not used & local server is inactive
+        if !rawUrl.usingRemoteServer {
+            Self.logger.info("Using local model for inference...")
+            try await self.startServer(
+                canReachRemoteServer: canReachRemoteServer
+            )
+        } else {
+            Self.logger.info("Using remote model for inference...")
+        }
+        // Get start time
+        let start: CFAbsoluteTime = CFAbsoluteTimeGetCurrent()
         // Formulate request
         var request = URLRequest(
             url: rawUrl.url
@@ -961,5 +971,3 @@ extension LlamaServer {
     }
     
 }
-
-

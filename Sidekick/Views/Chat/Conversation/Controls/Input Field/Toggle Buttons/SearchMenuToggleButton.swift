@@ -1,6 +1,6 @@
 //
 //  SearchMenuToggleButton.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by John Bean on 5/7/25.
 //
@@ -41,6 +41,22 @@ struct SearchMenuToggleButton: View {
     private func onToggle(
         newValue: Bool
     ) {
+        let hasLocalModel = Settings.modelUrl?.fileExists ?? false
+        let hasRemoteModel = InferenceSettings.useServer
+        if newValue,
+           InferenceSettings.useFoundationModels,
+           FoundationModelsSupport.isAvailable,
+           !hasLocalModel,
+           !hasRemoteModel {
+            Dialogs.showAlert(
+                title: String(localized: "Search Unavailable"),
+                message: String(
+                    localized: "Web search requires a local or remote model. Configure one in Settings or disable Apple Foundation Models."
+                )
+            )
+            self.resetSearchState()
+            return
+        }
         // Check if search is configured
         if !RetrievalSettings.canUseWebSearch {
             // If not, show error and return

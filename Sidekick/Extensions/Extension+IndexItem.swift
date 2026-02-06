@@ -1,6 +1,6 @@
 //
 //  Extension+IndexItem.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by Bean John on 10/19/24.
 //

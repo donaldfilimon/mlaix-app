@@ -1,6 +1,6 @@
 //
 //  CapsuleChecklistMenuButton.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by John Bean on 11/10/25.
 //

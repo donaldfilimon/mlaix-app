@@ -1,6 +1,6 @@
 //
 //  Settings.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by Bean John on 9/23/24.
 //
@@ -16,6 +16,64 @@ public class Settings {
 	
 	/// Static constant for the `gguf` UniformTypeIdentifier
 	static let ggufType: UTType = UTType("com.npc-pet.Chats.gguf") ?? .data
+	/// Static constant for the `mlx` UniformTypeIdentifier
+	static let mlxType: UTType = UTType(filenameExtension: "mlx") ?? .data
+    /// Static constant for folder selection
+    static let folderType: UTType = .folder
+    /// Static constant for the `mlmodel` UniformTypeIdentifier
+    static let coreMLModelType: UTType = UTType(filenameExtension: "mlmodel") ?? .data
+    /// Static constant for the `mlmodelc` UniformTypeIdentifier
+	static let coreMLCompiledModelType: UTType = UTType(filenameExtension: "mlmodelc") ?? .data
+    /// Static constant for CSV content type
+    static let csvType: UTType = UTType(filenameExtension: "csv") ?? .data
+	/// Static constant for model content types
+	static let modelContentTypes: [UTType] = [
+		ggufType,
+		mlxType,
+        folderType
+	]
+    /// Static constant for Core ML model content types
+    static let coreMLContentTypes: [UTType] = [
+        coreMLModelType,
+        coreMLCompiledModelType
+    ]
+    static let trainingDataContentTypes: [UTType] = [
+        csvType
+    ]
+	static func isSupportedModelURL(_ url: URL) -> Bool {
+        return isGGUFModelURL(url) || isMLXModelURL(url)
+	}
+
+    static func isGGUFModelURL(_ url: URL) -> Bool {
+        return url.pathExtension.lowercased() == "gguf"
+    }
+
+    static func isMLXModelURL(_ url: URL) -> Bool {
+        if url.pathExtension.lowercased() == "mlx" {
+            return true
+        }
+        if url.hasDirectoryPath {
+            return isMLXModelDirectory(url)
+        }
+        return false
+    }
+
+    private static func isMLXModelDirectory(_ url: URL) -> Bool {
+        guard url.hasDirectoryPath else { return false }
+        let fileNames = (try? FileManager.default.contentsOfDirectory(
+            atPath: url.path
+        )) ?? []
+        guard fileNames.contains("config.json") else {
+            return false
+        }
+        let hasTokenizer = fileNames.contains(where: { name in
+            name.hasPrefix("tokenizer") || name == "tokenizer.model"
+        })
+        let hasWeights = fileNames.contains(where: { name in
+            name.hasSuffix(".safetensors") || name.hasSuffix(".npz") || name.hasSuffix(".bin")
+        })
+        return hasTokenizer && hasWeights
+    }
 	
 	/// A `String` representing the user's name
 	public static var username: String {
@@ -49,14 +107,14 @@ public class Settings {
 	/// Static constant for the application's container directory
 	static let containerUrl: URL = URL
 		.applicationSupportDirectory
-		.appendingPathComponent("com.pattonium.Sidekick")
+		.appendingPathComponent("com.donaldfilimon.mlaix")
 	
 	/// Static constant for the application's cache directory
 	static var cacheUrl: URL {
 		// Check existence
 		let url: URL = URL
 			.applicationSupportDirectory
-			.appendingPathComponent("com.pattonium.Sidekick")
+			.appendingPathComponent("com.donaldfilimon.mlaix")
 			.appendingPathComponent("Cache")
 		if !url.fileExists {
 			// Create directory if missing
@@ -83,9 +141,7 @@ public class Settings {
 				// Get default
 				if let modelUrl: URL = Self.dirUrl.contents?.compactMap({
 					$0
-				}).filter({
-					$0.pathExtension == "gguf"
-				}).first {
+				}).first(where: Self.isSupportedModelURL) {
 					result = modelUrl
 				} else {
 					// If no model, return nil
@@ -98,13 +154,24 @@ public class Settings {
 			UserDefaults.standard.set(newValue, forKey: "modelUrl")
 		}
 	}
+
+    /// A `URL` representing the custom prompt classifier Core ML model
+    static var promptClassifierUrl: URL? {
+        get {
+            return UserDefaults.standard.url(forKey: "promptClassifierUrl")
+        }
+        set {
+            UserDefaults.standard.set(newValue, forKey: "promptClassifierUrl")
+        }
+    }
 	
 	/// A `Bool` representing  if an model exists for use, whether it is local or on a server
 	static var hasModel: Bool {
 		// Check for local model & remote model
 		let hasLocalModel: Bool = Self.modelUrl?.fileExists ?? false
 		let hasServerModel: Bool = InferenceSettings.serverModelSetupComplete && InferenceSettings.useServer
-		return hasLocalModel || hasServerModel
+        let hasFoundationModel: Bool = InferenceSettings.useFoundationModels && FoundationModelsSupport.isAvailable
+		return hasLocalModel || hasServerModel || hasFoundationModel
 	}
 	
 	/// A `Bool` representing whether functions are enabled
@@ -297,7 +364,7 @@ public class Settings {
             UserDefaults.standard.set(newValue, forKey: "completionSuggestionThreshold")
         }
     }
-    /// Search providers supported by Sidekick
+    /// Search providers supported by MLAI
     public enum CompletionSuggestionThreshold: Int, CaseIterable {
         
         case low = -1
@@ -324,7 +391,7 @@ public class Settings {
 				forKey: "completionsExcludedApps"
 			) as? [String] else {
 				return [
-                    "com.pattonium.Sidekick"
+					"com.donaldfilimon.mlaix"
                 ]
 			}
 			return completionsExcludedApps
@@ -342,14 +409,21 @@ public class Settings {
 			dialogTitle: String(
 				localized: "Select a Model"
 			),
-			canSelectDirectories: false,
-			allowedContentTypes: [Self.ggufType],
+			canSelectDirectories: true,
+			allowedContentTypes: Self.modelContentTypes,
 			allowMultipleSelection: false,
 			persistPermissions: true
 		) {
 			guard let modelUrl = modelUrls.first else {
 				return false
 			}
+            guard Self.isSupportedModelURL(modelUrl) else {
+                Dialogs.showAlert(
+                    title: String(localized: "Unsupported Model"),
+                    message: String(localized: "Select a .gguf file or an MLX model folder.")
+                )
+                return false
+            }
 			// Set and signal success
 			Self.modelUrl = modelUrl
 			// Add to model list
@@ -367,7 +441,7 @@ public class Settings {
 		// Show dialog
 		let _ = Dialogs.showConfirmation(
 			title: String(
-				localized: "Are you sure you want clear all Settings? This will delete all settings and quit Sidekick."
+				localized: "Are you sure you want clear all Settings? This will delete all settings and quit MLAI."
 			)
 		) {
 			// If "yes"

@@ -1,6 +1,6 @@
 //
 //  IntroductionPage.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by Bean John on 12/17/24.
 //
@@ -35,13 +35,13 @@ enum IntroductionPage: CaseIterable {
 				return Content(
 					image: Image("functionUse"),
 					title: String(localized: "Functions"),
-					description: String(localized: "Sidekick can call functions to obtain information from other applications and perform tasks. For example, when asked to reschedule a meeting, Sidekick can get all events from your calendar, find an available time slot, and then reschedule the meeting by creating a calendar event and drafting an email.")
+					description: String(localized: "MLAI can call functions to obtain information from other applications and perform tasks. For example, when asked to reschedule a meeting, MLAI can get all events from your calendar, find an available time slot, and then reschedule the meeting by creating a calendar event and drafting an email.")
 				)
             case .inlineWritingAssistantCommands:
 				return Content(
 					image: Image("inlineWritingAssistantCommands"),
 					title: String(localized: "Inline Writing Assistant Commands"),
-					description: String(localized: "Press 'Command + Control + I' to access Sidekick's inline writing assistant. For example, use the 'Answer Question' command to do your homework without leaving Microsoft Word!")
+					description: String(localized: "Press 'Command + Control + I' to access MLAI's inline writing assistant. For example, use the 'Answer Question' command to do your homework without leaving Microsoft Word!")
 				)
             case .inlineWritingAssistantCompletions:
                 return Content(

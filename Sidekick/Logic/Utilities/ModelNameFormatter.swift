@@ -1,8 +1,8 @@
 //
 //  ModelNameFormatter.swift
-//  Sidekick
+//  MLAI
 //
-//  Created by Sidekick on 2/5/26.
+//  Created by MLAI on 2/5/26.
 //
 
 import Foundation

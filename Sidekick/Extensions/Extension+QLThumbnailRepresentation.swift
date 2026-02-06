@@ -1,6 +1,6 @@
 //
 //  Extension+QLThumbnailRepresentation.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by Codex on 2/5/26.
 //

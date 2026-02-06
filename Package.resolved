@@ -1,5 +1,5 @@
 {
-  "originHash" : "9ce07871256b6878e5b0d29ad23b9a769752c0de60ed6157b9d2f863ee1d538d",
+  "originHash" : "c875b946663339976cc39d9e3bfe2c686c2e3d1cd0c686b22b2803504736431e",
   "pins" : [
     {
       "identity" : "axswift",
@@ -157,19 +157,10 @@
     {
       "identity" : "similarity-search-kit",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/johnbean393/similarity-search-kit",
+      "location" : "https://github.com/donaldfilimon/similarity-search-kit",
       "state" : {
-        "branch" : "main",
-        "revision" : "9bec54706c8124bb9b20a3a06d566066a9f55712"
-      }
-    },
-    {
-      "identity" : "sparkle",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/sparkle-project/Sparkle",
-      "state" : {
-        "revision" : "5581748cef2bae787496fe6d61139aebe0a451f6",
-        "version" : "2.8.1"
+        "branch" : "mlai-resources",
+        "revision" : "759a31901768db084031031bdde0ad3f83ebea65"
       }
     },
     {

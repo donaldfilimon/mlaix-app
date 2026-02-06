@@ -1,6 +1,6 @@
 //
 //  DiagrammerPromptView.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by John Bean on 2/20/25.
 //

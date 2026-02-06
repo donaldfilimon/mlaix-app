@@ -1,6 +1,6 @@
 //
 //  RemindersFunctions.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by John Bean on 4/17/25.
 //

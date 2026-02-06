@@ -1,6 +1,6 @@
 //
 //  DownloadManager.swift
-//  Sidekick
+//  MLAI
 //
 //  Created by Bean John on 9/22/24.
 //
@@ -37,7 +37,7 @@ public class DownloadManager: NSObject, ObservableObject {
 	override private init() {
 		super.init()
 		let config: URLSessionConfiguration = URLSessionConfiguration.background(
-			withIdentifier: "com.pattonium.Sidekick.DownloadManager"
+			withIdentifier: "com.donaldfilimon.mlaix.DownloadManager"
 		)
 		config.isDiscretionary = false
 		
