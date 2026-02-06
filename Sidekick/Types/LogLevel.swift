@@ -2,7 +2,7 @@ import SwiftUI
 import OSLog
 
 /// User-defined logging levels
-public enum LogLevel {
+public enum LogLevel: Sendable {
 	
     case debug   // Includes all logs
     case info    // Includes info, notice, warning, error, critical, fault
@@ -29,7 +29,7 @@ public enum LogLevel {
 }
 
 /// OSLog levels mapped to user-defined categories
-public enum OSLogLevel: Int, Comparable {
+public enum OSLogLevel: Int, Comparable, Sendable {
     case log = 0
     case trace = 1
     case debug = 2

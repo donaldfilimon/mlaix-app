@@ -8,7 +8,9 @@
 import DefaultModels
 import Foundation
 
-public struct ModelFamily: Identifiable, Hashable {
+/// Note: @unchecked Sendable because HuggingFaceModel (external) lacks Sendable.
+/// All properties are value types; thread-safe for read-only sharing.
+public struct ModelFamily: Identifiable, Hashable, @unchecked Sendable {
 	
 	/// Conform to `Identifiable`
 	public var id: String { self.name }

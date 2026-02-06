@@ -9,7 +9,7 @@ import Foundation
 import OSLog
 import SimilaritySearchKit
 
-struct ChatParameters: Codable {
+struct ChatParameters: Codable, Sendable {
     
     /// A `Logger` object for the ``ChatParameters`` object
     private static let logger: Logger = .init(
@@ -227,7 +227,7 @@ The `\(expert.name)` is currently active. Use `query_database` to query the `\(e
     }
     
     /// Enum representing all possible chat parameter keys
-    public enum ParamKey: String, CaseIterable, CodingKey {
+    public enum ParamKey: String, CaseIterable, CodingKey, Sendable {
         case model
         case messages
         case temperature
@@ -288,7 +288,7 @@ The `\(expert.name)` is currently active. Use `query_database` to query the `\(e
         return nil
     }
     
-    struct SystemPrompt: Codable {
+    struct SystemPrompt: Codable, Sendable {
         
         var prompt: String
         var anti_prompt : String = "user:"
@@ -298,7 +298,7 @@ The `\(expert.name)` is currently active. Use `query_database` to query the `\(e
             .init(system_prompt: self)
         }
         
-        public struct SystemPromptWrapper: Codable {
+        public struct SystemPromptWrapper: Codable, Sendable {
             
             var system_prompt: SystemPrompt
             
@@ -313,11 +313,11 @@ The `\(expert.name)` is currently active. Use `query_database` to query the `\(e
         }
     }
     
-    struct StreamOptions: Codable {
+    struct StreamOptions: Codable, Sendable {
         var include_usage: Bool = true
     }
     
-    struct ReasoningOptions: Codable {
+    struct ReasoningOptions: Codable, Sendable {
         var max_tokens: Int
         
         enum CodingKeys: String, CodingKey {

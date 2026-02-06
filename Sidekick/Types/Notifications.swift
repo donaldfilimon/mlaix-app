@@ -7,7 +7,7 @@
 
 import Foundation
 
-public enum Notifications: String, NotificationName {
+public enum Notifications: String, NotificationName, Sendable {
     
     case systemPromptChanged
     case changedInferenceConfig

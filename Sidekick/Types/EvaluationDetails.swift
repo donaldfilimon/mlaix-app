@@ -8,18 +8,18 @@
 import Foundation
 import SwiftUI
 
-public struct EvaluationDetails {
+public struct EvaluationDetails: Sendable {
 	
 	var chunks: [Chunk] = []
 	
-	public struct Chunk: Identifiable {
+	public struct Chunk: Identifiable, Sendable {
 		
 		public var id: UUID = UUID()
 		var text: String = ""
 		
 		var state: State = .normal
 		
-		public enum State: String, CaseIterable {
+		public enum State: String, CaseIterable, Sendable {
 			
 			case normal
 			case drivingAiProb
