@@ -1,0 +1,104 @@
+{
+    "configurations": [
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:Sidekick}",
+            "name": "Debug MLAIX",
+            "target": "MLAIX",
+            "configuration": "debug",
+            "preLaunchTask": "swift: Build Debug MLAIX"
+        },
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:Sidekick}",
+            "name": "Release MLAIX",
+            "target": "MLAIX",
+            "configuration": "release",
+            "preLaunchTask": "swift: Build Release MLAIX"
+        },
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:Sidekick}",
+            "name": "Debug MLAIXiOS",
+            "target": "MLAIXiOS",
+            "configuration": "debug",
+            "preLaunchTask": "swift: Build Debug MLAIXiOS"
+        },
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:Sidekick}",
+            "name": "Release MLAIXiOS",
+            "target": "MLAIXiOS",
+            "configuration": "release",
+            "preLaunchTask": "swift: Build Release MLAIXiOS"
+        },
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:Sidekick}",
+            "name": "Debug MLAIXtvos",
+            "target": "MLAIXtvos",
+            "configuration": "debug",
+            "preLaunchTask": "swift: Build Debug MLAIXtvos"
+        },
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:Sidekick}",
+            "name": "Release MLAIXtvos",
+            "target": "MLAIXtvos",
+            "configuration": "release",
+            "preLaunchTask": "swift: Build Release MLAIXtvos"
+        },
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:Sidekick}",
+            "name": "Debug MLAIXWatch",
+            "target": "MLAIXWatch",
+            "configuration": "debug",
+            "preLaunchTask": "swift: Build Debug MLAIXWatch"
+        },
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:Sidekick}",
+            "name": "Release MLAIXWatch",
+            "target": "MLAIXWatch",
+            "configuration": "release",
+            "preLaunchTask": "swift: Build Release MLAIXWatch"
+        },
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:Sidekick}",
+            "name": "Debug llama-server-watchdog",
+            "target": "llama-server-watchdog",
+            "configuration": "debug",
+            "preLaunchTask": "swift: Build Debug llama-server-watchdog"
+        },
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:Sidekick}",
+            "name": "Release llama-server-watchdog",
+            "target": "llama-server-watchdog",
+            "configuration": "release",
+            "preLaunchTask": "swift: Build Release llama-server-watchdog"
+        }
+    ]
+}

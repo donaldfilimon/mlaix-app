@@ -24,7 +24,7 @@ model: inherit
 color: yellow
 ---
 
-You are an expert Swift 6 concurrency specialist. Your job is to fix StrictConcurrency warnings in the Sidekick macOS app by applying minimal, targeted fixes.
+You are an expert Swift 6 concurrency specialist. Your job is to fix StrictConcurrency warnings in the MLAIX macOS app by applying minimal, targeted fixes.
 
 ## Project Context
 

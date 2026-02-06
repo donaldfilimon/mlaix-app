@@ -13,12 +13,12 @@
 ### Task 1: Add Sendable to LogLevel and OSLogLevel
 
 **Files:**
-- Modify: `Sidekick/Types/LogLevel.swift:5` and `:32`
-- Test: `SidekickTests/SendableConformanceTests.swift` (create)
+- Modify: `MLAIX/Types/LogLevel.swift:5` and `:32`
+- Test: `MLAIXTests/SendableConformanceTests.swift` (create)
 
 **Step 1: Write the failing test**
 
-Create `SidekickTests/SendableConformanceTests.swift`:
+Create `MLAIXTests/SendableConformanceTests.swift`:
 
 ```swift
 //
@@ -88,7 +88,7 @@ Expected: Compiler warning — `LogLevel` / `OSLogLevel` cannot satisfy `Sendabl
 
 **Step 3: Add Sendable conformance**
 
-In `Sidekick/Types/LogLevel.swift`, change line 5:
+In `MLAIX/Types/LogLevel.swift`, change line 5:
 ```swift
 public enum LogLevel: Sendable {
 ```
@@ -106,7 +106,7 @@ Expected: Build with 0 warnings, all 4 tests pass.
 **Step 5: Commit**
 
 ```bash
-git add Sidekick/Types/LogLevel.swift SidekickTests/SendableConformanceTests.swift
+git add MLAIX/Types/LogLevel.swift MLAIXTests/SendableConformanceTests.swift
 git commit -m "feat: add Sendable to LogLevel and OSLogLevel with tests"
 ```
 
@@ -115,12 +115,12 @@ git commit -m "feat: add Sendable to LogLevel and OSLogLevel with tests"
 ### Task 2: Add Sendable to Notifications enum
 
 **Files:**
-- Modify: `Sidekick/Types/Notifications.swift:10`
-- Test: `SidekickTests/SendableConformanceTests.swift` (append)
+- Modify: `MLAIX/Types/Notifications.swift:10`
+- Test: `MLAIXTests/SendableConformanceTests.swift` (append)
 
 **Step 1: Write the failing test**
 
-Append to `SidekickTests/SendableConformanceTests.swift`:
+Append to `MLAIXTests/SendableConformanceTests.swift`:
 
 ```swift
 // MARK: - Notifications Sendable Tests
@@ -167,7 +167,7 @@ Run: `swift test --filter NotificationsSendableTests 2>&1 | tail -10`
 
 **Step 3: Add Sendable conformance**
 
-In `Sidekick/Types/Notifications.swift`, change line 10:
+In `MLAIX/Types/Notifications.swift`, change line 10:
 ```swift
 public enum Notifications: String, NotificationName, Sendable {
 ```
@@ -180,7 +180,7 @@ Expected: 0 warnings, 3 tests pass.
 **Step 5: Commit**
 
 ```bash
-git add Sidekick/Types/Notifications.swift SidekickTests/SendableConformanceTests.swift
+git add MLAIX/Types/Notifications.swift MLAIXTests/SendableConformanceTests.swift
 git commit -m "feat: add Sendable to Notifications enum with tests"
 ```
 
@@ -189,12 +189,12 @@ git commit -m "feat: add Sendable to Notifications enum with tests"
 ### Task 3: Add Sendable to EvaluationDetails, Chunk, and State
 
 **Files:**
-- Modify: `Sidekick/Types/EvaluationDetails.swift:11`, `:15`, `:22`
-- Test: `SidekickTests/SendableConformanceTests.swift` (append)
+- Modify: `MLAIX/Types/EvaluationDetails.swift:11`, `:15`, `:22`
+- Test: `MLAIXTests/SendableConformanceTests.swift` (append)
 
 **Step 1: Write the failing test**
 
-Append to `SidekickTests/SendableConformanceTests.swift`:
+Append to `MLAIXTests/SendableConformanceTests.swift`:
 
 ```swift
 // MARK: - EvaluationDetails Sendable Tests
@@ -267,7 +267,7 @@ Run: `swift test --filter EvaluationDetailsSendableTests 2>&1 | tail -10`
 
 **Step 3: Add Sendable conformance**
 
-In `Sidekick/Types/EvaluationDetails.swift`:
+In `MLAIX/Types/EvaluationDetails.swift`:
 
 Line 11 — change to:
 ```swift
@@ -292,7 +292,7 @@ Expected: 0 warnings, 4 tests pass.
 **Step 5: Commit**
 
 ```bash
-git add Sidekick/Types/EvaluationDetails.swift SidekickTests/SendableConformanceTests.swift
+git add MLAIX/Types/EvaluationDetails.swift MLAIXTests/SendableConformanceTests.swift
 git commit -m "feat: add Sendable to EvaluationDetails and nested types with tests"
 ```
 
@@ -301,12 +301,12 @@ git commit -m "feat: add Sendable to EvaluationDetails and nested types with tes
 ### Task 4: Add Sendable to ChatParameters and nested types
 
 **Files:**
-- Modify: `Sidekick/Logic/Inference/llama.cpp/Types/ChatParameters.swift:12`, `:230`, `:291`, `:316`, `:320`
-- Test: `SidekickTests/SendableConformanceTests.swift` (append)
+- Modify: `MLAIX/Logic/Inference/llama.cpp/Types/ChatParameters.swift:12`, `:230`, `:291`, `:316`, `:320`
+- Test: `MLAIXTests/SendableConformanceTests.swift` (append)
 
 **Step 1: Write the failing test**
 
-Append to `SidekickTests/SendableConformanceTests.swift`:
+Append to `MLAIXTests/SendableConformanceTests.swift`:
 
 ```swift
 // MARK: - ChatParameters Sendable Tests
@@ -379,7 +379,7 @@ Run: `swift test --filter ChatParametersSendableTests 2>&1 | tail -10`
 
 **Step 3: Add Sendable conformance**
 
-In `Sidekick/Logic/Inference/llama.cpp/Types/ChatParameters.swift`:
+In `MLAIX/Logic/Inference/llama.cpp/Types/ChatParameters.swift`:
 
 Line 12 — change to:
 ```swift
@@ -419,7 +419,7 @@ Expected: 0 warnings, 5 tests pass. **If build warns** about `Message.MessageSub
 **Step 5: Commit**
 
 ```bash
-git add Sidekick/Logic/Inference/llama.cpp/Types/ChatParameters.swift SidekickTests/SendableConformanceTests.swift
+git add MLAIX/Logic/Inference/llama.cpp/Types/ChatParameters.swift MLAIXTests/SendableConformanceTests.swift
 git commit -m "feat: add Sendable to ChatParameters and nested types with tests"
 ```
 
@@ -428,12 +428,12 @@ git commit -m "feat: add Sendable to ChatParameters and nested types with tests"
 ### Task 5: Add Sendable to ModelFamily (unchecked)
 
 **Files:**
-- Modify: `Sidekick/Types/Model/ModelFamily.swift:11`
-- Test: `SidekickTests/SendableConformanceTests.swift` (append)
+- Modify: `MLAIX/Types/Model/ModelFamily.swift:11`
+- Test: `MLAIXTests/SendableConformanceTests.swift` (append)
 
 **Step 1: Write the failing test**
 
-Append to `SidekickTests/SendableConformanceTests.swift`:
+Append to `MLAIXTests/SendableConformanceTests.swift`:
 
 ```swift
 // MARK: - ModelFamily Sendable Tests
@@ -478,7 +478,7 @@ Run: `swift test --filter ModelFamilySendableTests 2>&1 | tail -10`
 
 **Step 3: Add @unchecked Sendable**
 
-In `Sidekick/Types/Model/ModelFamily.swift`, change line 11:
+In `MLAIX/Types/Model/ModelFamily.swift`, change line 11:
 ```swift
 public struct ModelFamily: Identifiable, Hashable, @unchecked Sendable {
 ```
@@ -497,7 +497,7 @@ Expected: 0 warnings, 2 tests pass.
 **Step 5: Commit**
 
 ```bash
-git add Sidekick/Types/Model/ModelFamily.swift SidekickTests/SendableConformanceTests.swift
+git add MLAIX/Types/Model/ModelFamily.swift MLAIXTests/SendableConformanceTests.swift
 git commit -m "feat: add @unchecked Sendable to ModelFamily with tests"
 ```
 

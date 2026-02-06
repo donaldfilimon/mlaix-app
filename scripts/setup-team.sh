@@ -8,7 +8,7 @@ if [ -z "$1" ]; then
 fi
 
 TEAM=$1
-PROJECT_FILE="../Sidekick.xcodeproj/project.pbxproj"
+PROJECT_FILE="../MLAIX.xcodeproj/project.pbxproj"
 
 # Use sed to search and replace the DEVELOPMENT_TEAM value in the project file
 # The pattern matches lines with "DEVELOPMENT_TEAM = [A-Z0-9]*;" and replaces the value
