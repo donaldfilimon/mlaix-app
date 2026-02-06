@@ -1,0 +1,698 @@
+[
+  {
+    "run_id": "784e81a2-5636-45d6-8df1-da9edc308593",
+    "timestamp": "2026-02-06T09:42:26Z",
+    "model": "MLAI-regression-eval",
+    "params": {
+      "temperature": 0.0,
+      "max_tokens": 512,
+      "top_p": 1.0,
+      "seed": 42
+    },
+    "prompt_id": "ui-001",
+    "prompt": "Type continuously in the MLAI input field for 30 seconds; no dropped characters or stale value reversion.",
+    "output": "[DRY RUN] Type continuously in the MLAI input field for 30 seconds; no dropped characters or stale value reversion.",
+    "latency_ms": 0,
+    "token_usage": {
+      "prompt": null,
+      "completion": null,
+      "total": null
+    },
+    "scores": {
+      "accuracy": 3,
+      "completeness": 3,
+      "reasoning": 3,
+      "instruction": 5,
+      "safety": 5,
+      "overall": 3.8
+    },
+    "notes": "Harness-only proxy scoring. Dry-run output validates loop determinism and schema, not model quality."
+  },
+  {
+    "run_id": "784e81a2-5636-45d6-8df1-da9edc308593",
+    "timestamp": "2026-02-06T09:42:26Z",
+    "model": "MLAI-regression-eval",
+    "params": {
+      "temperature": 0.0,
+      "max_tokens": 512,
+      "top_p": 1.0,
+      "seed": 42
+    },
+    "prompt_id": "ui-002",
+    "prompt": "Move cursor repeatedly while typing; insertion point must track user selection without jumps.",
+    "output": "[DRY RUN] Move cursor repeatedly while typing; insertion point must track user selection without jumps.",
+    "latency_ms": 0,
+    "token_usage": {
+      "prompt": null,
+      "completion": null,
+      "total": null
+    },
+    "scores": {
+      "accuracy": 3,
+      "completeness": 3,
+      "reasoning": 3,
+      "instruction": 5,
+      "safety": 5,
+      "overall": 3.8
+    },
+    "notes": "Harness-only proxy scoring. Dry-run output validates loop determinism and schema, not model quality."
+  },
+  {
+    "run_id": "784e81a2-5636-45d6-8df1-da9edc308593",
+    "timestamp": "2026-02-06T09:42:26Z",
+    "model": "MLAI-regression-eval",
+    "params": {
+      "temperature": 0.0,
+      "max_tokens": 512,
+      "top_p": 1.0,
+      "seed": 42
+    },
+    "prompt_id": "ui-003",
+    "prompt": "Toggle Search and Functions while typing; input text must remain unchanged and editable.",
+    "output": "[DRY RUN] Toggle Search and Functions while typing; input text must remain unchanged and editable.",
+    "latency_ms": 0,
+    "token_usage": {
+      "prompt": null,
+      "completion": null,
+      "total": null
+    },
+    "scores": {
+      "accuracy": 3,
+      "completeness": 3,
+      "reasoning": 3,
+      "instruction": 5,
+      "safety": 5,
+      "overall": 3.8
+    },
+    "notes": "Harness-only proxy scoring. Dry-run output validates loop determinism and schema, not model quality."
+  },
+  {
+    "run_id": "784e81a2-5636-45d6-8df1-da9edc308593",
+    "timestamp": "2026-02-06T09:42:26Z",
+    "model": "MLAI-regression-eval",
+    "params": {
+      "temperature": 0.0,
+      "max_tokens": 512,
+      "top_p": 1.0,
+      "seed": 42
+    },
+    "prompt_id": "ui-004",
+    "prompt": "Insert a quick prompt chip; editor should update exactly once with the selected prompt text.",
+    "output": "[DRY RUN] Insert a quick prompt chip; editor should update exactly once with the selected prompt text.",
+    "latency_ms": 0,
+    "token_usage": {
+      "prompt": null,
+      "completion": null,
+      "total": null
+    },
+    "scores": {
+      "accuracy": 3,
+      "completeness": 3,
+      "reasoning": 3,
+      "instruction": 5,
+      "safety": 5,
+      "overall": 3.8
+    },
+    "notes": "Harness-only proxy scoring. Dry-run output validates loop determinism and schema, not model quality."
+  },
+  {
+    "run_id": "784e81a2-5636-45d6-8df1-da9edc308593",
+    "timestamp": "2026-02-06T09:42:26Z",
+    "model": "MLAI-regression-eval",
+    "params": {
+      "temperature": 0.0,
+      "max_tokens": 512,
+      "top_p": 1.0,
+      "seed": 42
+    },
+    "prompt_id": "ui-005",
+    "prompt": "Switch conversation and return; focused editor should preserve fresh typing behavior.",
+    "output": "[DRY RUN] Switch conversation and return; focused editor should preserve fresh typing behavior.",
+    "latency_ms": 0,
+    "token_usage": {
+      "prompt": null,
+      "completion": null,
+      "total": null
+    },
+    "scores": {
+      "accuracy": 3,
+      "completeness": 3,
+      "reasoning": 3,
+      "instruction": 5,
+      "safety": 5,
+      "overall": 3.8
+    },
+    "notes": "Harness-only proxy scoring. Dry-run output validates loop determinism and schema, not model quality."
+  },
+  {
+    "run_id": "784e81a2-5636-45d6-8df1-da9edc308593",
+    "timestamp": "2026-02-06T09:42:26Z",
+    "model": "MLAI-regression-eval",
+    "params": {
+      "temperature": 0.0,
+      "max_tokens": 512,
+      "top_p": 1.0,
+      "seed": 42
+    },
+    "prompt_id": "conc-001",
+    "prompt": "Trigger speech permission callback path; no actor-isolation crash or dispatch assert.",
+    "output": "[DRY RUN] Trigger speech permission callback path; no actor-isolation crash or dispatch assert.",
+    "latency_ms": 0,
+    "token_usage": {
+      "prompt": null,
+      "completion": null,
+      "total": null
+    },
+    "scores": {
+      "accuracy": 3,
+      "completeness": 3,
+      "reasoning": 3,
+      "instruction": 5,
+      "safety": 5,
+      "overall": 3.8
+    },
+    "notes": "Harness-only proxy scoring. Dry-run output validates loop determinism and schema, not model quality."
+  },
+  {
+    "run_id": "784e81a2-5636-45d6-8df1-da9edc308593",
+    "timestamp": "2026-02-06T09:42:26Z",
+    "model": "MLAI-regression-eval",
+    "params": {
+      "temperature": 0.0,
+      "max_tokens": 512,
+      "top_p": 1.0,
+      "seed": 42
+    },
+    "prompt_id": "conc-002",
+    "prompt": "Run strict-concurrency complete build for MLAI; no new errors in touched files.",
+    "output": "[DRY RUN] Run strict-concurrency complete build for MLAI; no new errors in touched files.",
+    "latency_ms": 0,
+    "token_usage": {
+      "prompt": null,
+      "completion": null,
+      "total": null
+    },
+    "scores": {
+      "accuracy": 3,
+      "completeness": 3,
+      "reasoning": 3,
+      "instruction": 5,
+      "safety": 5,
+      "overall": 3.8
+    },
+    "notes": "Harness-only proxy scoring. Dry-run output validates loop determinism and schema, not model quality."
+  },
+  {
+    "run_id": "784e81a2-5636-45d6-8df1-da9edc308593",
+    "timestamp": "2026-02-06T09:42:26Z",
+    "model": "MLAI-regression-eval",
+    "params": {
+      "temperature": 0.0,
+      "max_tokens": 512,
+      "top_p": 1.0,
+      "seed": 42
+    },
+    "prompt_id": "build-001",
+    "prompt": "Build both SwiftPM executables (MLAI and llama-server-watchdog) and run full test suite.",
+    "output": "[DRY RUN] Build both SwiftPM executables (MLAI and llama-server-watchdog) and run full test suite.",
+    "latency_ms": 0,
+    "token_usage": {
+      "prompt": null,
+      "completion": null,
+      "total": null
+    },
+    "scores": {
+      "accuracy": 3,
+      "completeness": 3,
+      "reasoning": 3,
+      "instruction": 5,
+      "safety": 5,
+      "overall": 3.8
+    },
+    "notes": "Harness-only proxy scoring. Dry-run output validates loop determinism and schema, not model quality."
+  },
+  {
+    "run_id": "f8426284-0509-451a-85ac-d62af628a4d8",
+    "timestamp": "2026-02-06T09:42:26Z",
+    "model": "MLAI-regression-eval",
+    "params": {
+      "temperature": 0.2,
+      "max_tokens": 512,
+      "top_p": 1.0,
+      "seed": 43
+    },
+    "prompt_id": "ui-001",
+    "prompt": "Type continuously in the MLAI input field for 30 seconds; no dropped characters or stale value reversion.",
+    "output": "[DRY RUN] Type continuously in the MLAI input field for 30 seconds; no dropped characters or stale value reversion.",
+    "latency_ms": 0,
+    "token_usage": {
+      "prompt": null,
+      "completion": null,
+      "total": null
+    },
+    "scores": {
+      "accuracy": 3,
+      "completeness": 3,
+      "reasoning": 3,
+      "instruction": 5,
+      "safety": 5,
+      "overall": 3.8
+    },
+    "notes": "Harness-only proxy scoring. Dry-run output validates loop determinism and schema, not model quality."
+  },
+  {
+    "run_id": "f8426284-0509-451a-85ac-d62af628a4d8",
+    "timestamp": "2026-02-06T09:42:26Z",
+    "model": "MLAI-regression-eval",
+    "params": {
+      "temperature": 0.2,
+      "max_tokens": 512,
+      "top_p": 1.0,
+      "seed": 43
+    },
+    "prompt_id": "ui-002",
+    "prompt": "Move cursor repeatedly while typing; insertion point must track user selection without jumps.",
+    "output": "[DRY RUN] Move cursor repeatedly while typing; insertion point must track user selection without jumps.",
+    "latency_ms": 0,
+    "token_usage": {
+      "prompt": null,
+      "completion": null,
+      "total": null
+    },
+    "scores": {
+      "accuracy": 3,
+      "completeness": 3,
+      "reasoning": 3,
+      "instruction": 5,
+      "safety": 5,
+      "overall": 3.8
+    },
+    "notes": "Harness-only proxy scoring. Dry-run output validates loop determinism and schema, not model quality."
+  },
+  {
+    "run_id": "f8426284-0509-451a-85ac-d62af628a4d8",
+    "timestamp": "2026-02-06T09:42:26Z",
+    "model": "MLAI-regression-eval",
+    "params": {
+      "temperature": 0.2,
+      "max_tokens": 512,
+      "top_p": 1.0,
+      "seed": 43
+    },
+    "prompt_id": "ui-003",
+    "prompt": "Toggle Search and Functions while typing; input text must remain unchanged and editable.",
+    "output": "[DRY RUN] Toggle Search and Functions while typing; input text must remain unchanged and editable.",
+    "latency_ms": 0,
+    "token_usage": {
+      "prompt": null,
+      "completion": null,
+      "total": null
+    },
+    "scores": {
+      "accuracy": 3,
+      "completeness": 3,
+      "reasoning": 3,
+      "instruction": 5,
+      "safety": 5,
+      "overall": 3.8
+    },
+    "notes": "Harness-only proxy scoring. Dry-run output validates loop determinism and schema, not model quality."
+  },
+  {
+    "run_id": "f8426284-0509-451a-85ac-d62af628a4d8",
+    "timestamp": "2026-02-06T09:42:26Z",
+    "model": "MLAI-regression-eval",
+    "params": {
+      "temperature": 0.2,
+      "max_tokens": 512,
+      "top_p": 1.0,
+      "seed": 43
+    },
+    "prompt_id": "ui-004",
+    "prompt": "Insert a quick prompt chip; editor should update exactly once with the selected prompt text.",
+    "output": "[DRY RUN] Insert a quick prompt chip; editor should update exactly once with the selected prompt text.",
+    "latency_ms": 0,
+    "token_usage": {
+      "prompt": null,
+      "completion": null,
+      "total": null
+    },
+    "scores": {
+      "accuracy": 3,
+      "completeness": 3,
+      "reasoning": 3,
+      "instruction": 5,
+      "safety": 5,
+      "overall": 3.8
+    },
+    "notes": "Harness-only proxy scoring. Dry-run output validates loop determinism and schema, not model quality."
+  },
+  {
+    "run_id": "f8426284-0509-451a-85ac-d62af628a4d8",
+    "timestamp": "2026-02-06T09:42:26Z",
+    "model": "MLAI-regression-eval",
+    "params": {
+      "temperature": 0.2,
+      "max_tokens": 512,
+      "top_p": 1.0,
+      "seed": 43
+    },
+    "prompt_id": "ui-005",
+    "prompt": "Switch conversation and return; focused editor should preserve fresh typing behavior.",
+    "output": "[DRY RUN] Switch conversation and return; focused editor should preserve fresh typing behavior.",
+    "latency_ms": 0,
+    "token_usage": {
+      "prompt": null,
+      "completion": null,
+      "total": null
+    },
+    "scores": {
+      "accuracy": 3,
+      "completeness": 3,
+      "reasoning": 3,
+      "instruction": 5,
+      "safety": 5,
+      "overall": 3.8
+    },
+    "notes": "Harness-only proxy scoring. Dry-run output validates loop determinism and schema, not model quality."
+  },
+  {
+    "run_id": "f8426284-0509-451a-85ac-d62af628a4d8",
+    "timestamp": "2026-02-06T09:42:26Z",
+    "model": "MLAI-regression-eval",
+    "params": {
+      "temperature": 0.2,
+      "max_tokens": 512,
+      "top_p": 1.0,
+      "seed": 43
+    },
+    "prompt_id": "conc-001",
+    "prompt": "Trigger speech permission callback path; no actor-isolation crash or dispatch assert.",
+    "output": "[DRY RUN] Trigger speech permission callback path; no actor-isolation crash or dispatch assert.",
+    "latency_ms": 0,
+    "token_usage": {
+      "prompt": null,
+      "completion": null,
+      "total": null
+    },
+    "scores": {
+      "accuracy": 3,
+      "completeness": 3,
+      "reasoning": 3,
+      "instruction": 5,
+      "safety": 5,
+      "overall": 3.8
+    },
+    "notes": "Harness-only proxy scoring. Dry-run output validates loop determinism and schema, not model quality."
+  },
+  {
+    "run_id": "f8426284-0509-451a-85ac-d62af628a4d8",
+    "timestamp": "2026-02-06T09:42:26Z",
+    "model": "MLAI-regression-eval",
+    "params": {
+      "temperature": 0.2,
+      "max_tokens": 512,
+      "top_p": 1.0,
+      "seed": 43
+    },
+    "prompt_id": "conc-002",
+    "prompt": "Run strict-concurrency complete build for MLAI; no new errors in touched files.",
+    "output": "[DRY RUN] Run strict-concurrency complete build for MLAI; no new errors in touched files.",
+    "latency_ms": 0,
+    "token_usage": {
+      "prompt": null,
+      "completion": null,
+      "total": null
+    },
+    "scores": {
+      "accuracy": 3,
+      "completeness": 3,
+      "reasoning": 3,
+      "instruction": 5,
+      "safety": 5,
+      "overall": 3.8
+    },
+    "notes": "Harness-only proxy scoring. Dry-run output validates loop determinism and schema, not model quality."
+  },
+  {
+    "run_id": "f8426284-0509-451a-85ac-d62af628a4d8",
+    "timestamp": "2026-02-06T09:42:26Z",
+    "model": "MLAI-regression-eval",
+    "params": {
+      "temperature": 0.2,
+      "max_tokens": 512,
+      "top_p": 1.0,
+      "seed": 43
+    },
+    "prompt_id": "build-001",
+    "prompt": "Build both SwiftPM executables (MLAI and llama-server-watchdog) and run full test suite.",
+    "output": "[DRY RUN] Build both SwiftPM executables (MLAI and llama-server-watchdog) and run full test suite.",
+    "latency_ms": 0,
+    "token_usage": {
+      "prompt": null,
+      "completion": null,
+      "total": null
+    },
+    "scores": {
+      "accuracy": 3,
+      "completeness": 3,
+      "reasoning": 3,
+      "instruction": 5,
+      "safety": 5,
+      "overall": 3.8
+    },
+    "notes": "Harness-only proxy scoring. Dry-run output validates loop determinism and schema, not model quality."
+  },
+  {
+    "run_id": "68012233-71b6-4614-a282-b63470d129bf",
+    "timestamp": "2026-02-06T09:42:26Z",
+    "model": "MLAIX-regression-eval",
+    "params": {
+      "temperature": 0.0,
+      "max_tokens": 512,
+      "top_p": 1.0,
+      "seed": 42
+    },
+    "prompt_id": "ui-001",
+    "prompt": "Type continuously in the MLAI input field for 30 seconds; no dropped characters or stale value reversion.",
+    "output": "[DRY RUN] Type continuously in the MLAI input field for 30 seconds; no dropped characters or stale value reversion.",
+    "latency_ms": 0,
+    "token_usage": {
+      "prompt": null,
+      "completion": null,
+      "total": null
+    },
+    "scores": {
+      "accuracy": 3,
+      "completeness": 3,
+      "reasoning": 3,
+      "instruction": 5,
+      "safety": 5,
+      "overall": 3.8
+    },
+    "notes": "Harness-only proxy scoring. Dry-run output validates loop determinism and schema, not model quality."
+  },
+  {
+    "run_id": "68012233-71b6-4614-a282-b63470d129bf",
+    "timestamp": "2026-02-06T09:42:26Z",
+    "model": "MLAIX-regression-eval",
+    "params": {
+      "temperature": 0.0,
+      "max_tokens": 512,
+      "top_p": 1.0,
+      "seed": 42
+    },
+    "prompt_id": "ui-002",
+    "prompt": "Move cursor repeatedly while typing; insertion point must track user selection without jumps.",
+    "output": "[DRY RUN] Move cursor repeatedly while typing; insertion point must track user selection without jumps.",
+    "latency_ms": 0,
+    "token_usage": {
+      "prompt": null,
+      "completion": null,
+      "total": null
+    },
+    "scores": {
+      "accuracy": 3,
+      "completeness": 3,
+      "reasoning": 3,
+      "instruction": 5,
+      "safety": 5,
+      "overall": 3.8
+    },
+    "notes": "Harness-only proxy scoring. Dry-run output validates loop determinism and schema, not model quality."
+  },
+  {
+    "run_id": "68012233-71b6-4614-a282-b63470d129bf",
+    "timestamp": "2026-02-06T09:42:26Z",
+    "model": "MLAIX-regression-eval",
+    "params": {
+      "temperature": 0.0,
+      "max_tokens": 512,
+      "top_p": 1.0,
+      "seed": 42
+    },
+    "prompt_id": "ui-003",
+    "prompt": "Toggle Search and Functions while typing; input text must remain unchanged and editable.",
+    "output": "[DRY RUN] Toggle Search and Functions while typing; input text must remain unchanged and editable.",
+    "latency_ms": 0,
+    "token_usage": {
+      "prompt": null,
+      "completion": null,
+      "total": null
+    },
+    "scores": {
+      "accuracy": 3,
+      "completeness": 3,
+      "reasoning": 3,
+      "instruction": 5,
+      "safety": 5,
+      "overall": 3.8
+    },
+    "notes": "Harness-only proxy scoring. Dry-run output validates loop determinism and schema, not model quality."
+  },
+  {
+    "run_id": "68012233-71b6-4614-a282-b63470d129bf",
+    "timestamp": "2026-02-06T09:42:26Z",
+    "model": "MLAIX-regression-eval",
+    "params": {
+      "temperature": 0.0,
+      "max_tokens": 512,
+      "top_p": 1.0,
+      "seed": 42
+    },
+    "prompt_id": "ui-004",
+    "prompt": "Insert a quick prompt chip; editor should update exactly once with the selected prompt text.",
+    "output": "[DRY RUN] Insert a quick prompt chip; editor should update exactly once with the selected prompt text.",
+    "latency_ms": 0,
+    "token_usage": {
+      "prompt": null,
+      "completion": null,
+      "total": null
+    },
+    "scores": {
+      "accuracy": 3,
+      "completeness": 3,
+      "reasoning": 3,
+      "instruction": 5,
+      "safety": 5,
+      "overall": 3.8
+    },
+    "notes": "Harness-only proxy scoring. Dry-run output validates loop determinism and schema, not model quality."
+  },
+  {
+    "run_id": "68012233-71b6-4614-a282-b63470d129bf",
+    "timestamp": "2026-02-06T09:42:26Z",
+    "model": "MLAIX-regression-eval",
+    "params": {
+      "temperature": 0.0,
+      "max_tokens": 512,
+      "top_p": 1.0,
+      "seed": 42
+    },
+    "prompt_id": "ui-005",
+    "prompt": "Switch conversation and return; focused editor should preserve fresh typing behavior.",
+    "output": "[DRY RUN] Switch conversation and return; focused editor should preserve fresh typing behavior.",
+    "latency_ms": 0,
+    "token_usage": {
+      "prompt": null,
+      "completion": null,
+      "total": null
+    },
+    "scores": {
+      "accuracy": 3,
+      "completeness": 3,
+      "reasoning": 3,
+      "instruction": 5,
+      "safety": 5,
+      "overall": 3.8
+    },
+    "notes": "Harness-only proxy scoring. Dry-run output validates loop determinism and schema, not model quality."
+  },
+  {
+    "run_id": "68012233-71b6-4614-a282-b63470d129bf",
+    "timestamp": "2026-02-06T09:42:26Z",
+    "model": "MLAIX-regression-eval",
+    "params": {
+      "temperature": 0.0,
+      "max_tokens": 512,
+      "top_p": 1.0,
+      "seed": 42
+    },
+    "prompt_id": "conc-001",
+    "prompt": "Trigger speech permission callback path; no actor-isolation crash or dispatch assert.",
+    "output": "[DRY RUN] Trigger speech permission callback path; no actor-isolation crash or dispatch assert.",
+    "latency_ms": 0,
+    "token_usage": {
+      "prompt": null,
+      "completion": null,
+      "total": null
+    },
+    "scores": {
+      "accuracy": 3,
+      "completeness": 3,
+      "reasoning": 3,
+      "instruction": 5,
+      "safety": 5,
+      "overall": 3.8
+    },
+    "notes": "Harness-only proxy scoring. Dry-run output validates loop determinism and schema, not model quality."
+  },
+  {
+    "run_id": "68012233-71b6-4614-a282-b63470d129bf",
+    "timestamp": "2026-02-06T09:42:26Z",
+    "model": "MLAIX-regression-eval",
+    "params": {
+      "temperature": 0.0,
+      "max_tokens": 512,
+      "top_p": 1.0,
+      "seed": 42
+    },
+    "prompt_id": "conc-002",
+    "prompt": "Run strict-concurrency complete build for MLAI; no new errors in touched files.",
+    "output": "[DRY RUN] Run strict-concurrency complete build for MLAI; no new errors in touched files.",
+    "latency_ms": 0,
+    "token_usage": {
+      "prompt": null,
+      "completion": null,
+      "total": null
+    },
+    "scores": {
+      "accuracy": 3,
+      "completeness": 3,
+      "reasoning": 3,
+      "instruction": 5,
+      "safety": 5,
+      "overall": 3.8
+    },
+    "notes": "Harness-only proxy scoring. Dry-run output validates loop determinism and schema, not model quality."
+  },
+  {
+    "run_id": "68012233-71b6-4614-a282-b63470d129bf",
+    "timestamp": "2026-02-06T09:42:26Z",
+    "model": "MLAIX-regression-eval",
+    "params": {
+      "temperature": 0.0,
+      "max_tokens": 512,
+      "top_p": 1.0,
+      "seed": 42
+    },
+    "prompt_id": "build-001",
+    "prompt": "Build both SwiftPM executables (MLAI and llama-server-watchdog) and run full test suite.",
+    "output": "[DRY RUN] Build both SwiftPM executables (MLAI and llama-server-watchdog) and run full test suite.",
+    "latency_ms": 0,
+    "token_usage": {
+      "prompt": null,
+      "completion": null,
+      "total": null
+    },
+    "scores": {
+      "accuracy": 3,
+      "completeness": 3,
+      "reasoning": 3,
+      "instruction": 5,
+      "safety": 5,
+      "overall": 3.8
+    },
+    "notes": "Harness-only proxy scoring. Dry-run output validates loop determinism and schema, not model quality."
+  }
+]

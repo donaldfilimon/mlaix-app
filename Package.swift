@@ -2,26 +2,34 @@
 
 import PackageDescription
 
-let swiftSettings: [SwiftSetting] = {
-    let settings: [SwiftSetting] = [
-        .enableUpcomingFeature("StrictConcurrency")
-    ]
-    return settings
-}()
+// MARK: - Swift 6.2 Configuration
 
-let supportedPlatforms: [SupportedPlatform] = {
-#if swift(>=6.2)
-    return [.macOS(.v26)]
-#else
-    return [.macOS(.v15)]
-#endif
-}()
+/// Swift 6 strict concurrency; required for ralph-loop conc-002 (strict-concurrency build).
+let swiftSettings: [SwiftSetting] = [
+    .enableUpcomingFeature("StrictConcurrency")
+]
+
+/// All platforms require version 26 (macOS 26, iOS 26, iPadOS 26, tvOS 26, watchOS 26).
+let supportedPlatforms: [SupportedPlatform] = [
+    .macOS(.v26),
+    .iOS(.v26),
+    .tvOS(.v26),
+    .watchOS(.v26)
+]
+
+// MARK: - Resources
+
+private let llamaBin = "Logic/Inference/llama.cpp/build/bin/"
 
 let package = Package(
-    name: "MLAI",
+    name: "MLAIX",
     platforms: supportedPlatforms,
     products: [
-        .executable(name: "MLAI", targets: ["MLAI"]),
+        .library(name: "MLAIXShared", targets: ["MLAIXShared"]),
+        .executable(name: "MLAIX", targets: ["MLAIX"]),
+        .executable(name: "MLAIXiOS", targets: ["MLAIXiOS"]),
+        .executable(name: "MLAIXtvos", targets: ["MLAIXtvos"]),
+        .executable(name: "MLAIXWatch", targets: ["MLAIXWatch"]),
         .executable(name: "llama-server-watchdog", targets: ["llama-server-watchdog"])
     ],
     dependencies: [
@@ -49,10 +57,21 @@ let package = Package(
     ],
     targets: [
 
-        // MARK: - MLAI (Main App)
-        .executableTarget(
-            name: "MLAI",
+        // MARK: - MLAIXShared (Unified SwiftUI + SwiftData across platforms)
+        .target(
+            name: "MLAIXShared",
             dependencies: [
+                .product(name: "MarkdownUI", package: "swift-markdown-ui")
+            ],
+            path: "MLAIXShared",
+            swiftSettings: swiftSettings
+        ),
+
+        // MARK: - MLAIX (Main App)
+        .executableTarget(
+            name: "MLAIX",
+            dependencies: [
+                "MLAIXShared",
                 .product(name: "AXSwift", package: "AXSwift"),
                 .product(name: "CodeEditorView", package: "CodeEditorView"),
                 .product(name: "LanguageSupport", package: "CodeEditorView"),
@@ -77,14 +96,14 @@ let package = Package(
                 .product(name: "NetworkImage", package: "NetworkImage"),
                 .product(name: "WebViewKit", package: "WebViewKit")
             ],
-            path: "Sidekick",
+            path: "MLAIX",
             exclude: [
                 "Preview Content",
                 "Logic/Inference/llama.cpp/llama-server-watchdog",
                 "Views/Chat/Conversation/ChatStyle.swift",
                 "Info.plist",
-                "Sidekick.entitlements",
-                "Sidekick.icon",
+                "MLAIX.entitlements",
+                "MLAIX.icon",
                 "Logic/Inference/llama.cpp/build/bin/llama-perplexity"
             ],
             resources: [
@@ -95,23 +114,49 @@ let package = Package(
                 .process("Logic/Inference/Router/UserRequestClassifier.mlmodel"),
                 .process("Logic/Utilities/Tools/MermaidRenderer/Resources"),
                 .process("Logic/View Controllers/Tools/Slide Studio/Resources"),
-                .copy("Logic/Inference/llama.cpp/build/bin/llama-server"),
-                .copy("Logic/Inference/llama.cpp/build/bin/libggml.dylib"),
-                .copy("Logic/Inference/llama.cpp/build/bin/libggml-base.dylib"),
-                .copy("Logic/Inference/llama.cpp/build/bin/libggml-blas.dylib"),
-                .copy("Logic/Inference/llama.cpp/build/bin/libggml-cpu.dylib"),
-                .copy("Logic/Inference/llama.cpp/build/bin/libggml-metal.dylib"),
-                .copy("Logic/Inference/llama.cpp/build/bin/libggml-rpc.dylib"),
-                .copy("Logic/Inference/llama.cpp/build/bin/libllama.dylib"),
-                .copy("Logic/Inference/llama.cpp/build/bin/libmtmd.dylib")
+                .copy("\(llamaBin)llama-server"),
+                .copy("\(llamaBin)libggml.dylib"),
+                .copy("\(llamaBin)libggml-base.dylib"),
+                .copy("\(llamaBin)libggml-blas.dylib"),
+                .copy("\(llamaBin)libggml-cpu.dylib"),
+                .copy("\(llamaBin)libggml-metal.dylib"),
+                .copy("\(llamaBin)libggml-rpc.dylib"),
+                .copy("\(llamaBin)libllama.dylib"),
+                .copy("\(llamaBin)libmtmd.dylib")
             ],
+            swiftSettings: swiftSettings
+        ),
+
+        // MARK: - MLAIXiOS (iOS / iPadOS App)
+        .executableTarget(
+            name: "MLAIXiOS",
+            dependencies: ["MLAIXShared"],
+            path: "MLAIXiOS",
+            exclude: ["Info.plist"],
+            resources: [.process("Assets.xcassets")],
+            swiftSettings: swiftSettings
+        ),
+
+        // MARK: - MLAIXtvOS (tvOS placeholder)
+        .executableTarget(
+            name: "MLAIXtvos",
+            dependencies: ["MLAIXShared"],
+            path: "MLAIXtvos",
+            swiftSettings: swiftSettings
+        ),
+
+        // MARK: - MLAIXWatch (Apple Watch companion)
+        .executableTarget(
+            name: "MLAIXWatch",
+            dependencies: [],
+            path: "MLAIXWatch",
             swiftSettings: swiftSettings
         ),
 
         // MARK: - Watchdog
         .executableTarget(
             name: "llama-server-watchdog",
-            path: "Sidekick/Logic/Inference/llama.cpp/llama-server-watchdog",
+            path: "MLAIX/Logic/Inference/llama.cpp/llama-server-watchdog",
             exclude: [
                 "llama-server-watchdog.entitlements"
             ],
@@ -120,11 +165,23 @@ let package = Package(
 
         // MARK: - Tests
         .testTarget(
-            name: "MLAITests",
-            dependencies: ["MLAI"],
-            path: "SidekickTests",
+            name: "MLAIXTests",
+            dependencies: ["MLAIX"],
+            path: "MLAIXTests",
+            swiftSettings: swiftSettings
+        ),
+        .testTarget(
+            name: "MLAIXiOSTests",
+            dependencies: ["MLAIXiOS", "MLAIXShared"],
+            path: "MLAIXiOSTests",
+            swiftSettings: swiftSettings
+        ),
+        .testTarget(
+            name: "MLAIXSharedTests",
+            dependencies: ["MLAIXShared"],
+            path: "MLAIXSharedTests",
             swiftSettings: swiftSettings
         )
     ],
-    swiftLanguageModes: [.v6]
+    swiftLanguageModes: [.v6]  // Swift 6.2 language mode
 )

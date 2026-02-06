@@ -1,0 +1,27 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-and-test:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Build MLAIX (macOS)
+        run: swift build -c release --product MLAIX
+
+      - name: Build MLAIXiOS
+        run: swift build --product MLAIXiOS
+
+      - name: Build MLAIXtvos
+        run: swift build --product MLAIXtvos
+
+      - name: Test
+        run: swift test

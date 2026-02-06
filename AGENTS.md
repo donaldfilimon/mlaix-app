@@ -1,15 +1,16 @@
 # Repository Guidelines
 
 ## Project Structure & Module Organization
-- `Sidekick/`: main macOS app source (Swift/SwiftUI) for the MLAI app. Key subfolders include `Logic/`, `Views/`, `Types/`, `Extensions/`, plus assets in `Sidekick/Assets.xcassets` and resources in `Sidekick/Resources`.
-- `SidekickTests/`: unit tests using Swift Testing.
+- `MLAIX/`: main macOS app source (Swift/SwiftUI) for the MLAIX app. Key subfolders include `Logic/`, `Views/`, `Types/`, `Extensions/`, plus assets in `MLAIX/Assets.xcassets` and resources in `MLAIX/Resources`.
+- `MLAIX/Logic/Utilities/Services/`: extracted service helpers (ContextCompressor, SpeechService, Tavily).
+- `MLAIXTests/`: unit tests using Swift Testing.
 - `Docs Images/`, `Markdown/`, `Features/`, `About/`: documentation and site content.
 - `scripts/` and `setup.sh`: local setup helpers (signing, tooling).
 
 ## Build, Test, and Development Commands
-- `swift build`: build the SwiftPM target (`MLAI`).
-- `swift run MLAI`: run the MLAI app via SwiftPM.
-- `swift test`: run unit tests in `SidekickTests/`.
+- `swift build`: build the SwiftPM target (`MLAIX`).
+- `swift run MLAIX`: run the MLAI app via SwiftPM.
+- `swift test`: run unit tests in `MLAIXTests/`.
 - `./setup.sh <CODE_SIGNING_IDENTITY>`: download/sign Marp.
 
 ## Coding Style & Naming Conventions
@@ -20,11 +21,11 @@
 
 ## Testing Guidelines
 - Unit tests use Swift Testing (`import Testing`) and `@Test` functions.
-- Keep tests in `SidekickTests/` and name them descriptively (e.g., `checkModelReccomendations()`).
+- Keep tests in `MLAIXTests/` and name them descriptively (e.g., `checkModelRecommendations()`).
 
 ## Commit & Pull Request Guidelines
 - Commit messages follow Conventional Commits style (`feat:`, `fix:`, `chore:`), per recent history.
 - PRs should include a concise summary, test results (command + output), and screenshots for UI changes.
 
 ## Configuration Notes
-- The SwiftPM module name is `MLAI` (use `@testable import MLAI` in tests).
+- The SwiftPM module name is `MLAIX` (use `@testable import MLAIX` in tests).

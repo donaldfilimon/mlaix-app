@@ -215,7 +215,11 @@ Read more about our mission [here](https://johnbean393.github.io/Sidekick/Markdo
    - The `marp` binary is required for building and must be signed to create presentations.
 1. Build and run with SwiftPM:
    - `swift build`
-   - `swift run MLAI`
+   - `swift run MLAIX` (macOS)
+   - `swift build --product MLAIXiOS` (iOS/iPadOS)
+   - `swift build --product MLAIXtvos` (tvOS placeholder)
+   - `swift test` (all tests)
+   - See [docs/TESTING.md](docs/TESTING.md) for test coverage and patterns
 
 ## Contributing
 
