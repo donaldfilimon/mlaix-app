@@ -97,16 +97,23 @@ struct MultilineTextField: NSViewRepresentable {
         // Enable scroll position preservation during programmatic updates
         textView.shouldPreserveScrollPosition = true
         
-        // Only update if not editing (or not composing)
-        if !isFirstResponder || !hasMarkedText {
-            if textView.string != text {
-                coordinator.isProgrammaticUpdate = true
-                textView.string = text
-            }
-            if textView.selectedRange.location != insertionPoint {
-                coordinator.isProgrammaticUpdate = true
-                textView.setSelectedRange(NSRange(location: insertionPoint, length: 0))
-            }
+        let textChangedExternally = text != coordinator.lastTextFromView
+        let selectionChangedExternally = insertionPoint != coordinator.lastSelectionFromView
+        let canApplyExternalUpdates = !hasMarkedText
+        
+        if canApplyExternalUpdates && textChangedExternally && textView.string != text {
+            coordinator.suppressTextDidChange = true
+            textView.string = text
+            coordinator.lastTextFromView = text
+        }
+        
+        // Keep cursor in sync for external updates and when focus is restored.
+        if canApplyExternalUpdates &&
+            (selectionChangedExternally || !isFirstResponder) &&
+            textView.selectedRange.location != insertionPoint {
+            coordinator.suppressSelectionDidChange = true
+            textView.setSelectedRange(NSRange(location: insertionPoint, length: 0))
+            coordinator.lastSelectionFromView = insertionPoint
         }
         textView.setPrompt(prompt)
         textView.invalidateIntrinsicContentSize()
@@ -124,10 +131,15 @@ struct MultilineTextField: NSViewRepresentable {
     class Coordinator: NSObject, NSTextViewDelegate {
         
         var parent: MultilineTextField
-        var isProgrammaticUpdate = false
+        var suppressTextDidChange: Bool = false
+        var suppressSelectionDidChange: Bool = false
+        var lastTextFromView: String
+        var lastSelectionFromView: Int
         
         init(_ parent: MultilineTextField) {
             self.parent = parent
+            self.lastTextFromView = parent.text
+            self.lastSelectionFromView = parent.insertionPoint
         }
         
         var onImageDrop: ((URL) -> Void)? {
@@ -140,17 +152,17 @@ struct MultilineTextField: NSViewRepresentable {
             guard let textView = notification.object as? NSTextView else { return }
             // Don't update during IME composition.
             if textView.hasMarkedText() { return }
-            // Prevent feedback loop: only update binding if not a programmatic change
-            if isProgrammaticUpdate {
-                isProgrammaticUpdate = false
+            // Ignore synthetic notifications from programmatic string updates.
+            if suppressTextDidChange {
+                suppressTextDidChange = false
                 return
             }
             let newString = textView.string
             let cursor = textView.selectedRange.location
-            withAnimation(.linear) {
-                parent.text = newString
-                parent.insertionPoint = cursor
-            }
+            lastTextFromView = newString
+            lastSelectionFromView = cursor
+            parent.text = newString
+            parent.insertionPoint = cursor
             textView.invalidateIntrinsicContentSize()
             textView.enclosingScrollView?.invalidateIntrinsicContentSize()
         }
@@ -159,11 +171,13 @@ struct MultilineTextField: NSViewRepresentable {
             _ notification: Notification
         ) {
             guard let textView = notification.object as? NSTextView else { return }
-            if isProgrammaticUpdate {
-                isProgrammaticUpdate = false
+            // Ignore synthetic notifications from programmatic selection updates.
+            if suppressSelectionDidChange {
+                suppressSelectionDidChange = false
                 return
             }
             let cursor = textView.selectedRange.location
+            lastSelectionFromView = cursor
             if parent.insertionPoint != cursor {
                 parent.insertionPoint = cursor
             }
@@ -240,12 +254,10 @@ class PromptingTextView: NSTextView {
     func setPrompt(
         _ prompt: String
     ) {
-        DispatchQueue.main.async {
-            withAnimation(.linear) {
-                self.prompt = prompt
-            }
+        if self.prompt != prompt {
+            self.prompt = prompt
+            needsDisplay = true
         }
-        needsDisplay = true
     }
     
     /// Function to force pasting as plain text

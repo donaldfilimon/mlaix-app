@@ -70,7 +70,7 @@ public class PromptController: ObservableObject, DropDelegate {
         }
     }
     
-    private func checkPermissionsAndStartRecording() {
+    private nonisolated func checkPermissionsAndStartRecording() {
         SFSpeechRecognizer.requestAuthorization { [weak self] authStatus in
             switch authStatus {
                 case .authorized:
@@ -146,7 +146,9 @@ public class PromptController: ObservableObject, DropDelegate {
                 }
             }
             if error != nil || result?.isFinal == true {
-                self.stopAudioEngine()
+                Task { @MainActor [weak self] in
+                    self?.stopAudioEngine()
+                }
             }
         }
     }
@@ -199,7 +201,7 @@ public class PromptController: ObservableObject, DropDelegate {
     
     // MARK: - Permission requests
     
-    fileprivate func requestSpeechRecognitionAccess() {
+    fileprivate nonisolated func requestSpeechRecognitionAccess() {
         SFSpeechRecognizer.requestAuthorization { [weak self] authStatus in
             Task { @MainActor [weak self] in
                 switch authStatus {
@@ -215,7 +217,7 @@ public class PromptController: ObservableObject, DropDelegate {
         }
     }
     
-    fileprivate func requestMicrophoneAccess() {
+    fileprivate nonisolated func requestMicrophoneAccess() {
         AVCaptureDevice.requestAccess(
             for: .audio
         ) { [weak self] granted in

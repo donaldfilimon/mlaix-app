@@ -21,15 +21,12 @@ struct QuickPromptButton: View {
 		} label: {
 			prompt.label
 				.padding(.vertical, 8)
-				.padding(.horizontal, 10)
-				.frame(
-					maxWidth: .infinity,
-					alignment: .leading
-				)
+				.padding(.horizontal, 12)
 				.frame(minHeight: 35)
+                .lineLimit(1)
+                .fixedSize(horizontal: true, vertical: false)
 		}
 		.buttonStyle(CapsuleButtonStyle())
-		.frame(maxWidth: 300)
 	}
 	
 }

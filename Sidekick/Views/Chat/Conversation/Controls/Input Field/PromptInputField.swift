@@ -128,40 +128,32 @@ struct PromptInputField: View {
     }
     
     var textField: some View {
-        ChatPromptEditor(
-            isFocused: self._isFocused,
-            isRecording: self.$promptController.isRecording,
-            useAttachments: true,
-            bottomOptions: true,
-            cornerRadius: 22
-        )
-        .focused(self.$isFocused)
-        .submitLabel(.send)
-        .overlay(alignment: .leading) {
-            AttachmentSelectionButton { url in
-                await self.promptController.addFile(url)
+        VStack(
+            alignment: .leading,
+            spacing: 8
+        ) {
+            ChatPromptEditor(
+                isFocused: self._isFocused,
+                isRecording: self.$promptController.isRecording,
+                useAttachments: true,
+                bottomOptions: false,
+                cornerRadius: 22
+            )
+            .focused(self.$isFocused)
+            .submitLabel(.send)
+            .overlay(alignment: .leading) {
+                AttachmentSelectionButton { url in
+                    await self.promptController.addFile(url)
+                }
             }
-        }
-        .overlay(alignment: .trailing) {
-            DictationButton()
-        }
-        .overlay(alignment: .bottomLeading) {
-            HStack {
-                SearchMenuToggleButton(
-                    activatedFillColor: self.buttonFillColor,
-                    useWebSearch: self.$promptController.useWebSearch,
-                    selectedSearchState: self.$promptController.selectedSearchState
-                )
-                UseFunctionsButton(
-                    activatedFillColor: self.buttonFillColor,
-                    useFunctions: self.$promptController.useFunctions
-                )
+            .overlay(alignment: .trailing) {
+                DictationButton()
             }
-            .padding(.leading, 32)
-            .padding(.bottom, 10)
-            .frame(height: 25)
+            modeControlsRow
+                .padding(.leading, 4)
         }
-        .padding([.vertical, .leading], 10)
+        .padding(.horizontal, 10)
+        .padding(.vertical, 10)
         .onDrop(
             of: [
                 UTType.fileURL,
@@ -171,6 +163,23 @@ struct PromptInputField: View {
             ],
             delegate: self.promptController
         )
+    }
+
+    var modeControlsRow: some View {
+        HStack(
+            spacing: 8
+        ) {
+            SearchMenuToggleButton(
+                activatedFillColor: self.buttonFillColor,
+                useWebSearch: self.$promptController.useWebSearch,
+                selectedSearchState: self.$promptController.selectedSearchState
+            )
+            UseFunctionsButton(
+                activatedFillColor: self.buttonFillColor,
+                useFunctions: self.$promptController.useFunctions
+            )
+            Spacer(minLength: 0)
+        }
     }
     
     /// Set up NSEvent keyDown monitor

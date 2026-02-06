@@ -12,32 +12,23 @@ struct ConversationQuickPromptsView: View {
 	@Binding var input: String
 	
 	var body: some View {
-		ScrollView(
-			.horizontal, showsIndicators: false
-		) {
-			prompts
-		}
-		.mask {
-			Rectangle()
-				.overlay(alignment: .leading) {
-                    ScrollMask(edge: .leading)
-				}
-				.overlay(alignment: .trailing) {
-                    ScrollMask(edge: .trailing)
-				}
-		}
+        prompts
 	}
 	
 	var prompts: some View {
-		HStack {
-			ForEach(QuickPrompt.quickPrompts) { prompt in
-				QuickPromptButton(
-					input: $input,
-					prompt: prompt
-				)
-			}
-		}
-		.padding(.horizontal, 20)
+        WrappingHStack(
+            alignment: .leading,
+            horizontalSpacing: 8,
+            verticalSpacing: 8
+        ) {
+            ForEach(QuickPrompt.quickPrompts) { prompt in
+                QuickPromptButton(
+                    input: $input,
+                    prompt: prompt
+                )
+            }
+        }
+        .padding(.horizontal, 14)
 	}
 	
 }
