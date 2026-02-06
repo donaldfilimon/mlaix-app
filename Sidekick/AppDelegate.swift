@@ -65,6 +65,8 @@ public class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
     public func applicationShouldTerminate(
         _ sender: NSApplication
     ) -> NSApplication.TerminateReply {
+        // Flush pending conversation saves before shutdown
+        ConversationManager.shared.saveNow()
         // Stop server
         Task {
             await Model.shared.stopServers()

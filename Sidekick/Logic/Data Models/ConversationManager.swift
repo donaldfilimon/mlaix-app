@@ -19,7 +19,8 @@ public class ConversationManager: ObservableObject {
         category: String(describing: ConversationManager.self)
     )
     
-    init() {
+    init(containerUrl: URL = Settings.containerUrl) {
+        self.containerUrl = containerUrl
         let signpost = StartupMetrics.begin("ConversationManager.init")
         self.patchFileIntegrity()
         self.loadAsync()
@@ -32,7 +33,9 @@ public class ConversationManager: ObservableObject {
     /// Published property for all conversations
     @Published public var conversations: [Conversation] = [] {
         didSet {
-            self.save()
+            if self.isLoaded {
+                self.save()
+            }
         }
     }
     
@@ -41,6 +44,15 @@ public class ConversationManager: ObservableObject {
     
     /// Task handling the asynchronous datastore load
     private var loadTask: Task<Void, Never>?
+
+    /// Task handling debounced saves
+    private var saveTask: Task<Void, Never>?
+
+    /// Debounce interval for saves
+    private let saveDebounceInterval: Duration = .milliseconds(350)
+
+    /// Root container URL for this manager
+    private let containerUrl: URL
     
     /// Computed property returning the IDs of all messages
     var allMessagesIds: [UUID] {
@@ -103,8 +115,40 @@ public class ConversationManager: ObservableObject {
     }
     /// Function to save conversations to disk
     public func save() {
+        let snapshot = self.conversations
+        let targetUrl = self.datastoreUrl
+        let debounceInterval = self.saveDebounceInterval
+
+        saveTask?.cancel()
+        saveTask = Task.detached(priority: .utility) {
+            do {
+                try await Task.sleep(for: debounceInterval)
+            } catch {
+                return
+            }
+            if Task.isCancelled {
+                return
+            }
+            do {
+                let rawData: Data = try JSONEncoder().encode(snapshot)
+                if Task.isCancelled {
+                    return
+                }
+                try rawData.write(
+                    to: targetUrl,
+                    options: .atomic
+                )
+            } catch {
+                os_log("error = %@", error.localizedDescription)
+            }
+        }
+    }
+
+    /// Save immediately, bypassing debounce and cancelling pending saves.
+    public func saveNow() {
+        saveTask?.cancel()
+        saveTask = nil
         do {
-            // Save data
             let rawData: Data = try JSONEncoder().encode(
                 self.conversations
             )
@@ -270,6 +314,7 @@ public class ConversationManager: ObservableObject {
     
     /// Function to create backup for datastore
     public func createBackup() {
+        self.saveNow()
         // Delete if exists
         if self.backupDatastoreUrl.fileExists {
             FileManager.removeItem(at: self.backupDatastoreUrl)
@@ -290,7 +335,7 @@ public class ConversationManager: ObservableObject {
         ) {
             // If yes, restore
             self.load(fromBackup: true)
-            self.save()
+            self.saveNow()
         }
     }
     
@@ -307,7 +352,7 @@ public class ConversationManager: ObservableObject {
     
     /// Computed property returning the datastore's directory's url
     public var datastoreDirUrl: URL {
-        return Settings.containerUrl.appendingPathComponent(
+        return self.containerUrl.appendingPathComponent(
             "Conversations"
         )
     }

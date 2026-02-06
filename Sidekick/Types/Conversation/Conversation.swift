@@ -75,10 +75,11 @@ public struct Conversation: Identifiable, Codable, Hashable, Sendable {
 		if message.text.isEmpty && message.getSender() == .user {
 			return false
 		}
+		let wasEmpty: Bool = self.messages.isEmpty
 		// Make new message
 		self.messages.append(message)
 		// Set title if needed
-		if self.messages.isEmpty {
+		if wasEmpty {
 			self.title = message.text
 		}
 		return true
