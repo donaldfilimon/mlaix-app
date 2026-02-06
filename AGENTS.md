@@ -2,6 +2,7 @@
 
 ## Project Structure & Module Organization
 - `Sidekick/`: main macOS app source (Swift/SwiftUI) for the MLAI app. Key subfolders include `Logic/`, `Views/`, `Types/`, `Extensions/`, plus assets in `Sidekick/Assets.xcassets` and resources in `Sidekick/Resources`.
+- `Sidekick/Logic/Utilities/Services/`: extracted service helpers (ContextCompressor, SpeechService, Tavily).
 - `SidekickTests/`: unit tests using Swift Testing.
 - `Docs Images/`, `Markdown/`, `Features/`, `About/`: documentation and site content.
 - `scripts/` and `setup.sh`: local setup helpers (signing, tooling).

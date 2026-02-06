@@ -76,15 +76,15 @@ final class SpeechSynthesizer: NSObject, ObservableObject {
 			return
 		}
 		lastCancelation = onFinished
-		delegate.onSpeechFinished = {
+		delegate.onSpeechFinished = { [weak self] in
 			withAnimation {
-				self.isSpeaking = false
+				self?.isSpeaking = false
 			}
 			onFinished()
 		}
-		delegate.onSpeechStart = {
+		delegate.onSpeechStart = { [weak self] in
 			withAnimation(.linear) {
-				self.isSpeaking = true
+				self?.isSpeaking = true
 			}
 		}
 		let utterance = AVSpeechUtterance(string: text)

@@ -9,11 +9,11 @@ import Foundation
 
 // MARK: - OpenRouter API Response Structures
 
-struct OpenRouterResponse: Codable {
+struct OpenRouterResponse: Codable, Sendable {
     let data: [OpenRouterModel]
 }
 
-struct OpenRouterModel: Codable {
+struct OpenRouterModel: Codable, Sendable {
     let id: String
     let name: String
     let description: String?
@@ -29,7 +29,7 @@ struct OpenRouterModel: Codable {
     }
 }
 
-struct OpenRouterArchitecture: Codable {
+struct OpenRouterArchitecture: Codable, Sendable {
     let modality: String
     let inputModalities: [String]?
     let outputModalities: [String]?
@@ -41,14 +41,14 @@ struct OpenRouterArchitecture: Codable {
     }
 }
 
-struct OpenRouterPricing: Codable {
+struct OpenRouterPricing: Codable, Sendable {
     let prompt: String
     let completion: String
 }
 
 // MARK: - KnownModel
 
-public struct KnownModel: Identifiable, Codable {
+public struct KnownModel: Identifiable, Codable, Sendable {
     
     init(
         id: UUID = UUID(),
@@ -275,20 +275,21 @@ public struct KnownModel: Identifiable, Codable {
     
     /// Checks if the model needs an explicit reasoning parameter on OpenRouter
     public var requiresExplicitReasoning: Bool {
-        guard organization == .anthropic else { return false }
         let lowerName = primaryName.lowercased()
-        let glmPattern = #"glm-[4-9].[5-9]"#
-        let claudePattern = #"claude-[4-9]|(sonnet|opus|haiku)-[4-9]"#
-        for pattern in [glmPattern, claudePattern] {
-            if lowerName.range(of: pattern, options: .regularExpression) != nil {
-                return true
-            }
+        switch organization {
+        case .anthropic:
+            let claudePattern = #"claude-[4-9]|(sonnet|opus|haiku)-[4-9]"#
+            return lowerName.range(of: claudePattern, options: .regularExpression) != nil
+        case .zhipu:
+            let glmPattern = #"glm-[4-9]\.[5-9]"#
+            return lowerName.range(of: glmPattern, options: .regularExpression) != nil
+        default:
+            return false
         }
-        return false
     }
     
     /// Organizations that train models
-    public enum Organization: String, Codable, CaseIterable {
+    public enum Organization: String, Codable, CaseIterable, Sendable {
         case amazon = "Amazon"
         case anthropic = "Anthropic"
         case bytedance = "ByteDance"
@@ -350,19 +351,19 @@ public struct KnownModel: Identifiable, Codable {
     }
     
     /// Modalities supported by models
-    public enum Modality: Codable, CaseIterable {
+    public enum Modality: Codable, CaseIterable, Sendable {
         case audio
         case image
         case text
     }
     
     /// Capabilities supported by models
-    public enum Capability: Codable, CaseIterable {
+    public enum Capability: Codable, CaseIterable, Sendable {
         case reasoning
     }
     
     /// Hybrid reasoning style
-    public enum HybridReasoningStyle: String, Codable, CaseIterable {
+    public enum HybridReasoningStyle: String, Codable, CaseIterable, Sendable {
         
         case qwen3
         case glm4pt5

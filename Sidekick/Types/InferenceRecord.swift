@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct InferenceRecord: Identifiable, Codable {
+public struct InferenceRecord: Identifiable, Codable, Sendable {
     
     /// Stored property for `Identifiable` conformance
     public var id: UUID = UUID()
@@ -44,7 +44,7 @@ public struct InferenceRecord: Identifiable, Codable {
     /// A `Double` for the tokens per second, or generation speed
     public var tokensPerSecond: Double
     
-    public enum UsageType: String, Codable, CaseIterable {
+    public enum UsageType: String, Codable, CaseIterable, Sendable {
         
         case completions // Used for chat with an instruct tuned model
         case chatCompletions // Used for completions with a foundation model
