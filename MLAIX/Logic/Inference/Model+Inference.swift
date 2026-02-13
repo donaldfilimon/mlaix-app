@@ -9,28 +9,22 @@ import Foundation
 import OSLog
 @preconcurrency import SimilaritySearchKit
 import SwiftUI
+import Synchronization
 
 /// A thread-safe accumulator for collecting partial responses across actor boundaries
-private final class SendableAccumulator: @unchecked Sendable {
-    private let lock = NSLock()
-    private var _value: String = ""
+private final class SendableAccumulator: Sendable {
+    private let storage = Mutex("")
 
     var value: String {
-        lock.lock()
-        defer { lock.unlock() }
-        return _value
+        storage.withLock { $0 }
     }
 
     func append(_ string: String) {
-        lock.lock()
-        defer { lock.unlock() }
-        _value += string
+        storage.withLock { $0 += string }
     }
 
     func reset() {
-        lock.lock()
-        defer { lock.unlock() }
-        _value = ""
+        storage.withLock { $0 = "" }
     }
 }
 
@@ -82,20 +76,36 @@ extension Model {
         if #available(macOS 26.0, *) {
             let start: CFAbsoluteTime = CFAbsoluteTimeGetCurrent()
             let prompt = foundationModelsPrompt(from: messages)
-            let responseText = try await FoundationModelsClient.shared.respond(to: prompt)
-            if showPreview {
-                self.handleCompletionProgress(
-                    showPreview: showPreview,
-                    partialResponse: responseText,
-                    handleResponseUpdate: handleResponseUpdate
-                )
-            }
+            let systemPrompt = InferenceSettings.systemPrompt
+            FoundationModelsClient.shared.updateSystemPrompt(systemPrompt)
+
+            let responseText = try await FoundationModelsClient.shared.respondStreaming(
+                to: prompt,
+                onPartial: { [weak self] delta in
+                    Task { @MainActor in
+                        self?.handleCompletionProgress(
+                            showPreview: showPreview,
+                            partialResponse: delta,
+                            handleResponseUpdate: handleResponseUpdate
+                        )
+                    }
+                }
+            )
+
+            let elapsed = CFAbsoluteTimeGetCurrent() - start
+            let estimatedTokens = max(1, responseText.count / 4)
+            let tokensPerSecond = elapsed > 0 ? Double(estimatedTokens) / elapsed : 0
+
             return LlamaServer.CompleteResponse(
                 text: responseText,
                 responseStartSeconds: start,
-                predictedPerSecond: nil,
+                predictedPerSecond: tokensPerSecond,
                 modelName: "Apple Foundation Model",
-                usage: nil,
+                usage: LlamaServer.Usage(
+                    completion_tokens: estimatedTokens,
+                    prompt_tokens: max(1, prompt.count / 4),
+                    total_tokens: estimatedTokens + max(1, prompt.count / 4)
+                ),
                 usedServer: false
             )
         }
@@ -294,10 +304,13 @@ extension Model {
                 self.status = .ready
         }
         // Handle response finish
+        guard let response else {
+            throw LlamaServerError.modelError
+        }
         handleResponseFinish(
-            response!.text,
+            response.text,
             self.pendingMessage?.text ?? "",
-            response!.usage?.total_tokens
+            response.usage?.total_tokens
         )
         // Update display
         if showPreview && self.agent == nil {
@@ -305,7 +318,7 @@ extension Model {
             self.status = .ready
         }
         Self.logger.notice("Finished responding to prompt")
-        return response!
+        return response
     }
     
     /// A function to update the inference status

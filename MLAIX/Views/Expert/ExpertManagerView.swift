@@ -9,7 +9,7 @@ import SwiftUI
 
 struct ExpertManagerView: View {
 	
-	@EnvironmentObject private var expertManager: ExpertManager
+	@Environment(ExpertManager.self) private var expertManager
 	@Environment(ConversationState.self) private var conversationState
 	
 	@State private var selectedExpertId: UUID? = ExpertManager.shared.firstExpert?.id
@@ -19,7 +19,7 @@ struct ExpertManagerView: View {
 		return expertManager.getExpert(id: selectedExpertId)
 	}
 	
-	@State private var editingExpert: Expert = ExpertManager.shared.firstExpert!
+	@State private var editingExpert: Expert? = ExpertManager.shared.firstExpert
 	
 	var body: some View {
 		VStack {

@@ -21,7 +21,7 @@ struct CapsuleChecklistMenuButton: View {
     }
     
     @Binding var isActivated: Bool
-    @ObservedObject var functionSelectionManager: FunctionSelectionManager
+    var functionSelectionManager: FunctionSelectionManager
     
     @State private var anchorView: NSView?
     

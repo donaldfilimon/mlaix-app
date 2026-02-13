@@ -9,23 +9,26 @@ import Foundation
 import OSLog
 
 enum StartupMetrics {
-    
+
     private static let subsystem: String = Bundle.main.bundleIdentifier ?? "com.donaldfilimon.mlai"
-    static let log = OSLog(subsystem: subsystem, category: "Startup")
-    
+    static let signposter = OSSignposter(subsystem: subsystem, category: "Startup")
+
     @discardableResult
-    static func begin(_ name: StaticString) -> OSSignpostID {
-        let signpostID = OSSignpostID(log: log)
-        os_signpost(.begin, log: log, name: name, signpostID: signpostID)
-        return signpostID
+    static func beginInterval(_ name: StaticString) -> OSSignpostIntervalState {
+        signposter.beginInterval(name)
     }
-    
-    static func end(_ name: StaticString, _ signpostID: OSSignpostID) {
-        os_signpost(.end, log: log, name: name, signpostID: signpostID)
+
+    static func endInterval(_ name: StaticString, _ state: OSSignpostIntervalState) {
+        signposter.endInterval(name, state)
     }
-    
+
     static func event(_ name: StaticString) {
-        os_signpost(.event, log: log, name: name)
+        signposter.emitEvent(name)
     }
-    
+
+    static func withInterval<T>(_ name: StaticString, _ body: () async throws -> T) async rethrows -> T {
+        let state = beginInterval(name)
+        defer { endInterval(name, state) }
+        return try await body()
+    }
 }

@@ -71,7 +71,6 @@ actor ServerHealth {
 			let resW = (resOK ? 1 : 0) * 0.75
 			putResponse(ServerHealthResponse(ok: resOK, ms: delta, score: resW + deltaW))
 		} catch {
-//			print("Error requesting url \(url.absoluteString): ", error)
 			putResponse(ServerHealthResponse(ok: false, ms: nil, score: 0))
 		}
 	}

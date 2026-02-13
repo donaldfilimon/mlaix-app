@@ -6,12 +6,14 @@
 //
 
 import Foundation
+import Observation
 import OSLog
 import SimilaritySearchKit
 import SwiftUI
 
 @MainActor
-public class Memories: ObservableObject {
+@Observable
+public class Memories {
     
     /// A `Logger` object for the ``Memories`` object
     private static let logger: Logger = .init(
@@ -20,10 +22,10 @@ public class Memories: ObservableObject {
     )
     
     init() {
-        let signpost = StartupMetrics.begin("Memories.init")
+        let signpost = StartupMetrics.beginInterval("Memories.init")
         self.patchFileIntegrity()
         self.loadAsync()
-        StartupMetrics.end("Memories.init", signpost)
+        StartupMetrics.endInterval("Memories.init", signpost)
     }
     
     /// Static constant for the global ``Memories`` object
@@ -52,9 +54,9 @@ public class Memories: ObservableObject {
     private static let maxMemories: Int = 1000
 
     /// All memories
-    @Published public var memories: [Memory] = []
+    public var memories: [Memory] = []
     /// Whether the datastore has been loaded
-    @Published private(set) var isLoaded: Bool = false
+    private(set) var isLoaded: Bool = false
     /// Task handling asynchronous datastore loading
     private var loadTask: Task<Void, Never>?
     /// The memories similarity index
@@ -67,12 +69,12 @@ public class Memories: ObservableObject {
         guard RetrievalSettings.useMemory else {
             return
         }
-        let signpost = StartupMetrics.begin("Memories.initSimilarityIndex")
+        let signpost = StartupMetrics.beginInterval("Memories.initSimilarityIndex")
         self.similarityIndex = await SimilarityIndex(
             model: NativeEmbeddings(),
             metric: CosineSimilarity()
         )
-        StartupMetrics.end("Memories.initSimilarityIndex", signpost)
+        StartupMetrics.endInterval("Memories.initSimilarityIndex", signpost)
     }
     
     /// Function to make new datastore
@@ -93,8 +95,8 @@ public class Memories: ObservableObject {
         let targetUrl: URL = Self.datastoreUrl
         self.loadTask = Task(priority: .userInitiated) { [weak self] in
             guard let self else { return }
-            let signpost = StartupMetrics.begin("Memories.loadDatastore")
-            defer { StartupMetrics.end("Memories.loadDatastore", signpost) }
+            let signpost = StartupMetrics.beginInterval("Memories.loadDatastore")
+            defer { StartupMetrics.endInterval("Memories.loadDatastore", signpost) }
             let rawData: Data
             do {
                 rawData = try await Task.detached {

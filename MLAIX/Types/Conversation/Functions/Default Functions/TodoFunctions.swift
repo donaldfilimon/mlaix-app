@@ -6,14 +6,12 @@
 //
 
 import Foundation
+import Synchronization
 
-public final class TodoFunctions: @unchecked Sendable {
+public final class TodoFunctions: Sendable {
 
-    /// Storage for active to-do lists (keyed by conversation ID or session)
-    private nonisolated(unsafe) static var activeTodoLists: [String: TodoList] = [:]
-
-    /// Thread-safe access to active to-do lists
-    private static let todoListQueue = DispatchQueue(label: "com.mlaix.todolist", attributes: .concurrent)
+    /// Thread-safe storage for active to-do lists (keyed by conversation ID or session)
+    private static let activeTodoListsStorage = Mutex<[String: TodoList]>([:])
 
     static let functions: [AnyFunctionBox] = [
         TodoFunctions.createTodoList,
@@ -50,7 +48,7 @@ The to-do list will persist across tool calls, and incomplete items will be auto
             )
         ],
         run: { params in
-            return try todoListQueue.sync(flags: .barrier) {
+            return try activeTodoListsStorage.withLock { activeTodoLists in
                 guard !params.items.isEmpty else {
                     throw TodoError.noItemsProvided
                 }
@@ -100,7 +98,7 @@ Created to-do list '\(params.title)' with \(params.items.count) items:
             )
         ],
         run: { params in
-            return try todoListQueue.sync(flags: .barrier) {
+            return try activeTodoListsStorage.withLock { activeTodoLists in
                 guard var todoList = activeTodoLists[params.list_id] else {
                     throw TodoError.listNotFound(params.list_id)
                 }
@@ -159,7 +157,7 @@ Current status:
             )
         ],
         run: { params in
-            return try todoListQueue.sync(flags: .barrier) {
+            return try activeTodoListsStorage.withLock { activeTodoLists in
                 guard var todoList = activeTodoLists[params.list_id] else {
                     throw TodoError.listNotFound(params.list_id)
                 }
@@ -221,7 +219,7 @@ Marked \(finishedCount) item(s) as finished:
     
     /// Get formatted incomplete to-do items for all active lists
     static func getIncompleteTodoSummary() -> String? {
-        return todoListQueue.sync {
+        return activeTodoListsStorage.withLock { activeTodoLists in
             let incompleteLists = activeTodoLists.values.filter { list in
                 list.items.contains { !$0.isCompleted }
             }
@@ -255,16 +253,12 @@ Use `finish_todo_item` to mark items as complete, or `add_todo_item` to add more
     
     /// Clear all to-do lists (useful for cleanup)
     static func clearAllTodoLists() {
-        todoListQueue.sync(flags: .barrier) {
-            activeTodoLists.removeAll()
-        }
+        activeTodoListsStorage.withLock { $0.removeAll() }
     }
     
     /// Clear a specific to-do list
     static func clearTodoList(id: String) {
-        let _ = todoListQueue.sync(flags: .barrier) {
-            activeTodoLists.removeValue(forKey: id)
-        }
+        activeTodoListsStorage.withLock { _ = $0.removeValue(forKey: id) }
     }
     
 }

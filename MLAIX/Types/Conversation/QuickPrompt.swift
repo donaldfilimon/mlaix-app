@@ -33,7 +33,7 @@ public struct QuickPrompt: Identifiable, Sendable {
 	/// The identifier used for the prompt's icon's image
 	private var icon: String
 	/// The color used for the prompt's icon's image
-	private nonisolated(unsafe) var color: Color = Color.secondary
+	private let color: Color
 
 	/// This prompt's label
 	@MainActor var label: some View {

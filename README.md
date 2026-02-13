@@ -221,6 +221,13 @@ Read more about our mission [here](https://johnbean393.github.io/Sidekick/Markdo
    - `swift test` (all tests)
    - See [docs/TESTING.md](docs/TESTING.md) for test coverage and patterns
 
+### Troubleshooting
+
+- **`swiftly link` fails with "The folder 'bin' doesn't exist"**  
+  Swiftly expects the active toolchain to have a `bin` directory; Xcode's toolchain uses `usr/bin`. Run once (requires sudo):  
+  `./scripts/fix-swiftly-link.sh`  
+  Then run `swiftly link` again.
+
 ## Contributing
 
 Contributions are very welcome. Let's make MLAI simple and powerful.

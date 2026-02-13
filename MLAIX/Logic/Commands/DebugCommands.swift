@@ -18,7 +18,7 @@ public class DebugCommands {
 				Self.debugSettings
 				Self.debugConversations
 				Button("Script Testing (JS + WebView)") {
-					NotificationCenter.default.post(name: Notifications.showScriptTesting.name, object: nil)
+					NavigationState.shared.showScriptTestingRequested = true
 				}
 				Button(
 					action: ExpertManager.shared.resetDatastore

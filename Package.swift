@@ -53,7 +53,8 @@ let package = Package(
         .package(url: "https://github.com/xnth97/SymbolPicker", from: "1.5.3"),
         .package(url: "https://github.com/gonzalezreal/swift-markdown-ui", from: "2.4.0"),
         .package(url: "https://github.com/gonzalezreal/NetworkImage", from: "6.0.1"),
-        .package(url: "https://github.com/danielsaidi/WebViewKit", from: "0.5.0")
+        .package(url: "https://github.com/danielsaidi/WebViewKit", from: "0.5.0"),
+        .package(url: "https://github.com/ml-explore/mlx-swift-lm", from: "2.30.3")
     ],
     targets: [
 
@@ -94,7 +95,9 @@ let package = Package(
                 .product(name: "SymbolPicker", package: "SymbolPicker"),
                 .product(name: "MarkdownUI", package: "swift-markdown-ui"),
                 .product(name: "NetworkImage", package: "NetworkImage"),
-                .product(name: "WebViewKit", package: "WebViewKit")
+                .product(name: "WebViewKit", package: "WebViewKit"),
+                .product(name: "MLXLLM", package: "mlx-swift-lm"),
+                .product(name: "MLXLMCommon", package: "mlx-swift-lm")
             ],
             path: "MLAIX",
             exclude: [

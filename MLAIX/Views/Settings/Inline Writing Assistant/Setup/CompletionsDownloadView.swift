@@ -11,7 +11,7 @@ struct CompletionsDownloadView: View {
 
 	@EnvironmentObject private var downloadManager: DownloadManager
 	
-	@EnvironmentObject private var completionsSetupViewModel: CompletionsSetupViewModel
+	@Environment(CompletionsSetupViewModel.self) private var completionsSetupViewModel
 	
     var body: some View {
 		VStack {

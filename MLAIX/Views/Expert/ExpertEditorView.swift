@@ -10,8 +10,8 @@ import SymbolPicker
 
 struct ExpertEditorView: View {
     
-    @EnvironmentObject private var expertManager: ExpertManager
-    @EnvironmentObject private var lengthyTasksController: LengthyTasksController
+    @Environment(ExpertManager.self) private var expertManager
+    @Environment(LengthyTasksController.self) private var lengthyTasksController
     
     @Binding var expert: Expert
     

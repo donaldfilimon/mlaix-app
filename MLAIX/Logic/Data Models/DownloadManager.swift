@@ -24,7 +24,7 @@ public class DownloadManager: NSObject, ObservableObject {
 	static var shared: DownloadManager = DownloadManager()
 	
 	/// Property for currently downloading URL session
-	private var urlSession: URLSession!
+	private var urlSession: URLSession
 	/// A `Bool` representing whether the model should be added to the model manager
 	private var shouldAddModel: Bool = true
 	/// Published property for download progress
@@ -35,7 +35,6 @@ public class DownloadManager: NSObject, ObservableObject {
 	@Published var didFinishDownloadingModel: Bool = false
 	
 	override private init() {
-		super.init()
 		let config: URLSessionConfiguration = URLSessionConfiguration.background(
 			withIdentifier: "com.donaldfilimon.mlai.DownloadManager"
 		)
@@ -44,6 +43,9 @@ public class DownloadManager: NSObject, ObservableObject {
 		// Warning: Make sure that the URLSession is created only once (if an URLSession still
 		// exists from a previous download, it doesn't create a new URLSession object but returns
 		// the existing one with the old delegate object attached)
+		// Initialize urlSession with a temporary value before super.init()
+		self.urlSession = URLSession.shared
+		super.init()
 		self.urlSession = URLSession(configuration: config, delegate: self, delegateQueue: OperationQueue())
 		// Update lists of tasks for UI
 		self.updateTasks()

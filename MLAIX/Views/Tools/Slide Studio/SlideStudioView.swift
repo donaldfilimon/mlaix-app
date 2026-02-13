@@ -9,7 +9,7 @@ import SwiftUI
 
 struct SlideStudioView: View {
 	
-	@StateObject private var slideStudioViewController: SlideStudioViewController = .init()
+	@State private var slideStudioViewController: SlideStudioViewController = .init()
 	
     var body: some View {
 		Group {
@@ -31,7 +31,7 @@ struct SlideStudioView: View {
 			self.slideStudioViewController.stopPreview()
 			
 		}
-		.environmentObject(slideStudioViewController)
+		.environment(slideStudioViewController)
     }
 	
 }

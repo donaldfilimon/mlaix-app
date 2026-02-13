@@ -10,7 +10,7 @@ import SwiftUI
 
 struct ModelRowView: View {
 	
-	@EnvironmentObject private var modelManager: ModelManager
+	@Environment(ModelManager.self) private var modelManager
     
 	@Binding var modelFile: ModelManager.ModelFile
     @Binding var modelUrl: URL?
@@ -107,11 +107,8 @@ struct ModelRowView: View {
                 InferenceSettings.workerModelUrl = self.modelFile.url
                 self.modelUrl = InferenceSettings.workerModelUrl
         }
-		// Send notification to reload model
-		NotificationCenter.default.post(
-			name: Notifications.changedInferenceConfig.name,
-			object: nil
-		)
+		// Signal inference config change
+		NavigationState.shared.inferenceConfigChanged = true
 	}
 	
 }

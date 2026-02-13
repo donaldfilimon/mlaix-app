@@ -14,7 +14,7 @@ struct SlideStudioPreviewEditor: View {
 	@Environment(\.colorScheme) private var colorScheme: ColorScheme
 	@Environment(\.dismissWindow) private var dismissWindow
 	
-	@EnvironmentObject private var slideStudioViewController: SlideStudioViewController
+	@Environment(SlideStudioViewController.self) private var slideStudioViewController
 	@State private var position: CodeEditor.Position = CodeEditor.Position()
 	@State private var messages: Set<TextLocated<LanguageSupport.Message>> = Set()
 	
@@ -64,15 +64,17 @@ struct SlideStudioPreviewEditor: View {
 	
 	/// The code editor theme based on the current color scheme
 	private var editorTheme: Theme {
-		// Access the static properties with nonisolated(unsafe) to satisfy concurrency requirements
+		// nonisolated(unsafe): Theme (external type) is not Sendable; read-only constants
+		// accessed only on the main actor via the View body.
 		nonisolated(unsafe) let darkTheme = Theme.defaultDark
 		nonisolated(unsafe) let lightTheme = Theme.defaultLight
 		return colorScheme == .dark ? darkTheme : lightTheme
 	}
 
 	var editor: some View {
-		CodeEditor(
-			text: self.$slideStudioViewController.markdown,
+		@Bindable var slideStudioViewController = slideStudioViewController
+		return CodeEditor(
+			text: $slideStudioViewController.markdown,
 			position: self.$position,
 			messages: self.$messages
 		)

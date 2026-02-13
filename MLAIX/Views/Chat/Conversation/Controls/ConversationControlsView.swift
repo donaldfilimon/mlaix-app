@@ -11,9 +11,9 @@ import SwiftUI
 
 struct ConversationControlsView: View {
     
-    @EnvironmentObject private var promptController: PromptController
-    @EnvironmentObject private var conversationManager: ConversationManager
-    @EnvironmentObject private var expertManager: ExpertManager
+    @Environment(PromptController.self) private var promptController
+    @Environment(ConversationManager.self) private var conversationManager
+    @Environment(ExpertManager.self) private var expertManager
     @Environment(ConversationState.self) private var conversationState
     
     @State private var didFinishTyping: Bool = false
@@ -88,7 +88,7 @@ struct ConversationControlsView: View {
             }
             if showQuickPrompts {
                 ConversationQuickPromptsView(
-                    input: $promptController.prompt
+                    input: Bindable(promptController).prompt
                 )
                 .transition(
                     .asymmetric(
@@ -121,7 +121,7 @@ struct ConversationControlsView: View {
     
     var resources: some View {
         TemporaryResourcesView(
-            tempResources: self.$promptController.tempResources
+            tempResources: Bindable(promptController).tempResources
         )
         .transition(
             .opacity

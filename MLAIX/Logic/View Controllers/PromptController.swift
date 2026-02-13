@@ -7,6 +7,7 @@
 
 import AVFoundation
 import Foundation
+import Observation
 import OSLog
 import Speech
 import SwiftUI
@@ -15,7 +16,7 @@ import AppKit
 import UniformTypeIdentifiers
 
 @MainActor
-public class PromptController: ObservableObject, DropDelegate {
+@Observable public class PromptController: DropDelegate {
     
     /// A `Logger` object for the `PromptController` object
     nonisolated private static let logger: Logger = .init(
@@ -23,32 +24,32 @@ public class PromptController: ObservableObject, DropDelegate {
         category: String(describing: PromptController.self)
     )
     
-    @Published var sentConversation: Conversation? = nil
-    @Published var sentExpertId: UUID? = nil
+    var sentConversation: Conversation? = nil
+    var sentExpertId: UUID? = nil
     
-    @Published var isGeneratingImage: Bool = false
-    @Published var imageConcept: String? = nil
+    var isGeneratingImage: Bool = false
+    var imageConcept: String? = nil
     
-    @Published var didManuallyToggleReasoning: Bool = false
+    var didManuallyToggleReasoning: Bool = false
     
-    @Published var useWebSearch: Bool = false
-    @Published var selectedSearchState: SearchState = .search
+    var useWebSearch: Bool = false
+    var selectedSearchState: SearchState = .search
     var isUsingDeepResearch: Bool {
         return self.useWebSearch && self.selectedSearchState == .deepResearch
     }
     
-    @Published var useFunctions: Bool = Settings.useFunctions
+    var useFunctions: Bool = Settings.useFunctions
     
-    @Published var prompt: String = ""
-    @Published var insertionPoint: Int = 0
-    @FocusState public var isFocused: Bool
+    var prompt: String = ""
+    var insertionPoint: Int = 0
+    @ObservationIgnored @FocusState public var isFocused: Bool
     
-    @Published var isRecording: Bool = false
-    @Published var audioLevel: Float = 0.0
-    @Published var audioSamples: [Float] = []
+    var isRecording: Bool = false
+    var audioLevel: Float = 0.0
+    var audioSamples: [Float] = []
     
     /// A list of resources temporarily passed to the chatbot, of type ``[TemporaryResource]``
-    @Published var tempResources: [TemporaryResource] = []
+    var tempResources: [TemporaryResource] = []
     
     /// A `Bool` representing whether resources will be passed to the chatbot
     public var hasResources: Bool {

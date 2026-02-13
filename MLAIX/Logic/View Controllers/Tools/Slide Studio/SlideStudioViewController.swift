@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Observation
 import OSLog
 import SimilaritySearchKit
 import SwiftUI
@@ -13,19 +14,19 @@ import WebViewKit
 import WebKit
 
 @MainActor
-public class SlideStudioViewController: ObservableObject, DropDelegate {
+@Observable public class SlideStudioViewController: DropDelegate {
 	
 	/// The current step in the slide generation process, of type `SlideStudioStep`
-	@Published public var currentStep: SlideStudioStep = .prompt
+	public var currentStep: SlideStudioStep = .prompt
 	
 	/// A `Bool` indicating whether the content of the presentation should be informed by content from the web
-	@Published public var useWebSearch: Bool = false
+	public var useWebSearch: Bool = false
 	
 	/// The ID of the selected expert, of type `UUID`
-	@Published public var selectedExpertId: UUID?
+	public var selectedExpertId: UUID?
 	
 	/// A list of `TemporaryResource` used to inform the presentation's content
-	@Published public var tempResources: [TemporaryResource] = []
+	public var tempResources: [TemporaryResource] = []
 	
 	/// The current selected expert, of type `Expert`
 	public var selectedExpert: Expert? {
@@ -34,13 +35,13 @@ public class SlideStudioViewController: ObservableObject, DropDelegate {
 	}
 	
 	/// The prompt given by the user, of type `String`
-	@Published public var prompt: String = ""
+	public var prompt: String = ""
 	
 	/// The number of pages in the finished powerpoint, of type `Int`
-	@Published public var pageCount: Int = 10
+	public var pageCount: Int = 10
 	
 	/// The markdown generated, of type `String`
-	@Published public var markdown: String = ""
+	public var markdown: String = ""
 	
 	/// The user's prompt rephrased to generate text content, of type `String`
 	private var rephrasedPrompt: String = ""
@@ -260,8 +261,8 @@ You are about to create a presentation about the content above. List 1-2 word ti
 									return image.urlString.contains(`extension`)
 								}.contains(true)
 							}
-							.prefix(2)
-							.map(\.url)
+						.prefix(2)
+						.compactMap(\.url)
 						return (title, imageUrls)
 					} catch {
 						return nil

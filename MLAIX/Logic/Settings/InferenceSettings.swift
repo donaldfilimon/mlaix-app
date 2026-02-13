@@ -7,7 +7,6 @@
 
 import CoreML
 import Foundation
-import Combine
 import SecureDefaults
 
 public class InferenceSettings {
@@ -149,10 +148,9 @@ You recall the following information about the user from prior interactions:
             // Save
             UserDefaults.standard.set(newValue, forKey: "systemPrompt")
             // Notify
-            NotificationCenter.default.post(
-                name: Notifications.systemPromptChanged.name,
-                object: nil
-            )
+            Task { @MainActor in
+                NavigationState.shared.systemPromptChanged = true
+            }
         }
     }
     
@@ -562,6 +560,14 @@ You recall the following information about the user from prior interactions:
         }
     }
     
+    /// Whether flash attention should be auto-enabled based on context length and GPU memory
+    @MainActor
+    public static var shouldAutoEnableFlashAttention: Bool {
+        return GPUMonitor.shared.shouldEnableFlashAttention(
+            contextLength: Self.contextLength
+        )
+    }
+
     /// Function that sets default values
     public static func setDefaults() {
         systemPrompt = defaultSystemPrompt

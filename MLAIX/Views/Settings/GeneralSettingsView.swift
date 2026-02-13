@@ -152,11 +152,8 @@ struct GeneralSettingsView: View {
             Toggle("", isOn: $useFunctions)
 				.toggleStyle(.switch)
                 .onChange(of: useFunctions, initial: false) { _, _ in
-                    // Send notification to reload model with jinja
-                    NotificationCenter.default.post(
-                        name: Notifications.changedInferenceConfig.name,
-                        object: nil
-                    )
+                    // Signal inference config change
+                    NavigationState.shared.inferenceConfigChanged = true
                 }
 		}
 	}

@@ -9,7 +9,7 @@ import SwiftUI
 
 struct DetectorEntitySentencesView: View {
 	
-	@EnvironmentObject private var detectorViewController: DetectorViewController
+	@Environment(DetectorViewController.self) private var detectorViewController
 	
 	let isHuman: Bool
 	

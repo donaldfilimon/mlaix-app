@@ -13,7 +13,7 @@ struct ServerArgumentsEditor: View {
     
     @State private var tableId: UUID = UUID()
     
-    @EnvironmentObject private var serverArgumentsManager: ServerArgumentsManager
+    @Environment(ServerArgumentsManager.self) private var serverArgumentsManager
     @State private var selections = Set<ServerArgument.ID>()
     
     var body: some View {
@@ -69,11 +69,8 @@ struct ServerArgumentsEditor: View {
     
     var doneButton: some View {
         Button {
-            // Send notification to reload model
-            NotificationCenter.default.post(
-                name: Notifications.changedInferenceConfig.name,
-                object: nil
-            )
+            // Signal inference config change
+            NavigationState.shared.inferenceConfigChanged = true
             // Exit
             withAnimation(.linear) {
                 self.isPresented.toggle()
@@ -84,7 +81,8 @@ struct ServerArgumentsEditor: View {
     }
     
     var table: some View {
-        Table(
+        @Bindable var serverArgumentsManager = serverArgumentsManager
+        return Table(
             of: Binding<ServerArgument>.self,
             selection: self.$selections
         ) {
@@ -119,7 +117,7 @@ struct ServerArgumentsEditor: View {
             .width(min: 250)
         } rows: {
             ForEach(
-                self.$serverArgumentsManager.serverArguments
+                $serverArgumentsManager.serverArguments
             ) { argument in
                 TableRow(argument)
                     .contextMenu {

@@ -10,8 +10,16 @@ import Testing
 @MainActor
 struct iOSChatStateTests {
 
-    @Test func testSendRequiresNonEmptyInput() async {
+    /// Helper to create a clean state for each test
+    private func freshState() -> iOSChatState {
         let state = iOSChatState()
+        state.startNewConversation()
+        state.inputText = ""
+        return state
+    }
+
+    @Test func testSendRequiresNonEmptyInput() async {
+        let state = freshState()
         state.inputText = "   "
         state.send()
         #expect(state.messages.isEmpty)
@@ -19,7 +27,7 @@ struct iOSChatStateTests {
     }
 
     @Test func testSendAppendsUserMessage() async {
-        let state = iOSChatState()
+        let state = freshState()
         state.inputText = "Hello"
         state.send()
         #expect(state.messages.count == 1)
@@ -29,28 +37,28 @@ struct iOSChatStateTests {
     }
 
     @Test func testSendClearsInput() async {
-        let state = iOSChatState()
+        let state = freshState()
         state.inputText = "Test"
         state.send()
         #expect(state.inputText.isEmpty)
     }
 
     @Test func testiOSMessageIdentifiable() async {
-        let msg = iOSChatState.iOSMessage(text: "Hi", isUser: true)
+        let msg = iOSMessage(text: "Hi", isUser: true)
         #expect(msg.id != UUID())
         #expect(msg.text == "Hi")
         #expect(msg.isUser)
     }
 
     @Test func testRetryDoesNothingWhenNoLastMessage() async {
-        let state = iOSChatState()
+        let state = freshState()
         state.retryLastMessage()
         #expect(state.messages.isEmpty)
         #expect(!state.isGenerating)
     }
 
     @Test func testStartNewConversationClearsMessages() async {
-        let state = iOSChatState()
+        let state = freshState()
         state.inputText = "Hello"
         state.send()
         #expect(state.messages.count == 1)
@@ -62,9 +70,9 @@ struct iOSChatStateTests {
     // MARK: - handleIncomingURL
 
     @Test func testHandleIncomingURLNewChatClearsAndStartsFresh() async {
-        let state = iOSChatState()
+        let state = freshState()
         state.inputText = "Existing"
-        state.messages.append(.init(text: "Hi", isUser: true))
+        state.send()
         guard let url = URL(string: "mlaix://new-chat") else { return }
         state.handleIncomingURL(url)
         #expect(state.messages.isEmpty)
@@ -72,15 +80,16 @@ struct iOSChatStateTests {
     }
 
     @Test func testHandleIncomingURLAskSetsPrompt() async {
-        let state = iOSChatState()
+        let state = freshState()
         guard let url = URL(string: "mlaix://ask?prompt=Hello%20World") else { return }
         state.handleIncomingURL(url)
         #expect(state.inputText == "Hello World")
     }
 
     @Test func testHandleIncomingURLAskStartsNewChat() async {
-        let state = iOSChatState()
-        state.messages.append(.init(text: "Old", isUser: true))
+        let state = freshState()
+        state.inputText = "Old"
+        state.send()
         guard let url = URL(string: "mlaix://ask?prompt=New") else { return }
         state.handleIncomingURL(url)
         #expect(state.messages.isEmpty)
@@ -88,7 +97,7 @@ struct iOSChatStateTests {
     }
 
     @Test func testHandleIncomingURLIgnoresNonMlaixScheme() async {
-        let state = iOSChatState()
+        let state = freshState()
         state.inputText = "Keep"
         guard let url = URL(string: "https://example.com") else { return }
         state.handleIncomingURL(url)
@@ -96,7 +105,7 @@ struct iOSChatStateTests {
     }
 
     @Test func testHandleIncomingURLIgnoresUnknownHost() async {
-        let state = iOSChatState()
+        let state = freshState()
         state.inputText = "Keep"
         guard let url = URL(string: "mlaix://other") else { return }
         state.handleIncomingURL(url)

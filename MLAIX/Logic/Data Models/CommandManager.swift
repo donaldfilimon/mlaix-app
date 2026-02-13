@@ -6,31 +6,33 @@
 //
 
 import Foundation
+import Observation
 import os.log
 import SwiftUI
 
 @MainActor
-public class CommandManager: ObservableObject {
+@Observable
+public class CommandManager {
     
     init() {
-        let signpost = StartupMetrics.begin("CommandManager.init")
+        let signpost = StartupMetrics.beginInterval("CommandManager.init")
         self.patchFileIntegrity()
         self.loadAsync()
-        StartupMetrics.end("CommandManager.init", signpost)
+        StartupMetrics.endInterval("CommandManager.init", signpost)
     }
     
     /// Static constant for the global ``CommandManager`` object
     static public let shared: CommandManager = .init()
     
     /// Published property for all commands
-    @Published public var commands: [Command] = [] {
+    public var commands: [Command] = [] {
         didSet {
             self.save()
         }
     }
     
     /// Published state tracking whether the datastore has been loaded
-    @Published private(set) var isLoaded: Bool = false
+    private(set) var isLoaded: Bool = false
     
     /// Task handling asynchronous datastore loading
     private var loadTask: Task<Void, Never>?
@@ -89,8 +91,8 @@ public class CommandManager: ObservableObject {
         }
         let targetUrl: URL = self.datastoreUrl
         self.loadTask = Task.detached(priority: .userInitiated) {
-            let signpost = StartupMetrics.begin("CommandManager.loadDatastore")
-            defer { StartupMetrics.end("CommandManager.loadDatastore", signpost) }
+            let signpost = StartupMetrics.beginInterval("CommandManager.loadDatastore")
+            defer { StartupMetrics.endInterval("CommandManager.loadDatastore", signpost) }
             let rawData: Data
             do {
                 rawData = try Data(contentsOf: targetUrl)

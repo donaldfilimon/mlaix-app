@@ -11,7 +11,7 @@ struct ExpertSelectionMenu: View {
     
     @Environment(\.colorScheme) var colorScheme
     
-    @EnvironmentObject private var expertManager: ExpertManager
+    @Environment(ExpertManager.self) private var expertManager
     @Environment(ConversationState.self) private var conversationState
     
     var selectedExpert: Expert? {
@@ -144,10 +144,10 @@ struct ExpertSelectionMenu: View {
                             .fill(Color.white)
                             .opacity(0.5)
                     }
-            } else {
+            } else if let selectedExpert {
                 Label(
-                    self.selectedExpert!.name,
-                    systemImage: self.selectedExpert!.symbolName
+                    selectedExpert.name,
+                    systemImage: selectedExpert.symbolName
                 )
                 .labelStyle(.titleAndIcon)
                 .foregroundStyle(toolbarTextColor)

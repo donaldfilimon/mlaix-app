@@ -5,7 +5,6 @@
 //  Created by Bean John on 10/8/24.
 //
 
-import Combine
 import SwiftUI
 
 struct ConversationManagerView: View {
@@ -15,12 +14,12 @@ struct ConversationManagerView: View {
     
     @AppStorage("remoteModelName") private var serverModelName: String = InferenceSettings.serverModelName
     
-    @EnvironmentObject private var model: Model
-    @StateObject private var canvasController: CanvasController = .init()
+    @Environment(Model.self) private var model
+    @State private var canvasController: CanvasController = .init()
     
-    @EnvironmentObject private var appState: AppState
-    @EnvironmentObject private var expertManager: ExpertManager
-    @EnvironmentObject private var conversationManager: ConversationManager
+    @Environment(AppState.self) private var appState
+    @Environment(ExpertManager.self) private var expertManager
+    @Environment(ConversationManager.self) private var conversationManager
     @Environment(ConversationState.self) private var conversationState
     
     var selectedExpert: Expert? {
@@ -101,25 +100,18 @@ struct ConversationManagerView: View {
         .onChange(of: self.selectedConversation?.messagesWithSnapshots) { _, _ in
             self.loadLatestSnapshot()
         }
-        .onReceive(
-            NotificationCenter.default.publisher(
-                for: Notifications.systemPromptChanged.name
-            )
-        ) { output in
+        .onChange(of: NavigationState.shared.systemPromptChanged) { _, newValue in
+            guard newValue else { return }
             self.refreshSystemPrompt()
+            NavigationState.shared.systemPromptChanged = false
         }
-        .onReceive(
-            NotificationCenter.default.publisher(
-                for: Notifications.changedInferenceConfig.name
-            )
-        ) { output in
+        .onChange(of: NavigationState.shared.inferenceConfigChanged) { _, newValue in
+            guard newValue else { return }
             self.refreshModel()
+            NavigationState.shared.inferenceConfigChanged = false
         }
-        .onReceive(
-            NotificationCenter.default.publisher(
-                for: Notifications.newConversation.name
-            )
-        ) { output in
+        .onChange(of: NavigationState.shared.newConversationRequested) { _, newValue in
+            guard newValue else { return }
             withAnimation(.linear) {
                 self.conversationState.selectedExpertId = expertManager.default?.id
             }
@@ -128,33 +120,28 @@ struct ConversationManagerView: View {
                     self.conversationState.selectedConversationId = recentConversationId
                 }
             }
+            NavigationState.shared.newConversationRequested = false
         }
-        .onReceive(
-            NotificationCenter.default.publisher(
-                for: Notifications.switchToConversation.name
-            )
-        ) { output in
-            guard let targetId = output.object as? UUID else {
-                return
-            }
+        .onChange(of: NavigationState.shared.switchToConversationId) { _, newValue in
+            guard let targetId = newValue else { return }
             withAnimation(.linear) {
                 self.conversationState.selectedConversationId = targetId
             }
+            NavigationState.shared.switchToConversationId = nil
         }
-        .onReceive(NotificationCenter.default.publisher(for: Notifications.toggleCanvas.name)) { _ in
+        .onChange(of: NavigationState.shared.toggleCanvasRequested) { _, newValue in
+            guard newValue else { return }
             self.toggleCanvas()
+            NavigationState.shared.toggleCanvasRequested = false
         }
-        .onReceive(
-            NotificationCenter.default.publisher(
-                for: Notifications.didCommandSelectExpert.name
-            )
-        ) { output in
+        .onChange(of: NavigationState.shared.commandSelectedExpertId) { _, newValue in
             // Update expert if needed
             if self.appearsActive {
                 withAnimation(.linear) {
                     self.conversationState.selectedExpertId = self.appState.commandSelectedExpertId
                 }
             }
+            NavigationState.shared.commandSelectedExpertId = nil
         }
         .onReceive(
             NotificationCenter.default.publisher(
@@ -166,8 +153,8 @@ struct ConversationManagerView: View {
                 await self.model.stopServers()
             }
         }
-        .environmentObject(model)
-        .environmentObject(canvasController)
+        .environment(model)
+        .environment(canvasController)
     }
     
     var conversationList: some View {

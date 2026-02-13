@@ -10,7 +10,7 @@ import SwiftUI
 
 struct ModelExplorerView: View {
 	
-	@StateObject private var modelExplorerViewController: ModelExplorerViewController = .init()
+	@State private var modelExplorerViewController: ModelExplorerViewController = .init()
 	
 	@State private var modelDownloadUrl: String = "https://huggingface.co/models?sort=trending&search=GGUF%20MLX"
 
@@ -28,11 +28,13 @@ struct ModelExplorerView: View {
 					// Show list of model families to choose from
 					VStack {
 						familyList
+					if let moreModelsUrl = URL(string: modelDownloadUrl) {
 						Link(
-							destination: URL(string: modelDownloadUrl)!
+							destination: moreModelsUrl
 						) {
 							Text("More Models")
 						}
+					}
 					}
 					.padding(.vertical, 5)
 					.padding(.bottom, 8)
@@ -98,8 +100,9 @@ struct ModelExplorerView: View {
 	/// Check if Hugging Face is reachable
 	private func checkModelUrl() {
 		Task { @MainActor in
+			guard let verifyUrl = URL(string: self.modelDownloadUrl) else { return }
 			let isValid = await URL.verifyURL(
-				url: URL(string: self.modelDownloadUrl)!,
+				url: verifyUrl,
 				timeoutInterval: 1
 			)
 			if !isValid {

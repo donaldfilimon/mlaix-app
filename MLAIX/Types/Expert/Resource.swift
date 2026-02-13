@@ -72,12 +72,10 @@ public struct Resource: Identifiable, Codable, Hashable, Sendable {
     /// The resource's filename of type `String`
     public var filename: String {
         // If website
-        if self.url.isWebURL {
-            return self.url.host(percentEncoded: false)!
-        } else {
-            // If file or directory
-            return self.url.lastPathComponent
-        }
+		if self.url.isWebURL {
+			return self.url.host(percentEncoded: false) ?? "unknown"
+		}
+		return self.url.lastPathComponent
     }
     
     /// Progress update information emitted while indexing a resource

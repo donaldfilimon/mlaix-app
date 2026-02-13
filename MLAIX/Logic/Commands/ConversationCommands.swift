@@ -79,10 +79,7 @@ public class ConversationCommands {
 			AppState.setCommandSelectedExpertId(
 				expert.id
 			)
-			NotificationCenter.default.post(
-				name: Notifications.didCommandSelectExpert.name,
-				object: nil
-			)
+			NavigationState.shared.commandSelectedExpertId = expert.id
 		}
 		
 	}

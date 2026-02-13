@@ -20,7 +20,7 @@ struct MessageContentView: View {
         self.shimmer = shimmer
     }
     
-    @EnvironmentObject private var conversationManager: ConversationManager
+    @Environment(ConversationManager.self) private var conversationManager
     @Environment(ConversationState.self) private var conversationState
     
     @Binding private var isEditing: Bool

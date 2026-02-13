@@ -9,10 +9,11 @@ import SwiftUI
 
 struct DetectorView: View {
 	
-	@StateObject private var detectorViewController: DetectorViewController = .init()
+	@State private var detectorViewController: DetectorViewController = .init()
 	@Environment(\.dismissWindow) private var dismissWindow
 	
 	var body: some View {
+		@Bindable var detectorViewController = detectorViewController
 		Group {
 			switch detectorViewController.state {
 				case .input:
@@ -41,7 +42,7 @@ struct DetectorView: View {
 				exitButton
 			}
 		}
-		.environmentObject(detectorViewController)
+		.environment(detectorViewController)
 	}
 	
 	var evaluating: some View {

@@ -7,16 +7,17 @@
 
 import CodeEditorView
 import Foundation
+import Observation
 import SwiftUI
 
 @MainActor
-public class CanvasController: ObservableObject {
+@Observable public class CanvasController {
 	
-	@Published public var selectedMessageId: UUID? = nil
-	@Published public var isExtractingSnapshot: Bool = false
+	public var selectedMessageId: UUID? = nil
+	public var isExtractingSnapshot: Bool = false
 	
-	@Published public var position: CodeEditor.Position = CodeEditor.Position()
-	@Published public var selection: String = ""
+	public var position: CodeEditor.Position = CodeEditor.Position()
+	public var selection: String = ""
 	
 	/// Function to extract a snapshot from the selected conversation
 	@MainActor

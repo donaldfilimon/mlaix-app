@@ -463,7 +463,7 @@ extension MultilineTextField {
 
 struct ChatPromptEditor: View {
 
-    @EnvironmentObject private var promptController: PromptController
+    @Environment(PromptController.self) private var promptController
 
     @AppStorage("useCommandReturn") private var useCommandReturn: Bool = Settings.useCommandReturn
     var sendDescription: String {
@@ -495,8 +495,8 @@ struct ChatPromptEditor: View {
 
     var body: some View {
         MultilineTextField(
-            text: self.$promptController.prompt,
-            insertionPoint: self.$promptController.insertionPoint,
+            text: Bindable(promptController).prompt,
+            insertionPoint: Bindable(promptController).insertionPoint,
             shouldFocus: self.isFocused.wrappedValue,
             prompt: sendDescription,
             onImageDrop: { url in

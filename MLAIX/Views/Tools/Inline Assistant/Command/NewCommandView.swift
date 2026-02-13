@@ -9,7 +9,7 @@ import SwiftUI
 
 struct NewCommandView: View {
 	
-	@EnvironmentObject private var commandManager: CommandManager
+	@Environment(CommandManager.self) private var commandManager
 	
 	@State private var name: String = ""
 	@State private var prompt: String = ""

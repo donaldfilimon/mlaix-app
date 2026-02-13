@@ -10,7 +10,7 @@ import SwiftUI
 
 struct MarkdownLineChartView: View {
 	
-	@EnvironmentObject private var controller: MarkdownDataViewController
+	@Environment(MarkdownDataViewController.self) private var controller
 	
 	@State private var selectedPoint: Point? = nil
 	

@@ -7,15 +7,16 @@
 
 @preconcurrency import DefaultModels
 import Foundation
+import Observation
 
 @MainActor
-public class ModelExplorerViewController: ObservableObject {
+@Observable public class ModelExplorerViewController {
 	
 	/// An array of model families, of type ``ModelFamily``
-	@Published public var modelFamilies: [ModelFamily] = []
+	public var modelFamilies: [ModelFamily] = []
 	
 	/// The current selected model family, of type `ModelFamily`
-	@Published public var selectedFamily: ModelFamily? = nil
+	public var selectedFamily: ModelFamily? = nil
 	
 	/// A list of models from the selected family, of type `[HuggingFaceModel]`
 	var selectedFamilyModels: [HuggingFaceModel] {

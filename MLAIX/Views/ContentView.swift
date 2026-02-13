@@ -12,8 +12,8 @@ struct ContentView: View {
 
 	@Environment(\.openWindow) private var openWindow
 	@EnvironmentObject private var downloadManager: DownloadManager
-	@EnvironmentObject private var expertManager: ExpertManager
-	@EnvironmentObject private var conversationManager: ConversationManager
+	@Environment(ExpertManager.self) private var expertManager
+	@Environment(ConversationManager.self) private var conversationManager
 
 	@State private var conversationState = ConversationState()
 	
@@ -41,12 +41,16 @@ struct ContentView: View {
 				conversationState.newConversation()
 			}
 		}
-		.onReceive(NotificationCenter.default.publisher(for: Notifications.showKeyboardShortcuts.name)) { _ in
+		.onChange(of: NavigationState.shared.showKeyboardShortcutsRequested) { _, newValue in
+			guard newValue else { return }
 			openWindow(id: "keyboardShortcuts")
+			NavigationState.shared.showKeyboardShortcutsRequested = false
 		}
 		#if DEBUG
-		.onReceive(NotificationCenter.default.publisher(for: Notifications.showScriptTesting.name)) { _ in
+		.onChange(of: NavigationState.shared.showScriptTestingRequested) { _, newValue in
+			guard newValue else { return }
 			openWindow(id: "scriptTesting")
+			NavigationState.shared.showScriptTestingRequested = false
 		}
 		#endif
     }
@@ -54,9 +58,9 @@ struct ContentView: View {
 
 #Preview {
     ContentView()
-        .environmentObject(AppState.shared)
+        .environment(AppState.shared)
         .environmentObject(DownloadManager.shared)
-        .environmentObject(ExpertManager.shared)
-        .environmentObject(ConversationManager.shared)
-        .environmentObject(Model.shared)
+        .environment(ExpertManager.shared)
+        .environment(ConversationManager.shared)
+        .environment(Model.shared)
 }

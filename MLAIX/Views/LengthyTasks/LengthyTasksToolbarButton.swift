@@ -14,9 +14,9 @@ struct LengthyTasksButton: View {
 	
 	@Environment(\.colorScheme) var colorScheme
 	
-	@EnvironmentObject private var lengthyTasksController: LengthyTasksController
+	@Environment(LengthyTasksController.self) private var lengthyTasksController
 	@Environment(ConversationState.self) private var conversationState
-	@EnvironmentObject private var expertManager: ExpertManager
+	@Environment(ExpertManager.self) private var expertManager
 	
 	var selectedExpert: Expert? {
 		guard let selectedExpertId = conversationState.selectedExpertId else {

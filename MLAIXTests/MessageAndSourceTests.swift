@@ -35,7 +35,7 @@ struct SourceTests {
     }
 
     @Test func testSourceEqualityByAllFields() {
-        var a = Source(text: "A", source: "https://a.com")
+        let a = Source(text: "A", source: "https://a.com")
         var b = Source(text: "B", source: "https://b.com")
         #expect(a != b)
 

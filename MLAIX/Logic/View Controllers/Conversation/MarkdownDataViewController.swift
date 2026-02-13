@@ -7,10 +7,11 @@
 
 import Foundation
 import MarkdownUI
+import Observation
 import SwiftUI
 
 @MainActor
-public class MarkdownDataViewController: ObservableObject {
+@Observable public class MarkdownDataViewController {
     
     init(
         configuration: BlockConfiguration
@@ -22,25 +23,28 @@ public class MarkdownDataViewController: ObservableObject {
         let rawData: [[String]]? = Self.parseMarkdownTable(string)
         self.data =  rawData
         // Get rows
+        let computedRows: [[String]]
         if let rawData, rawData.count > 1 {
             var rows: [[String]] = Array(rawData.dropFirst())
             // Drop header indicator
             if let firstRow = rows.first, firstRow.allSatisfy({ $0 == "---" }) {
                 rows = Array(rows.dropFirst())
             }
-            self.rows = rows
+            computedRows = rows
         } else {
-            self.rows = []
+            computedRows = []
         }
+        self.rows = computedRows
         // Cache expensive computations
         self._cachedHeaders = Self.computeHeaders(from: rawData)
-        self._cachedColumns = Self.computeColumns(from: self.rows)
-        self._cachedIsNumeric = Self.computeIsNumeric(from: rawData)
-        self._cachedDataFormat = Self.computeDataFormat(isNumeric: self._cachedIsNumeric)
+        self._cachedColumns = Self.computeColumns(from: computedRows)
+        let cachedIsNumeric = Self.computeIsNumeric(from: rawData)
+        self._cachedIsNumeric = cachedIsNumeric
+        self._cachedDataFormat = Self.computeDataFormat(isNumeric: cachedIsNumeric)
     }
     
-    @Published var selectedVisualization: Visualization = .table
-    @Published var flipAxis: Bool = false
+    var selectedVisualization: Visualization = .table
+    var flipAxis: Bool = false
     
     /// The configuration for this "block" of Markdown
     var configuration: BlockConfiguration

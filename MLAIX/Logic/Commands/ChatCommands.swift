@@ -14,7 +14,7 @@ public enum ChatCommands {
     static var commands: some Commands {
         CommandGroup(after: .pasteboard) {
             Button {
-                NotificationCenter.default.post(name: Notifications.sendMessage.name, object: nil)
+                NavigationState.shared.sendMessageRequested = true
             } label: {
                 Text("Send Message")
             }
@@ -23,7 +23,7 @@ public enum ChatCommands {
             Divider()
 
             Button {
-                NotificationCenter.default.post(name: Notifications.toggleCanvas.name, object: nil)
+                NavigationState.shared.toggleCanvasRequested = true
             } label: {
                 Text("Toggle Canvas")
             }
@@ -32,7 +32,7 @@ public enum ChatCommands {
             Divider()
 
             Button {
-                NotificationCenter.default.post(name: Notifications.toggleFunctions.name, object: nil)
+                NavigationState.shared.toggleFunctionsRequested = true
             } label: {
                 Text("Toggle Functions")
             }
@@ -40,7 +40,7 @@ public enum ChatCommands {
 
             if RetrievalSettings.canUseWebSearch {
                 Button {
-                    NotificationCenter.default.post(name: Notifications.toggleWebSearch.name, object: nil)
+                    NavigationState.shared.toggleWebSearchRequested = true
                 } label: {
                     Text("Toggle Web Search")
                 }

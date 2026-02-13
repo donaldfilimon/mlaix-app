@@ -6,11 +6,13 @@
 //
 
 import Foundation
+import Observation
 import os.log
 import SwiftUI
 
 @MainActor
-public class ExpertManager: ObservableObject {
+@Observable
+public class ExpertManager {
     
     init() {
         self.patchFileIntegrity()
@@ -27,7 +29,7 @@ public class ExpertManager: ObservableObject {
     )
     
     /// Published property for all experts
-    @Published public var experts: [Expert] = [] {
+    public var experts: [Expert] = [] {
         didSet {
             self.save()
         }

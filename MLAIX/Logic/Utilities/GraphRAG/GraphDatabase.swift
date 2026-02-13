@@ -235,7 +235,7 @@ public class GraphDatabase {
 			var loadedEntities: [GraphEntity] = []
 			
 			for row in entityRows {
-				let id = UUID(uuidString: row[entityId])!
+				guard let id = UUID(uuidString: row[entityId]) else { continue }
 				let embedding: [Float]? = if let data = row[entityEmbedding] {
 					try? JSONDecoder().decode([Float].self, from: data)
 				} else {
@@ -266,16 +266,19 @@ public class GraphDatabase {
 			
 			for row in relationshipRows {
 				// Check if both entities exist in the graph
-				let sourceId = UUID(uuidString: row[relationshipSource])!
-				let targetId = UUID(uuidString: row[relationshipTarget])!
+				guard let sourceId = UUID(uuidString: row[relationshipSource]),
+				      let targetId = UUID(uuidString: row[relationshipTarget]) else {
+					continue  // Skip relationships with invalid UUIDs
+				}
 				
 				guard graph.findEntity(id: sourceId) != nil,
 				      graph.findEntity(id: targetId) != nil else {
 					continue  // Skip relationships with missing entities
 				}
 				
+				guard let relId = UUID(uuidString: row[relationshipId]) else { continue }
 				let relationship = GraphRelationship(
-					id: UUID(uuidString: row[relationshipId])!,
+					id: relId,
 					sourceEntityId: sourceId,
 					targetEntityId: targetId,
 					relationshipType: row[relationshipType],
@@ -316,8 +319,9 @@ public class GraphDatabase {
 					}
 				}
 				
+				guard let communityUUID = UUID(uuidString: commId) else { continue }
 				let community = Community(
-					id: UUID(uuidString: commId)!,
+					id: communityUUID,
 					level: Int(row[communityLevel]),
 					memberEntityIds: entityIds,
 					subCommunityIds: subCommIds,

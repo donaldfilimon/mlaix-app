@@ -11,9 +11,9 @@ import SwiftUI
 
 struct SnapshotTextEditor: View {
 	
-	@EnvironmentObject private var canvasController: CanvasController
+	@Environment(CanvasController.self) private var canvasController
 	@Environment(ConversationState.self) private var conversationState
-	@EnvironmentObject private var conversationManager: ConversationManager
+	@Environment(ConversationManager.self) private var conversationManager
 	
 	@Environment(\.colorScheme) private var colorScheme: ColorScheme
 	@State private var messages: Set<TextLocated<LanguageSupport.Message>> = Set()
@@ -53,7 +53,7 @@ struct SnapshotTextEditor: View {
 	var body: some View {
 		CodeEditor(
 			text: self.$text,
-			position: self.$canvasController.position,
+			position: Bindable(canvasController).position,
 			messages: self.$messages
 		)
 		.environment(

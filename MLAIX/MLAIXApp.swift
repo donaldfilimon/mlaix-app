@@ -8,27 +8,36 @@
 import AppKit
 import Foundation
 import FSKit_macOS
+import SwiftData
 import SwiftUI
 import TipKit
+
+import class MLAIXShared.FunctionSelectionModel
+import class MLAIXShared.SharedConversation
+import class MLAIXShared.SharedChatMessage
+import class MLAIXShared.MemoryModel
+import class MLAIXShared.CommandModel
+import class MLAIXShared.InferenceRecordModel
+import class MLAIXShared.ServerArgumentModel
 
 @main
 struct MLAIApp: App {
     
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     
-    @StateObject private var appState: AppState = .shared
-    @StateObject private var downloadManager: DownloadManager = .shared
-    @StateObject private var conversationManager: ConversationManager = .shared
-    @StateObject private var expertManager: ExpertManager = .shared
-    @StateObject private var commandManager: CommandManager = .shared
-    @StateObject private var memories: Memories = .shared
-    @StateObject private var lengthyTasksController: LengthyTasksController = .shared
-    @StateObject private var modelManager: ModelManager = .shared
-    @StateObject private var inferenceRecords: InferenceRecords = .shared
-    @StateObject private var speechSynthesizer: SpeechSynthesizer = .shared
-    @StateObject private var serverArgumentsManager: ServerArgumentsManager = .shared
-    @StateObject private var inlineAssistantController: InlineAssistantController = .shared
-    @StateObject private var model: Model = .shared
+    @State private var appState: AppState = .shared
+    @State private var downloadManager: DownloadManager = .shared
+    @State private var conversationManager: ConversationManager = .shared
+    @State private var expertManager: ExpertManager = .shared
+    @State private var commandManager: CommandManager = .shared
+    @State private var memories: Memories = .shared
+    @State private var lengthyTasksController: LengthyTasksController = .shared
+    @State private var modelManager: ModelManager = .shared
+    @State private var inferenceRecords: InferenceRecords = .shared
+    @State private var speechSynthesizer: SpeechSynthesizer = .shared
+    @State private var serverArgumentsManager: ServerArgumentsManager = .shared
+    @State private var inlineAssistantController: InlineAssistantController = .shared
+    @State private var model: Model = .shared
 
     @AppStorage("appearanceMode") private var appearanceModeRaw: String = AppearanceSettings.AppearanceMode.system.rawValue
     @AppStorage("appearanceAccentHex") private var accentHex: String = ""
@@ -62,38 +71,65 @@ struct MLAIApp: App {
         )
     }
     
+    /// SwiftData model container shared across all windows.
+    private let modelContainer: ModelContainer
+
     init() {
         // Hide all tips for now
         Tips.hideAllTipsForTesting()
         // Initialize model cache
         Task {
-            let signpost = StartupMetrics.begin("KnownModel.initializeModelCache")
+            let signpost = StartupMetrics.beginInterval("KnownModel.initializeModelCache")
             await KnownModel.initializeModelCache()
-            StartupMetrics.end("KnownModel.initializeModelCache", signpost)
+            StartupMetrics.endInterval("KnownModel.initializeModelCache", signpost)
         }
+        // Configure SwiftData
+        let schema = Schema([
+            SharedConversation.self,
+            SharedChatMessage.self,
+            MemoryModel.self,
+            CommandModel.self,
+            InferenceRecordModel.self,
+            ServerArgumentModel.self,
+            FunctionSelectionModel.self
+        ])
+        let fileConfig = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
+        let memoryConfig = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
+        let container: ModelContainer
+        if let c = try? ModelContainer(for: schema, configurations: [fileConfig]) {
+            container = c
+        } else if let c = try? ModelContainer(for: schema, configurations: [memoryConfig]) {
+            container = c
+        } else {
+            preconditionFailure("SwiftData container failed: disk and in-memory initialization both failed.")
+        }
+        self.modelContainer = container
+        // Run one-time JSON → SwiftData migration
+        let context = ModelContext(container)
+        DataMigrationService.migrateIfNeeded(context: context)
     }
     
     var body: some Scene {
         
         // Main window
         WindowGroup {
-            ContentView()
-                .environmentObject(appState)
-                .environmentObject(downloadManager)
-                .environmentObject(conversationManager)
-                .environmentObject(expertManager)
-                .environmentObject(lengthyTasksController)
-                .environmentObject(memories)
-                .environmentObject(modelManager)
-                .environmentObject(inferenceRecords)
-                .environmentObject(speechSynthesizer)
-                .environmentObject(serverArgumentsManager)
-                .environmentObject(inlineAssistantController)
-                .environmentObject(model)
-                .environmentObject(commandManager)
+			ContentView()
+				.environment(appState)
+				.environmentObject(downloadManager)
+				.environment(conversationManager)
+				.environment(expertManager)
+				.environment(lengthyTasksController)
+				.environment(memories)
+				.environment(modelManager)
+				.environment(inferenceRecords)
+				.environmentObject(speechSynthesizer)
+				.environment(serverArgumentsManager)
+				.environment(inlineAssistantController)
+				.environment(model)
+				.environment(commandManager)
                 .environment(\.liquidGlassStyle, liquidGlassStyle)
                 .preferredColorScheme(appearanceMode.colorScheme)
-                .modifier(OptionalTintModifier(color: resolvedAccentColor))
+                .optionalTint(resolvedAccentColor)
                 .modifier(FontScaleModifier(scale: fontScaleRaw))
                 .liquidGlassWindow()
         }
@@ -117,7 +153,7 @@ struct MLAIApp: App {
         // Window for managing memories
         SwiftUI.Window("Memory", id: "memory") {
             MemoriesManagerView()
-                .environmentObject(memories)
+                .environment(memories)
                 .frame(minWidth: 500, maxWidth: 600, maxHeight: 550)
         }
         .windowResizability(.contentSize)
@@ -131,7 +167,7 @@ struct MLAIApp: App {
         // Window for Tool: Dashboard
         SwiftUI.Window("Dashboard", id: "dashboard") {
             DashboardView()
-                .environmentObject(inferenceRecords)
+                .environment(inferenceRecords)
         }
         
         // Window for Tool: Detector
@@ -142,7 +178,7 @@ struct MLAIApp: App {
         // Window for Tool: Diagrammer
         SwiftUI.Window("Diagrammer", id: "diagrammer") {
             DiagrammerView()
-                .environmentObject(model)
+                .environment(model)
         }
 
         // Window for Tool: Slide Studio
@@ -167,14 +203,14 @@ struct MLAIApp: App {
         #endif
 
         // Settings window
-        SwiftUI.Settings {
-            SettingsView()
-                .environmentObject(commandManager)
-                .environmentObject(modelManager)
-                .environmentObject(speechSynthesizer)
-                .environmentObject(serverArgumentsManager)
-                .environmentObject(downloadManager)
-        }
+		SwiftUI.Settings {
+			SettingsView()
+				.environment(commandManager)
+				.environment(modelManager)
+				.environmentObject(speechSynthesizer)
+				.environment(serverArgumentsManager)
+				.environmentObject(downloadManager)
+		}
         
     }
     

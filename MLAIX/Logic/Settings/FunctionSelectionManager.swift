@@ -6,11 +6,13 @@
 //
 
 import Foundation
+import Observation
 import OSLog
 
 /// Manager class for persisting and managing function selection state
 @MainActor
-public class FunctionSelectionManager: ObservableObject {
+@Observable
+public class FunctionSelectionManager {
     
     /// Logger for the manager
     private static let logger: Logger = .init(
@@ -22,7 +24,7 @@ public class FunctionSelectionManager: ObservableObject {
     public static let shared = FunctionSelectionManager()
     
     /// Set of enabled function categories
-    @Published public var enabledCategories: Set<FunctionCategory> = []
+    public var enabledCategories: Set<FunctionCategory> = []
     
     /// Path to the JSON file storing the selection state
     private var storageURL: URL {

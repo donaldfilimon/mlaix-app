@@ -47,7 +47,7 @@ struct ExpertTests {
     }
 
     @Test func testExpertEqualityById() {
-        var a = Expert(name: "A", symbolName: "star", color: .red)
+        let a = Expert(name: "A", symbolName: "star", color: .red)
         var b = Expert(name: "B", symbolName: "moon", color: .blue)
         #expect(a != b)
 

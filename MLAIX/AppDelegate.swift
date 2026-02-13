@@ -29,9 +29,9 @@ public class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
         Logger(subsystem: Bundle.main.logSubsystem, category: "AppDelegate").debug("Hid all tips")
         // Relocate legacy resources if setup finished
         if Settings.setupComplete {
-            let signpost = StartupMetrics.begin("Refactorer.refactor")
+            let signpost = StartupMetrics.beginInterval("Refactorer.refactor")
             Refactorer.refactor()
-            StartupMetrics.end("Refactorer.refactor", signpost)
+            StartupMetrics.endInterval("Refactorer.refactor", signpost)
         }
         // Configure Tip's data container
         try? Tips.configure(

@@ -17,6 +17,8 @@ struct FileDragProvider: NSViewRepresentable {
     @MainActor
     class NSViewType: NSView, NSFilePromiseProviderDelegate, NSDraggingSource {
         
+        // nonisolated(unsafe): FilePromise contains a non-Sendable closure; accessed from
+        // nonisolated delegate methods (NSFilePromiseProviderDelegate) on this @MainActor class.
         nonisolated(unsafe) var filePromise: FilePromise
         var preview: NSImage
         

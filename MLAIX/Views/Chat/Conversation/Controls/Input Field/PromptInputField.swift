@@ -27,12 +27,12 @@ struct PromptInputField: View {
         .italic()
     }
     
-    @EnvironmentObject private var model: Model
-    @EnvironmentObject private var conversationManager: ConversationManager
-    @EnvironmentObject private var expertManager: ExpertManager
+    @Environment(Model.self) private var model
+    @Environment(ConversationManager.self) private var conversationManager
+    @Environment(ExpertManager.self) private var expertManager
     @Environment(ConversationState.self) private var conversationState
-    @EnvironmentObject private var promptController: PromptController
-    @EnvironmentObject private var canvasController: CanvasController
+    @Environment(PromptController.self) private var promptController
+    @Environment(CanvasController.self) private var canvasController
     
     @FocusState var isFocused: Bool
     
@@ -95,26 +95,29 @@ struct PromptInputField: View {
                     }
                 }
             }
-            .onReceive(
-                NotificationCenter.default.publisher(
-                    for: Notifications.changedInferenceConfig.name
-                )
-            ) { output in
+            .onChange(of: NavigationState.shared.inferenceConfigChanged) { _, newValue in
+                guard newValue else { return }
                 withAnimation(.linear) {
                     // Handle model change
                     self.handleModelChange()
                 }
             }
-            .onReceive(NotificationCenter.default.publisher(for: Notifications.sendMessage.name)) { _ in
+            .onChange(of: NavigationState.shared.sendMessageRequested) { _, newValue in
+                guard newValue else { return }
                 self.onSubmit()
+                NavigationState.shared.sendMessageRequested = false
             }
-            .onReceive(NotificationCenter.default.publisher(for: Notifications.toggleFunctions.name)) { _ in
+            .onChange(of: NavigationState.shared.toggleFunctionsRequested) { _, newValue in
+                guard newValue else { return }
                 guard Settings.useFunctions else { return }
                 self.promptController.useFunctions.toggle()
+                NavigationState.shared.toggleFunctionsRequested = false
             }
-            .onReceive(NotificationCenter.default.publisher(for: Notifications.toggleWebSearch.name)) { _ in
+            .onChange(of: NavigationState.shared.toggleWebSearchRequested) { _, newValue in
+                guard newValue else { return }
                 guard RetrievalSettings.canUseWebSearch else { return }
                 self.promptController.useWebSearch.toggle()
+                NavigationState.shared.toggleWebSearchRequested = false
             }
             .onAppear {
                 self.isFocused = true
@@ -139,7 +142,7 @@ struct PromptInputField: View {
         ) {
             ChatPromptEditor(
                 isFocused: self.$isFocused,
-                isRecording: self.$promptController.isRecording,
+                isRecording: Bindable(promptController).isRecording,
                 useAttachments: true,
                 bottomOptions: false,
                 cornerRadius: 22
@@ -175,12 +178,12 @@ struct PromptInputField: View {
         ) {
             SearchMenuToggleButton(
                 activatedFillColor: self.buttonFillColor,
-                useWebSearch: self.$promptController.useWebSearch,
-                selectedSearchState: self.$promptController.selectedSearchState
+                useWebSearch: Bindable(promptController).useWebSearch,
+                selectedSearchState: Bindable(promptController).selectedSearchState
             )
             UseFunctionsButton(
                 activatedFillColor: self.buttonFillColor,
-                useFunctions: self.$promptController.useFunctions
+                useFunctions: Bindable(promptController).useFunctions
             )
             Spacer(minLength: 0)
         }

@@ -7,10 +7,11 @@
 
 import AppKit
 import Foundation
+import Observation
 import SwiftUI
 
 @MainActor
-public class InlineAssistantController: ObservableObject {
+@Observable public class InlineAssistantController {
 	
 	/// Static constant for the global `InlineAssistantController` object
 	static public let shared: InlineAssistantController = .init()
@@ -64,9 +65,9 @@ public class InlineAssistantController: ObservableObject {
 		// Get screen with pointer
 		let mouseLocation: CGPoint = NSEvent.mouseLocation
 		let screens: [NSScreen] = NSScreen.screens
-		let screenWithMouse: NSScreen = screens.first(where: {
+		guard let screenWithMouse: NSScreen = screens.first(where: {
 			NSMouseInRect(mouseLocation, $0.frame, false)
-		}) ??  NSScreen.main!
+		}) ?? NSScreen.main else { return }
 		// Position screen
 		panel.setPosition(
 			vertical: .center,

@@ -14,11 +14,11 @@ struct MessageView: View {
 	
     @Environment(\.openWindow) var openWindow
     
-	@EnvironmentObject private var model: Model
-	@EnvironmentObject private var conversationManager: ConversationManager
+	@Environment(Model.self) private var model
+	@Environment(ConversationManager.self) private var conversationManager
 	@Environment(ConversationState.self) private var conversationState
-	@EnvironmentObject private var promptController: PromptController
-    @EnvironmentObject private var memories: Memories
+	@Environment(PromptController.self) private var promptController
+    @Environment(Memories.self) private var memories
     
     @State private var isEditing: Bool = false
 	@State private var isShowingSources: Bool = false
@@ -84,11 +84,13 @@ struct MessageView: View {
 		}
 		.padding(.trailing)
 		.sheet(isPresented: $isShowingSources) {
-			SourcesView(
-				isShowingSources: $isShowingSources,
-				sources: self.sources!
-			)
-			.frame(minWidth: 600, minHeight: 650, maxHeight: 700)
+			if let sources {
+				SourcesView(
+					isShowingSources: $isShowingSources,
+					sources: sources
+				)
+				.frame(minWidth: 600, minHeight: 650, maxHeight: 700)
+			}
 		}
     }
     

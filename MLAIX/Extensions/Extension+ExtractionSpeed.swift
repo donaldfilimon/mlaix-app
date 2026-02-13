@@ -7,4 +7,5 @@
 
 import ExtractKit_macOS
 
+// External type from ExtractKit: cannot add Sendable conformance directly
 extension ExtractionSpeed: @retroactive @unchecked Sendable {}

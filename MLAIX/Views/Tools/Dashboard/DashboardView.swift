@@ -10,7 +10,7 @@ import SwiftUI
 
 struct DashboardView: View {
     
-    @EnvironmentObject private var inferenceRecords: InferenceRecords
+    @Environment(InferenceRecords.self) private var inferenceRecords
     
     // Cached date formatter for performance
     private static let dateFormatter: Date.FormatStyle = .dateTime
@@ -40,6 +40,7 @@ struct DashboardView: View {
     }
     
     var body: some View {
+        @Bindable var inferenceRecords = inferenceRecords
         VStack {
             stats
                 .frame(minHeight: 320)
@@ -59,7 +60,7 @@ struct DashboardView: View {
             }
         }
         .navigationTitle(Text("Dashboard"))
-        .environmentObject(self.inferenceRecords)
+        .environment(self.inferenceRecords)
     }
     
     var stats: some View {
@@ -212,9 +213,10 @@ struct DashboardView: View {
     }
     
     var table: some View {
-        Table(
-            self.inferenceRecords.displayedRecords,
-            selection: self.$inferenceRecords.selections
+        @Bindable var inferenceRecords = inferenceRecords
+        return Table(
+            inferenceRecords.displayedRecords,
+            selection: $inferenceRecords.selections
         ) {
             TableColumn("Start Time") { record in
                 Text(record.startTime.formatted(Self.dateFormatter))
@@ -247,9 +249,10 @@ struct DashboardView: View {
     }
     
     var typePicker: some View {
-        Picker(
+        @Bindable var inferenceRecords = inferenceRecords
+        return Picker(
             "",
-            selection: self.$inferenceRecords.selectedType.animation(
+            selection: $inferenceRecords.selectedType.animation(
                 .linear
             )
         ) {
@@ -266,9 +269,10 @@ struct DashboardView: View {
     }
     
     var modelPicker: some View {
-        Picker(
+        @Bindable var inferenceRecords = inferenceRecords
+        return Picker(
             "",
-            selection: self.$inferenceRecords.selectedModel.animation(
+            selection: $inferenceRecords.selectedModel.animation(
                 .linear
             )
         ) {
@@ -287,9 +291,10 @@ struct DashboardView: View {
     }
     
     var timeframePicker: some View {
-        Picker(
+        @Bindable var inferenceRecords = inferenceRecords
+        return Picker(
             "",
-            selection: self.$inferenceRecords.selectedTimeframe.animation(
+            selection: $inferenceRecords.selectedTimeframe.animation(
                 .linear
             )
         ) {

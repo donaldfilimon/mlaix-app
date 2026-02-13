@@ -9,11 +9,12 @@ import SwiftUI
 
 struct ExpertListView: View {
 	
-	@EnvironmentObject private var expertManager: ExpertManager
+	@Environment(ExpertManager.self) private var expertManager
 	
     var body: some View {
-		List(
-			self.$expertManager.experts,
+		@Bindable var expertManager = expertManager
+		return List(
+			$expertManager.experts,
 			editActions: .move
 		) { expert in
 			ExpertNavigationRowView(

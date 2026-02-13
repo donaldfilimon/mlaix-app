@@ -10,7 +10,7 @@ import SwiftUI
 
 struct MarkdownBarChartView: View {
 	
-	@EnvironmentObject private var controller: MarkdownDataViewController
+	@Environment(MarkdownDataViewController.self) private var controller
 	
 	private var bars: [Bar] {
 		return controller.rows.enumerated().compactMap { index, row -> Bar? in

@@ -72,11 +72,8 @@ struct ServerModelSettingsView: View {
 			.disabled(serverEndpoint.isEmpty || !endpointUrlIsValid)
 		}
 		.onChange(of: useServer, initial: false) { _, _ in
-			// Send notification to reload model
-			NotificationCenter.default.post(
-				name: Notifications.changedInferenceConfig.name,
-				object: nil
-			)
+			// Signal inference config change
+			NavigationState.shared.inferenceConfigChanged = true
 		}
 	}
 	

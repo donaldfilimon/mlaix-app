@@ -9,9 +9,9 @@ import SwiftUI
 
 struct CommandButton: View {
 	
-	@EnvironmentObject private var model: Model
-	@EnvironmentObject private var commandManager: CommandManager
-	@EnvironmentObject private var inlineAssistantController: InlineAssistantController
+	@Environment(Model.self) private var model
+	@Environment(CommandManager.self) private var commandManager
+	@Environment(InlineAssistantController.self) private var inlineAssistantController
 	
 	@State private var isEditingCommand: Bool = false
 	

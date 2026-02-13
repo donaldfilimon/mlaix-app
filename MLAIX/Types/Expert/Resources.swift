@@ -10,6 +10,7 @@ import FSKit_macOS
 import OSLog
 import SimilaritySearchKit
 import SwiftUI
+import Synchronization
 
 /// An object that manages a expert's resources
 public struct Resources: Identifiable, Codable, Hashable, Sendable {
@@ -201,37 +202,31 @@ public struct Resources: Identifiable, Codable, Hashable, Sendable {
         let indexUrl: URL = self.indexUrl
         var allGraphsSucceeded = true
 
-        final class GraphProgressState: @unchecked Sendable {
-            private let lock = NSLock()
-            private var _totalEntities: Int = 0
-            private var _latestProgress: GraphProgress?
+        final class GraphProgressState: Sendable {
+            private struct State {
+                var totalEntities: Int = 0
+                var latestProgress: GraphProgress?
+            }
+            private let storage: Mutex<State>
 
             init(latestProgress: GraphProgress?) {
-                _latestProgress = latestProgress
+                storage = Mutex(State(latestProgress: latestProgress))
             }
 
             func updateEntities(_ entities: Int) {
-                lock.lock()
-                defer { lock.unlock() }
-                _totalEntities = entities
+                storage.withLock { $0.totalEntities = entities }
             }
 
             func updateLatest(_ progress: GraphProgress) {
-                lock.lock()
-                defer { lock.unlock() }
-                _latestProgress = progress
+                storage.withLock { $0.latestProgress = progress }
             }
 
             var totalEntities: Int {
-                lock.lock()
-                defer { lock.unlock() }
-                return _totalEntities
+                storage.withLock { $0.totalEntities }
             }
 
             var latestProgress: GraphProgress? {
-                lock.lock()
-                defer { lock.unlock() }
-                return _latestProgress
+                storage.withLock { $0.latestProgress }
             }
         }
 

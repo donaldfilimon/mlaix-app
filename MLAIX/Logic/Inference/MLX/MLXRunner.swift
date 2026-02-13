@@ -6,6 +6,9 @@
 //
 
 import Foundation
+import MLX
+import MLXLLM
+import MLXLMCommon
 import OSLog
 
 public enum MLXRunner {
@@ -14,10 +17,13 @@ public enum MLXRunner {
         category: String(describing: MLXRunner.self)
     )
 
+    // MARK: - Types
+
     public struct Availability: Sendable {
-        let pythonAvailable: Bool
+        let pythonAvailable: Bool   // Kept for backward compat (always false)
         let mlxAvailable: Bool
         let mlxVersion: String?
+        let nativeAvailable: Bool   // Native Swift MLX
     }
 
     public struct Message: Codable, Sendable {
@@ -59,180 +65,146 @@ public enum MLXRunner {
         case pythonUnavailable
         case invalidResponse
         case generationFailed(String)
+        case modelLoadFailed(String)
 
         public var errorDescription: String? {
             switch self {
             case .pythonUnavailable:
-                return "Python is not available"
+                return "Python is not available (native MLX is used instead)"
             case .invalidResponse:
                 return "MLX did not return a valid response"
             case .generationFailed(let message):
                 return "MLX generation failed: \(message)"
+            case .modelLoadFailed(let message):
+                return "Failed to load MLX model: \(message)"
             }
         }
     }
+
+    // MARK: - Model Cache
+
+    /// Thread-safe model cache using an actor to avoid reloading models.
+    private actor ModelCache {
+        private var cache: [String: ModelContainer] = [:]
+
+        func get(_ path: String) -> ModelContainer? {
+            cache[path]
+        }
+
+        func set(_ path: String, container: ModelContainer) {
+            cache[path] = container
+        }
+
+        func clear() {
+            cache.removeAll()
+        }
+    }
+
+    private static let modelCache = ModelCache()
+
+    // MARK: - Public API
 
     public static func checkAvailability() async -> Availability {
-        await Task.detached(priority: .userInitiated) {
-            guard PythonRunner.isPythonInstalled() else {
-                return Availability(
-                    pythonAvailable: false,
-                    mlxAvailable: false,
-                    mlxVersion: nil
-                )
-            }
-            let pythonCode = """
-import importlib.util
-import json
-
-spec = importlib.util.find_spec("mlx_lm")
-mlx_available = spec is not None
-version = None
-if mlx_available:
-    try:
-        import mlx_lm
-        version = getattr(mlx_lm, "__version__", None)
-    except Exception:
-        version = None
-
-print(json.dumps({
-    "mlx_available": mlx_available,
-    "version": version
-}))
-"""
-            do {
-                let output = try PythonRunner.executePython(pythonCode)
-                if let availability = parseAvailabilityOutput(output) {
-                    return Availability(
-                        pythonAvailable: true,
-                        mlxAvailable: availability.mlxAvailable,
-                        mlxVersion: availability.mlxVersion
-                    )
-                }
-            } catch {
-                logger.error("Failed to check MLX availability: \(error.localizedDescription, privacy: .public)")
-            }
-            return Availability(
-                pythonAvailable: true,
-                mlxAvailable: false,
-                mlxVersion: nil
-            )
-        }.value
-    }
-
-    private static func parseAvailabilityOutput(
-        _ output: String
-    ) -> Availability? {
-        let trimmed = output.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard let start = trimmed.lastIndex(of: "{"),
-              let end = trimmed.lastIndex(of: "}"),
-              start <= end else {
-            return nil
-        }
-        let jsonString = String(trimmed[start...end])
-        struct AvailabilityPayload: Codable {
-            let mlx_available: Bool
-            let version: String?
-        }
-        guard let data = jsonString.data(using: .utf8),
-              let decoded = try? JSONDecoder().decode(AvailabilityPayload.self, from: data) else {
-            return nil
-        }
+        // Native MLX is always available on Apple Silicon with this build.
         return Availability(
-            pythonAvailable: true,
-            mlxAvailable: decoded.mlx_available,
-            mlxVersion: decoded.version
+            pythonAvailable: false,
+            mlxAvailable: true,
+            mlxVersion: "native",
+            nativeAvailable: true
         )
     }
 
     public static func generate(
-        request: Request
+        request: Request,
+        progressHandler: (@Sendable (String) -> Void)? = nil
     ) async throws -> Response {
-        guard PythonRunner.isPythonInstalled() else {
-            throw MLXError.pythonUnavailable
+        do {
+            let modelUrl = URL(fileURLWithPath: request.modelPath)
+
+            // Check cache first
+            let container: ModelContainer
+            if let cached = await modelCache.get(request.modelPath) {
+                container = cached
+            } else {
+                logger.info("Loading MLX model from: \(request.modelPath, privacy: .public)")
+                let configuration = ModelConfiguration(directory: modelUrl)
+                let loadedContainer = try await LLMModelFactory.shared.loadContainer(
+                    configuration: configuration
+                )
+                await modelCache.set(request.modelPath, container: loadedContainer)
+                container = loadedContainer
+                logger.info("MLX model loaded successfully")
+            }
+
+            // Build chat messages for UserInput
+            let chatMessages: [Chat.Message] = request.messages.map { msg in
+                let role: Chat.Message.Role = switch msg.role {
+                case "system": .system
+                case "assistant": .assistant
+                case "tool": .tool
+                default: .user
+                }
+                return Chat.Message(role: role, content: msg.content)
+            }
+
+            let userInput = UserInput(chat: chatMessages)
+
+            // Prepare input (tokenize with chat template)
+            let lmInput = try await container.prepare(input: userInput)
+
+            // Count prompt tokens
+            let promptTokenCount = lmInput.text.tokens.size
+
+            // Configure generation parameters
+            let generateParameters = GenerateParameters(
+                maxTokens: request.maxTokens,
+                temperature: Float(request.temperature),
+                topP: Float(request.topP)
+            )
+
+            // Generate via AsyncStream
+            let stream = try await container.generate(
+                input: lmInput,
+                parameters: generateParameters
+            )
+
+            var outputText = ""
+            var completionTokens = 0
+
+            for await generation in stream {
+                if Task.isCancelled { break }
+
+                switch generation {
+                case .chunk(let text):
+                    outputText += text
+                    completionTokens += 1
+                    progressHandler?(text)
+
+                case .info(let info):
+                    completionTokens = info.generationTokenCount
+
+                case .toolCall:
+                    // Tool calls not handled at this level
+                    break
+                }
+            }
+
+            return Response(
+                text: outputText,
+                promptTokens: promptTokenCount,
+                completionTokens: completionTokens,
+                error: nil
+            )
+        } catch {
+            logger.error(
+                "Native MLX generation failed: \(error.localizedDescription, privacy: .public)"
+            )
+            throw MLXError.generationFailed(error.localizedDescription)
         }
-        let encoder = JSONEncoder()
-        let payloadData = try encoder.encode(request)
-        let payloadBase64 = payloadData.base64EncodedString()
-        let pythonCode = """
-import base64
-import contextlib
-import io
-import json
+    }
 
-payload = json.loads(base64.b64decode(\"\(payloadBase64)\").decode(\"utf-8\"))
-model_path = payload.get(\"model_path\")
-messages = payload.get(\"messages\", [])
-max_tokens = int(payload.get(\"max_tokens\", 1024))
-temperature = float(payload.get(\"temperature\", 0.7))
-top_p = float(payload.get(\"top_p\", 1.0))
-
-
-def build_prompt(messages, tokenizer):
-    if hasattr(tokenizer, \"apply_chat_template\"):
-        try:
-            return tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
-        except Exception:
-            pass
-    lines = []
-    for message in messages:
-        role = message.get(\"role\", \"user\")
-        content = message.get(\"content\", \"\")
-        lines.append(f\"{role.capitalize()}: {content}\")
-    return "\\n\\n".join(lines)
-
-try:
-    from mlx_lm import load, generate
-
-    with contextlib.redirect_stdout(io.StringIO()):
-        model, tokenizer = load(model_path)
-
-    prompt = build_prompt(messages, tokenizer)
-
-    with contextlib.redirect_stdout(io.StringIO()):
-        output = generate(
-            model,
-            tokenizer,
-            prompt=prompt,
-            max_tokens=max_tokens,
-            temp=temperature,
-            top_p=top_p,
-            verbose=False
-        )
-
-    try:
-        prompt_tokens = len(tokenizer.encode(prompt))
-    except Exception:
-        prompt_tokens = None
-
-    try:
-        completion_tokens = len(tokenizer.encode(output))
-    except Exception:
-        completion_tokens = None
-
-    print(json.dumps({
-        \"text\": output,
-        \"prompt_tokens\": prompt_tokens,
-        \"completion_tokens\": completion_tokens
-    }))
-except Exception as error:
-    print(json.dumps({\"error\": str(error)}))
-"""
-        let output = try await Task.detached(priority: .userInitiated) {
-            try PythonRunner.executePython(pythonCode)
-        }.value
-        let trimmedOutput = output.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard let data = trimmedOutput.data(using: .utf8) else {
-            throw MLXError.invalidResponse
-        }
-        let decoder = JSONDecoder()
-        let response = try decoder.decode(Response.self, from: data)
-        if let error = response.error, !error.isEmpty {
-            throw MLXError.generationFailed(error)
-        }
-        guard response.text != nil else {
-            throw MLXError.invalidResponse
-        }
-        return response
+    /// Clear the model cache to free memory.
+    public static func clearModelCache() async {
+        await modelCache.clear()
     }
 }

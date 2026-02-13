@@ -10,6 +10,7 @@ import Foundation
 import OSLog
 import SwiftUI
 
+// @unchecked Sendable: NSObject subclass with delegate callbacks; cannot safely make Sendable
 class SpeechSynthesizerDelegate: NSObject, AVSpeechSynthesizerDelegate, @unchecked Sendable {
 	private static let logger = Logger(subsystem: Bundle.main.logSubsystem, category: "SpeechSynthesizerDelegate")
 	

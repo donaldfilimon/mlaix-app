@@ -9,7 +9,7 @@ import SwiftUI
 
 struct DiagrammerQuickPromptsView: View {
 	
-	@EnvironmentObject private var diagrammerViewController: DiagrammerViewController
+	@Environment(DiagrammerViewController.self) private var diagrammerViewController
 	
     let quickPrompts: [QuickPrompt] = [
         QuickPrompt(
@@ -92,7 +92,8 @@ struct DiagrammerQuickPromptsView: View {
     }
 	
 	var prompts: some View {
-		HStack {
+		@Bindable var diagrammerViewController = diagrammerViewController
+		return HStack {
 			ForEach(self.quickPrompts) { prompt in
 				QuickPromptButton(
 					input: $diagrammerViewController.prompt,

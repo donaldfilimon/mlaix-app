@@ -7,11 +7,13 @@
 
 import Foundation
 import FSKit_macOS
+import Observation
 import os.log
 import SwiftUI
 
 @MainActor
-public class ModelManager: ObservableObject {
+@Observable
+public class ModelManager {
 	
 	init() {
 		self.patchFileIntegrity()
@@ -21,7 +23,7 @@ public class ModelManager: ObservableObject {
 	/// Static constant for the global ``ModelManager`` object
 	static public let shared: ModelManager = .init()
 	
-	@Published var models: [ModelFile] = [] {
+	var models: [ModelFile] = [] {
 		didSet {
 			self.save()
 		}

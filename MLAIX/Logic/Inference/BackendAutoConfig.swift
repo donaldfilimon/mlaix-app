@@ -22,6 +22,7 @@ public enum BackendAutoConfig {
         public let local: Bool
         public let remote: Bool
         public let foundationModels: Bool
+        public let mlx: Bool
         public let recommendedBackend: RecommendedBackend
         public let canAutoConnect: Bool
 
@@ -29,6 +30,7 @@ public enum BackendAutoConfig {
             case local
             case remote
             case foundationModels
+            case mlx
             case none
         }
     }
@@ -54,7 +56,10 @@ public enum BackendAutoConfig {
         let foundationAvailable = FoundationModelsSupport.isAvailable
         let localAvailable = (Settings.modelUrl?.path).map { FileManager.default.fileExists(atPath: $0) } ?? false
         let remoteReachable = await probeRemoteEndpoint()
+        let mlxAvailability = await MLXRunner.checkAvailability()
+        let mlxAvailable = mlxAvailability.mlxAvailable
 
+        // Priority cascade: Foundation Models → Remote → Local llama.cpp → MLX
         let recommended: BackendAvailability.RecommendedBackend
         let canAutoConnect: Bool
 
@@ -67,11 +72,8 @@ public enum BackendAutoConfig {
         } else if localAvailable {
             recommended = .local
             canAutoConnect = true
-        } else if foundationAvailable {
-            recommended = .foundationModels
-            canAutoConnect = true
-        } else if remoteReachable {
-            recommended = .remote
+        } else if mlxAvailable {
+            recommended = .mlx
             canAutoConnect = true
         } else {
             recommended = .none
@@ -79,13 +81,14 @@ public enum BackendAutoConfig {
         }
 
         Self.logger.info(
-            "Backend probe: local=\(localAvailable) remote=\(remoteReachable) foundation=\(foundationAvailable) recommended=\(recommended.rawValue)"
+            "Backend probe: local=\(localAvailable) remote=\(remoteReachable) foundation=\(foundationAvailable) mlx=\(mlxAvailable) recommended=\(recommended.rawValue)"
         )
 
         return BackendAvailability(
             local: localAvailable,
             remote: remoteReachable,
             foundationModels: foundationAvailable,
+            mlx: mlxAvailable,
             recommendedBackend: recommended,
             canAutoConnect: canAutoConnect
         )
@@ -120,6 +123,11 @@ public enum BackendAutoConfig {
             InferenceSettings.useServer = false
             InferenceSettings.useFoundationModels = false
             Self.logger.notice("Auto-configured: Local model")
+            return true
+        case .mlx:
+            InferenceSettings.useServer = false
+            InferenceSettings.useFoundationModels = false
+            Self.logger.notice("Auto-configured: MLX backend")
             return true
         case .none:
             return false

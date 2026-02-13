@@ -10,7 +10,7 @@ import SwiftUI
 
 struct MarkdownPieChartView: View {
 	
-	@EnvironmentObject private var controller: MarkdownDataViewController
+	@Environment(MarkdownDataViewController.self) private var controller
 	
 	private var sectors: [Sector] {
 		let validRows = controller.rows.compactMap { row -> (label: String, value: Double)? in

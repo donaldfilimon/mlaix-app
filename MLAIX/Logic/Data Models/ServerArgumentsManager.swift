@@ -6,11 +6,13 @@
 //
 
 import Foundation
+import Observation
 import os.log
 import SwiftUI
 
 @MainActor
-public class ServerArgumentsManager: ObservableObject {
+@Observable
+public class ServerArgumentsManager {
     
     init() {
         self.patchFileIntegrity()
@@ -21,7 +23,7 @@ public class ServerArgumentsManager: ObservableObject {
     static public let shared: ServerArgumentsManager = .init()
     
     /// Published property for all serverArguments
-    @Published public var serverArguments: [ServerArgument] = ServerArgument.defaultServerArguments {
+    public var serverArguments: [ServerArgument] = ServerArgument.defaultServerArguments {
         didSet {
             self.save()
         }

@@ -8,12 +8,14 @@
 import Charts
 import Foundation
 import FSKit_macOS
+import Observation
 import os.log
 import SwiftUI
 import UniformTypeIdentifiers
 
 @MainActor
-public class InferenceRecords: ObservableObject {
+@Observable
+public class InferenceRecords {
     
     init() {
         self.patchFileIntegrity()
@@ -26,14 +28,14 @@ public class InferenceRecords: ObservableObject {
     /// Maximum number of records to retain to prevent unbounded memory growth
     private static let maxRecords: Int = 10000
 
-    @Published var records: [InferenceRecord] = [] {
+    var records: [InferenceRecord] = [] {
         didSet {
             self.save()
         }
     }
     
     /// The selected record type
-    @Published public var selectedType: InferenceRecord.UsageType = .chatCompletions
+    public var selectedType: InferenceRecord.UsageType = .chatCompletions
     /// All records belonging to the selected type
     var typeRecords: [InferenceRecord] {
         return records.filter { record in
@@ -42,7 +44,7 @@ public class InferenceRecords: ObservableObject {
     }
     
     // Table config
-    @Published public var selections = Set<InferenceRecord.ID>()
+    public var selections = Set<InferenceRecord.ID>()
     private var selectedRecords: [InferenceRecord] {
         return self.typeRecords.filter { record in
             return self.selections.contains(record.id)
@@ -85,9 +87,9 @@ public class InferenceRecords: ObservableObject {
     }
     
     /// The currently selected model
-    @Published public var selectedModel: String? = nil
+    public var selectedModel: String? = nil
     /// The currently selected timeframe
-    @Published public var selectedTimeframe: Timeframe = .today
+    public var selectedTimeframe: Timeframe = .today
     
     public var intervalUsage: [IntervalUse] {
         let calendar = Calendar.current

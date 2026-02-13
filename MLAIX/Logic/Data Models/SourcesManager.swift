@@ -6,11 +6,13 @@
 //
 
 import Foundation
+import Observation
 import os.log
 import SwiftUI
 
 @MainActor
-public class SourcesManager: ObservableObject {
+@Observable
+public class SourcesManager {
 	
 	init() {
 		self.patchFileIntegrity()
@@ -21,7 +23,7 @@ public class SourcesManager: ObservableObject {
 	static public let shared: SourcesManager = .init()
 	
 	/// Published property for all sources
-	@Published public var sources: [Sources] = [] {
+	public var sources: [Sources] = [] {
 		didSet {
 			self.save()
 		}
