@@ -6,8 +6,10 @@
 //
 
 import Foundation
+import os.log
 
 enum NodeEditorPersistence {
+    private static let logger = Logger(subsystem: "com.mlaix", category: "NodeEditorPersistence")
     private static let fileName = "NodeEditorGraph.json"
 
     static var graphURL: URL {
@@ -18,13 +20,23 @@ enum NodeEditorPersistence {
     }
 
     static func load() -> NodeGraph? {
-        let data = try? Data(contentsOf: graphURL)
-        guard let data else { return nil }
-        return try? JSONDecoder().decode(NodeGraph.self, from: data)
+        let url = graphURL
+        guard FileManager.default.fileExists(atPath: url.path) else { return nil }
+        do {
+            let data = try Data(contentsOf: url)
+            return try JSONDecoder().decode(NodeGraph.self, from: data)
+        } catch {
+            logger.error("Failed to load node graph: \(error.localizedDescription)")
+            return nil
+        }
     }
 
     static func save(_ graph: NodeGraph) {
-        guard let data = try? JSONEncoder().encode(graph) else { return }
-        try? data.write(to: graphURL)
+        do {
+            let data = try JSONEncoder().encode(graph)
+            try data.write(to: graphURL)
+        } catch {
+            logger.error("Failed to save node graph: \(error.localizedDescription)")
+        }
     }
 }

@@ -73,6 +73,10 @@ Experts contain domain-specific resources (files, folders, websites, emails). Us
 
 Extracted utilities: `ContextCompressor` (summarizes tool outputs exceeding token limits), `SpeechService` (TTS), `Tavily` (web search API), `SwiftDataStore` (shared SwiftData container/context), `DataMigrationService` (JSON → SwiftData one-time migration).
 
+### Node Editor (`Views/Tools/NodeEditor/`, `Types/NodeEditor/`)
+
+Visual node-based scripting: **NodeEditorModels** (NodeKind, ScriptNode, ScriptConnection, NodeGraph), **NodeGraphCompiler** (graph → JavaScript for JavaScriptCore with cycle detection), **NodeEditorPersistence** (save/load to Application Support with error logging). **NodeEditorView** provides canvas, draggable nodes, connections (drag output to input), Run (Cmd+Return), output/console panel. JavaScript execution supports timeouts via `JavaScriptRunner.executeWithTimeout()`.
+
 ## Conventions
 
 - **Swift 6 strict concurrency** is enabled (`swiftLanguageModes: [.v6]`, `StrictConcurrency` upcoming feature). `LlamaServer` is an `actor`; most UI-facing managers are `@MainActor`. Types crossing actor boundaries must be `Sendable`. Mutable statics protected by external locks use `nonisolated(unsafe)`.
@@ -82,6 +86,7 @@ Extracted utilities: `ContextCompressor` (summarizes tool outputs exceeding toke
 - **Conventional Commits** — `feat:`, `fix:`, `chore:`, etc.
 - **4-space indentation**, braces on same line, `UpperCamelCase` types, `lowerCamelCase` members.
 - **Asset references by string** — `Image("useExperts")`, `Color("brightGreen")`.
+- **Error handling** — **Throw** for recoverable errors the caller should handle. **Return nil/empty + log** for optional lookups where absence is normal. **Never** silently discard errors on persistence or network operations — use `do/catch` with `Logger` instead of `try?`. Keep `try?` only for genuinely optional operations (cleanup, directory creation where existence is expected).
 - **Git LFS** — The `marp` binary in Slide Studio resources is tracked via LFS (see `.gitattributes`).
 - **Platform minimum**: All platforms require v26 (macOS 26, iOS 26, tvOS 26). Apple Silicon required for macOS.
 - **Multi-platform**: macOS (full), iOS/iPadOS (remote API only), tvOS (placeholder), watchOS. Unified code in `MLAIXShared`. See `docs/PLATFORMS.md`.

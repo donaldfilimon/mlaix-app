@@ -14,9 +14,10 @@ enum NodeGraphCompiler {
             throw CompileError.noStartNode
         }
         var emitted = Set<UUID>()
+        var inProgress = Set<UUID>()
         var lines: [String] = []
         var resultVar: String?
-        try emitNode(startNode.id, graph: graph, emitted: &emitted, lines: &lines, nodeIdsByVar: [:], resultVar: &resultVar)
+        try emitNode(startNode.id, graph: graph, emitted: &emitted, inProgress: &inProgress, lines: &lines, nodeIdsByVar: [:], resultVar: &resultVar)
         if let r = resultVar {
             lines.append(r)
         }
@@ -27,38 +28,42 @@ enum NodeGraphCompiler {
         _ nodeId: UUID,
         graph: NodeGraph,
         emitted: inout Set<UUID>,
+        inProgress: inout Set<UUID>,
         lines: inout [String],
         nodeIdsByVar: [UUID: String],
         resultVar: inout String?
     ) throws {
         guard !emitted.contains(nodeId) else { return }
+        if inProgress.contains(nodeId) {
+            throw CompileError.cyclicGraph(nodeId: nodeId)
+        }
         guard let node = graph.nodes.first(where: { $0.id == nodeId }) else { return }
-        emitted.insert(nodeId)
+        inProgress.insert(nodeId)
         let varName = "n_\(nodeId.uuidString.prefix(8))"
 
         switch node.kind {
         case .start:
             let outConns = graph.connections.filter { $0.fromNodeId == nodeId && $0.fromSlot == "out" }
             for c in outConns {
-                try emitNode(c.toNodeId, graph: graph, emitted: &emitted, lines: &lines, nodeIdsByVar: nodeIdsByVar, resultVar: &resultVar)
+                try emitNode(c.toNodeId, graph: graph, emitted: &emitted, inProgress: &inProgress, lines: &lines, nodeIdsByVar: nodeIdsByVar, resultVar: &resultVar)
             }
         case .number:
             lines.append("const \(varName) = \(node.numberValue);")
-            try emitOutgoing(nodeId, graph: graph, emitted: &emitted, lines: &lines, nodeIdsByVar: nodeIdsByVar, resultVar: &resultVar)
+            try emitOutgoing(nodeId, graph: graph, emitted: &emitted, inProgress: &inProgress, lines: &lines, nodeIdsByVar: nodeIdsByVar, resultVar: &resultVar)
         case .string:
             let escaped = node.stringValue.replacingOccurrences(of: "\\", with: "\\\\").replacingOccurrences(of: "\"", with: "\\\"")
             lines.append("const \(varName) = \"\(escaped)\";")
-            try emitOutgoing(nodeId, graph: graph, emitted: &emitted, lines: &lines, nodeIdsByVar: nodeIdsByVar, resultVar: &resultVar)
+            try emitOutgoing(nodeId, graph: graph, emitted: &emitted, inProgress: &inProgress, lines: &lines, nodeIdsByVar: nodeIdsByVar, resultVar: &resultVar)
         case .add:
-            let aVar = try resolveInput(nodeId, slot: "a", graph: graph, emitted: &emitted, lines: &lines, nodeIdsByVar: nodeIdsByVar, resultVar: &resultVar)
-            let bVar = try resolveInput(nodeId, slot: "b", graph: graph, emitted: &emitted, lines: &lines, nodeIdsByVar: nodeIdsByVar, resultVar: &resultVar)
+            let aVar = try resolveInput(nodeId, slot: "a", graph: graph, emitted: &emitted, inProgress: &inProgress, lines: &lines, nodeIdsByVar: nodeIdsByVar, resultVar: &resultVar)
+            let bVar = try resolveInput(nodeId, slot: "b", graph: graph, emitted: &emitted, inProgress: &inProgress, lines: &lines, nodeIdsByVar: nodeIdsByVar, resultVar: &resultVar)
             lines.append("const \(varName) = (\(aVar)) + (\(bVar));")
-            try emitOutgoing(nodeId, graph: graph, emitted: &emitted, lines: &lines, nodeIdsByVar: nodeIdsByVar, resultVar: &resultVar)
+            try emitOutgoing(nodeId, graph: graph, emitted: &emitted, inProgress: &inProgress, lines: &lines, nodeIdsByVar: nodeIdsByVar, resultVar: &resultVar)
         case .log:
-            let valueVar = try resolveInput(nodeId, slot: "value", graph: graph, emitted: &emitted, lines: &lines, nodeIdsByVar: nodeIdsByVar, resultVar: &resultVar)
+            let valueVar = try resolveInput(nodeId, slot: "value", graph: graph, emitted: &emitted, inProgress: &inProgress, lines: &lines, nodeIdsByVar: nodeIdsByVar, resultVar: &resultVar)
             lines.append("console.log(\(valueVar));")
             lines.append("const \(varName) = \(valueVar);")
-            try emitOutgoing(nodeId, graph: graph, emitted: &emitted, lines: &lines, nodeIdsByVar: nodeIdsByVar, resultVar: &resultVar)
+            try emitOutgoing(nodeId, graph: graph, emitted: &emitted, inProgress: &inProgress, lines: &lines, nodeIdsByVar: nodeIdsByVar, resultVar: &resultVar)
         case .runJS:
             if !node.runJSCode.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                 let escaped = node.runJSCode
@@ -68,11 +73,13 @@ enum NodeGraphCompiler {
             } else {
                 lines.append("const \(varName) = undefined;")
             }
-            try emitOutgoing(nodeId, graph: graph, emitted: &emitted, lines: &lines, nodeIdsByVar: nodeIdsByVar, resultVar: &resultVar)
+            try emitOutgoing(nodeId, graph: graph, emitted: &emitted, inProgress: &inProgress, lines: &lines, nodeIdsByVar: nodeIdsByVar, resultVar: &resultVar)
         case .output:
-            let valueVar = try resolveInput(nodeId, slot: "value", graph: graph, emitted: &emitted, lines: &lines, nodeIdsByVar: nodeIdsByVar, resultVar: &resultVar)
+            let valueVar = try resolveInput(nodeId, slot: "value", graph: graph, emitted: &emitted, inProgress: &inProgress, lines: &lines, nodeIdsByVar: nodeIdsByVar, resultVar: &resultVar)
             resultVar = valueVar
         }
+        inProgress.remove(nodeId)
+        emitted.insert(nodeId)
     }
 
     private static func resolveInput(
@@ -80,6 +87,7 @@ enum NodeGraphCompiler {
         slot: String,
         graph: NodeGraph,
         emitted: inout Set<UUID>,
+        inProgress: inout Set<UUID>,
         lines: inout [String],
         nodeIdsByVar: [UUID: String],
         resultVar: inout String?
@@ -90,7 +98,7 @@ enum NodeGraphCompiler {
         guard graph.nodes.contains(where: { $0.id == conn.fromNodeId }) else {
             throw CompileError.unknownNode(conn.fromNodeId)
         }
-        try emitNode(conn.fromNodeId, graph: graph, emitted: &emitted, lines: &lines, nodeIdsByVar: nodeIdsByVar, resultVar: &resultVar)
+        try emitNode(conn.fromNodeId, graph: graph, emitted: &emitted, inProgress: &inProgress, lines: &lines, nodeIdsByVar: nodeIdsByVar, resultVar: &resultVar)
         return "n_\(conn.fromNodeId.uuidString.prefix(8))"
     }
 
@@ -98,13 +106,14 @@ enum NodeGraphCompiler {
         _ nodeId: UUID,
         graph: NodeGraph,
         emitted: inout Set<UUID>,
+        inProgress: inout Set<UUID>,
         lines: inout [String],
         nodeIdsByVar: [UUID: String],
         resultVar: inout String?
     ) throws {
         let outConns = graph.connections.filter { $0.fromNodeId == nodeId && $0.fromSlot == "out" }
         for c in outConns {
-            try emitNode(c.toNodeId, graph: graph, emitted: &emitted, lines: &lines, nodeIdsByVar: nodeIdsByVar, resultVar: &resultVar)
+            try emitNode(c.toNodeId, graph: graph, emitted: &emitted, inProgress: &inProgress, lines: &lines, nodeIdsByVar: nodeIdsByVar, resultVar: &resultVar)
         }
     }
 
@@ -112,6 +121,7 @@ enum NodeGraphCompiler {
         case noStartNode
         case missingInput(nodeId: UUID, slot: String)
         case unknownNode(UUID)
+        case cyclicGraph(nodeId: UUID)
 
         var errorDescription: String? {
             switch self {
@@ -121,6 +131,8 @@ enum NodeGraphCompiler {
                 return String(localized: "Node \(nodeId.uuidString) is missing input for slot \"\(slot)\".")
             case .unknownNode(let id):
                 return String(localized: "Unknown node \(id.uuidString).")
+            case .cyclicGraph(let nodeId):
+                return String(localized: "Graph contains a cycle at node \(nodeId.uuidString).")
             }
         }
     }

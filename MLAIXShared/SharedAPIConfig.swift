@@ -11,7 +11,7 @@ import Foundation
 public final class SharedAPIConfig {
     public static let shared = SharedAPIConfig()
 
-    private let defaults = UserDefaults.standard
+	private let defaults = UserDefaults.standard
     private let keyBase = "com.donaldfilimon.mlaix.shared"
     private let apiKeyKey = "api_key"
 

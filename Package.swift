@@ -1,15 +1,15 @@
-// swift-tools-version: 6.2
-
+// swift-tools-version: 6.3
 import PackageDescription
 
-// MARK: - Swift 6.2 Configuration
-
-// /// Swift 6 strict concurrency; required for ralph-loop conc-002 (strict-concurrency build).
-let swiftSettings: [SwiftSetting] = []
+// MARK: - Platform Configuration
 
 /// All platforms require version 26 (macOS 26, iOS 26, iPadOS 26, tvOS 26, watchOS 26).
 let supportedPlatforms: [SupportedPlatform] = [
-    .macOS(.v26)
+    .macOS(.v26),
+    .iOS(.v26),
+    .watchOS(.v26),
+    .visionOS(.v26),
+    .tvOS(.v26),
 ]
 
 // MARK: - Resources
@@ -18,6 +18,7 @@ private let llamaBin = "Logic/Inference/llama.cpp/build/bin/"
 
 let package = Package(
     name: "MLAIX",
+    defaultLocalization: "en",
     platforms: supportedPlatforms,
     products: [
         .library(name: "MLAIXShared", targets: ["MLAIXShared"]),
@@ -28,28 +29,28 @@ let package = Package(
         .executable(name: "llama-server-watchdog", targets: ["llama-server-watchdog"])
     ],
     dependencies: [
-        .package(url: "https://github.com/tmandry/AXSwift/", from: "0.3.2"),
-        .package(url: "https://github.com/mchakravarty/CodeEditorView", from: "0.15.3"),
-        .package(url: "https://github.com/johnbean393/Default-Models", revision: "d5bc71875649c4febfba9b78b456b9cb6c90f23e"),
-        .package(url: "https://github.com/johnbean393/EventSource", revision: "a6c5d1b77bf9161866e36b5c9f018871ff42f747"),
-        .package(url: "https://github.com/johnbean393/ExtractKit-macOS", revision: "d2374e0fc535340fb2fe2f4825c5ae41035f4c7c"),
+        .package(url: "https://github.com/tmandry/AXSwift/", branch: "main"),
+        .package(url: "https://github.com/mchakravarty/CodeEditorView", branch: "main"),
+        .package(url: "https://github.com/johnbean393/Default-Models", branch: "main"),
+        .package(url: "https://github.com/johnbean393/EventSource", branch: "main"),
+        .package(url: "https://github.com/johnbean393/ExtractKit-macOS", branch: "main"),
         .package(url: "https://github.com/johnbean393/FSKit-macOS", branch: "main"),
-        .package(url: "https://github.com/johnbean393/GoogleSearch", revision: "8578671e3bc7277cff15949b142375ab581b216c"),
-        .package(url: "https://github.com/raspu/Highlightr", from: "2.2.1"),
-        .package(url: "https://github.com/sindresorhus/KeyboardShortcuts", from: "2.2.4"),
-        .package(url: "https://github.com/colinc86/LaTeXSwiftUI", revision: "c45e0fd45f64923c49c5904a9f9626bc8939f05f"),
-        .package(url: "https://github.com/sindresorhus/LaunchAtLogin-Modern", revision: "a04ec1c363be3627734f6dad757d82f5d4fa8fcc"),
-        .package(url: "https://github.com/vpeschenkov/SecureDefaults", from: "1.2.2"),
-        .package(url: "https://github.com/donaldfilimon/similarity-search-kit", revision: "759a31901768db084031031bdde0ad3f83ebea65"),
-        .package(url: "https://github.com/JohnSundell/Splash", from: "0.16.0"),
-        .package(url: "https://github.com/stephencelis/SQLite.swift", from: "0.15.4"),
-        .package(url: "https://github.com/SwiftfulThinking/SwiftfulLoadingIndicators", from: "0.0.4"),
-        .package(url: "https://github.com/markiv/SwiftUI-Shimmer", from: "1.5.1"),
-        .package(url: "https://github.com/xnth97/SymbolPicker", from: "1.5.3"),
-        .package(url: "https://github.com/gonzalezreal/swift-markdown-ui", from: "2.4.0"),
-        .package(url: "https://github.com/gonzalezreal/NetworkImage", from: "6.0.1"),
-        .package(url: "https://github.com/danielsaidi/WebViewKit", from: "0.5.0"),
-        .package(url: "https://github.com/ml-explore/mlx-swift-lm", from: "2.30.3")
+        .package(url: "https://github.com/johnbean393/GoogleSearch", branch: "main"),
+        .package(url: "https://github.com/raspu/Highlightr", branch: "master"),
+        .package(url: "https://github.com/sindresorhus/KeyboardShortcuts", branch: "main"),
+        .package(url: "https://github.com/colinc86/LaTeXSwiftUI", branch: "main"),
+        .package(url: "https://github.com/sindresorhus/LaunchAtLogin-Modern", branch: "main"),
+        .package(url: "https://github.com/vpeschenkov/SecureDefaults", branch: "master"),
+        .package(url: "https://github.com/donaldfilimon/similarity-search-kit", branch: "main"),
+        .package(url: "https://github.com/JohnSundell/Splash", branch: "master"),
+        .package(url: "https://github.com/stephencelis/SQLite.swift", branch: "master"),
+        .package(url: "https://github.com/SwiftfulThinking/SwiftfulLoadingIndicators", branch: "main"),
+        .package(url: "https://github.com/markiv/SwiftUI-Shimmer", branch: "main"),
+        .package(url: "https://github.com/xnth97/SymbolPicker", branch: "main"),
+        .package(url: "https://github.com/gonzalezreal/swift-markdown-ui", branch: "main"),
+        .package(url: "https://github.com/gonzalezreal/NetworkImage", branch: "main"),
+        .package(url: "https://github.com/danielsaidi/WebViewKit", branch: "main"),
+        .package(url: "https://github.com/ml-explore/mlx-swift-lm", branch: "main")
     ],
     targets: [
 
@@ -59,8 +60,7 @@ let package = Package(
             dependencies: [
                 .product(name: "MarkdownUI", package: "swift-markdown-ui")
             ],
-            path: "MLAIXShared",
-            swiftSettings: swiftSettings
+            path: "MLAIXShared"
         ),
 
         // MARK: - MLAIX (Main App)
@@ -97,8 +97,8 @@ let package = Package(
             exclude: [
                 "Preview Content",
                 "Logic/Inference/llama.cpp/llama-server-watchdog",
+                "Logic/Inference/Router/UserRequestClassifier.mlmodel",
                 "Info.plist",
-                "MLAIX.entitlements",
                 "MLAIX.icon"
             ],
             resources: [
@@ -106,7 +106,7 @@ let package = Package(
                 .process("Resources"),
                 .process("Localizable.xcstrings"),
                 .process("Credits.html"),
-                .process("Logic/Inference/Router/UserRequestClassifier.mlmodel"),
+                .copy("Logic/Inference/Router/UserRequestClassifier.mlmodelc"),
                 .process("Logic/Utilities/Tools/MermaidRenderer/Resources"),
                 .process("Logic/View Controllers/Tools/Slide Studio/Resources"),
                 .copy("\(llamaBin)llama-server"),
@@ -118,8 +118,7 @@ let package = Package(
                 .copy("\(llamaBin)libggml-rpc.dylib"),
                 .copy("\(llamaBin)libllama.dylib"),
                 .copy("\(llamaBin)libmtmd.dylib")
-            ],
-            swiftSettings: swiftSettings
+            ]
         ),
 
         // MARK: - MLAIXiOS (iOS / iPadOS App)
@@ -128,24 +127,21 @@ let package = Package(
             dependencies: ["MLAIXShared"],
             path: "MLAIXiOS",
             exclude: ["Info.plist"],
-            resources: [.process("Assets.xcassets")],
-            swiftSettings: swiftSettings
+            resources: [.process("Assets.xcassets")]
         ),
 
         // MARK: - MLAIXtvOS (tvOS placeholder)
         .executableTarget(
             name: "MLAIXtvos",
             dependencies: ["MLAIXShared"],
-            path: "MLAIXtvos",
-            swiftSettings: swiftSettings
+            path: "MLAIXtvos"
         ),
 
         // MARK: - MLAIXWatch (Apple Watch companion)
         .executableTarget(
             name: "MLAIXWatch",
             dependencies: [],
-            path: "MLAIXWatch",
-            swiftSettings: swiftSettings
+            path: "MLAIXWatch"
         ),
 
         // MARK: - Watchdog
@@ -154,35 +150,30 @@ let package = Package(
             path: "MLAIX/Logic/Inference/llama.cpp/llama-server-watchdog",
             exclude: [
                 "llama-server-watchdog.entitlements"
-            ],
-            swiftSettings: swiftSettings
+            ]
         ),
 
         // MARK: - Tests
         .testTarget(
             name: "MLAIXTests",
             dependencies: ["MLAIX"],
-            path: "MLAIXTests",
-            swiftSettings: swiftSettings
+            path: "MLAIXTests"
         ),
         .testTarget(
             name: "MLAIXiOSTests",
             dependencies: ["MLAIXiOS", "MLAIXShared"],
-            path: "MLAIXiOSTests",
-            swiftSettings: swiftSettings
+            path: "MLAIXiOSTests"
         ),
         .testTarget(
             name: "MLAIXSharedTests",
             dependencies: ["MLAIXShared"],
-            path: "MLAIXSharedTests",
-            swiftSettings: swiftSettings
+            path: "MLAIXSharedTests"
         ),
         .testTarget(
             name: "MLAIXUITests",
             dependencies: ["MLAIX"],
             path: "MLAIXUITests",
-            exclude: ["README.md"],
-            swiftSettings: swiftSettings
+            exclude: ["README.md"]
         )
     ],
     swiftLanguageModes: [.v6]  // Swift 6.2 language mode

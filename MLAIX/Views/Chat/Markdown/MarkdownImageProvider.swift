@@ -113,7 +113,7 @@ private struct MarkdownImageView: View {
                 name: url.lastPathComponent,
                 type: .fileURL
             ) { destUrl in
-                FileManager.copyItem(from: url, to: destUrl)
+                try? FileManager.default.copyItem(at: url, to: destUrl)
             },
             preview: NSImage(contentsOf: url) ?? NSImage(named: "questionmark.app.fill") ?? NSImage()
         )
@@ -202,3 +202,11 @@ struct MarkdownInlineImageProvider: InlineImageProvider {
     }
     
 }
+#Preview {
+    MarkdownImageView(
+        url: nil,
+        scaleFactor: 1
+    )
+    .padding()
+}
+

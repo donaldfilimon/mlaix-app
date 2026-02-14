@@ -32,7 +32,7 @@ struct WindowCommandObserver: ViewModifier {
             }
             .onChange(of: NavigationState.shared.openNewMainWindowRequested) { _, newValue in
                 guard newValue else { return }
-                openWindow(id: "newMain", value: UUID())
+                openWindow(id: "main")
                 NavigationState.shared.openNewMainWindowRequested = false
             }
             #if DEBUG

@@ -1,0 +1,55 @@
+[
+  {
+    "metadataOutputVersion" : "3.0",
+    "shortDescription" : "This text classifier model distinguishes between prompts to generate text and prompts to generate images.",
+    "outputSchema" : [
+      {
+        "isOptional" : "0",
+        "formattedType" : "String",
+        "type" : "String",
+        "name" : "label",
+        "shortDescription" : "Text label"
+      }
+    ],
+    "modelParameters" : [
+
+    ],
+    "author" : "John Bean",
+    "specificationVersion" : 8,
+    "isUpdatable" : "0",
+    "stateSchema" : [
+
+    ],
+    "availability" : {
+      "macOS" : "14.0",
+      "tvOS" : "17.0",
+      "visionOS" : "1.0",
+      "watchOS" : "10.0",
+      "iOS" : "17.0",
+      "macCatalyst" : "17.0"
+    },
+    "modelType" : {
+      "name" : "MLModelType_textClassifier"
+    },
+    "inputSchema" : [
+      {
+        "isOptional" : "0",
+        "formattedType" : "String",
+        "type" : "String",
+        "name" : "text",
+        "shortDescription" : "Input text"
+      }
+    ],
+    "classLabels" : [
+      "image-generation",
+      "text-generation"
+    ],
+    "generatedClassName" : "UserRequestClassifier",
+    "userDefinedMetadata" : {
+      "com.apple.coreml.model.preview.type" : "textClassifier",
+      "com.apple.createml.app.tag" : "150.3",
+      "com.apple.createml.app.version" : "6.1"
+    },
+    "method" : "predict"
+  }
+]

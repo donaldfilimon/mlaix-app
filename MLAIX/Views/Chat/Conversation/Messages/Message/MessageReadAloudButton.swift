@@ -7,9 +7,10 @@
 
 import SwiftUI
 
+@MainActor
 struct MessageReadAloudButton: View {
 	
-	@EnvironmentObject private var speechSynthesizer: SpeechSynthesizer
+	@Environment(SpeechSynthesizer.self) private var speechSynthesizer
 	
 	var message: Message
 	
@@ -44,6 +45,7 @@ struct MessageReadAloudButton: View {
     }
 	
 	/// Function to start reading the response
+	@MainActor
 	private func startReading() {
 		// Get response text
 		let text: String = message.hasReasoning ? message.responseText : message.text
@@ -52,17 +54,20 @@ struct MessageReadAloudButton: View {
 			await speechSynthesizer.speak(
 				text: text
 			) {
-				withAnimation(.linear) {
-					self.isReading = false // Reset on complete
+				Task { @MainActor in
+					withAnimation(.linear) {
+						self.isReading = false // Reset on complete
+					}
 				}
 			}
 		}
 	}
 	
 	/// Function to stop reading the response
+	@MainActor
 	private func stopReading() {
 		// End TTS
-		Task {
+		Task { @MainActor in
 			await speechSynthesizer.stopSpeaking()
 		}
 	}

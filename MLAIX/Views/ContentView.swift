@@ -10,7 +10,7 @@ import SwiftUI
 
 struct ContentView: View {
 
-	@EnvironmentObject private var downloadManager: DownloadManager
+	@Environment(DownloadManager.self) private var downloadManager
 	@Environment(ExpertManager.self) private var expertManager
 	@Environment(ConversationManager.self) private var conversationManager
 
@@ -47,8 +47,8 @@ struct ContentView: View {
 #Preview {
     ContentView()
         .environment(AppState.shared)
-        .environmentObject(DownloadManager.shared)
+        .environment(DownloadManager.shared)
         .environment(ExpertManager.shared)
         .environment(ConversationManager.shared)
-        .environment(Model.shared)
+		.environment(Model.shared)
 }

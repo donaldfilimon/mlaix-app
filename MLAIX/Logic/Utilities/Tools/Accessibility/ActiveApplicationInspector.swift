@@ -50,7 +50,7 @@ enum ActiveApplicationInspector {
 		guard let windowRef else {
 			throw InspectorError.accessibilityError("Could not cast focused window to AXUIElement")
 		}
-		let window = unsafeBitCast(windowRef, to: AXUIElement.self)
+		let window = unsafeDowncast(windowRef, to: AXUIElement.self)
 		return window
 	}
 	
@@ -70,7 +70,7 @@ enum ActiveApplicationInspector {
 		guard let focusedRef else {
 			throw InspectorError.accessibilityError("Could not cast focused element to AXUIElement")
 		}
-		let focused = unsafeBitCast(focusedRef, to: AXUIElement.self)
+		let focused = unsafeDowncast(focusedRef, to: AXUIElement.self)
 		return focused
 	}
 	
@@ -174,7 +174,7 @@ enum ActiveApplicationInspector {
 			return nil
 		}
 		// Now it's safe to treat it as an AXValue (CF type, use unsafeBitCast)
-		let axValue = unsafeBitCast(cfType, to: AXValue.self)
+		let axValue = unsafeDowncast(cfType, to: AXValue.self)
 		// Verify the AXValue type is a CFRange
 		let axValueType = AXValueGetType(axValue)
 		guard axValueType == .cfRange else {

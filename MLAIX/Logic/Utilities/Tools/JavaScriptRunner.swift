@@ -111,14 +111,40 @@ public class JavaScriptRunner {
 		return result.toString() ?? "\(result)"
 	}
 
+	/// Executes JavaScript with a timeout to prevent infinite loops from hanging the app.
+	/// - Parameters:
+	///   - code: The JavaScript code to run
+	///   - timeout: Maximum execution time in seconds (default: 5)
+	/// - Returns: The execution result with console output
+	public static func executeWithTimeout(
+		_ code: String,
+		timeout: TimeInterval = 5.0
+	) async throws -> JavaScriptExecutionResult {
+		try await withThrowingTaskGroup(of: JavaScriptExecutionResult.self) { group in
+			group.addTask {
+				try executeWithConsoleOutput(code)
+			}
+			group.addTask {
+				try await Task.sleep(for: .seconds(timeout))
+				throw JSError.timeout(seconds: timeout)
+			}
+			guard let result = try await group.next() else {
+				throw JSError.executionFailed
+			}
+			group.cancelAll()
+			return result
+		}
+	}
+
 	/// Enum for possible errors during JavaScript execution
     public enum JSError: LocalizedError {
-        
+
 		case failedToInitContext
 		case exception(error: String)
 		case executionFailed
 		case couldNotObtainResult
-        
+		case timeout(seconds: TimeInterval)
+
         public var errorDescription: String? {
             switch self {
                 case .failedToInitContext:
@@ -129,8 +155,10 @@ public class JavaScriptRunner {
                     return "JavaScript execution failed"
                 case .couldNotObtainResult:
                     return "JavaScript execution did not return a result"
+				case .timeout(let seconds):
+					return "JavaScript execution timed out after \(Int(seconds)) seconds"
             }
         }
 	}
-	
+
 }

@@ -8,66 +8,181 @@
 @preconcurrency import DefaultModels
 import Foundation
 import OSLog
+import Synchronization
 import SwiftUI
 
-@MainActor
+// MARK: - DownloadSessionDelegate
+
+/// Separated URLSession delegate so that DownloadManager itself does not need NSObject.
+/// Callbacks are protected by Mutex for thread safety (delegate methods are called on arbitrary threads).
+final class DownloadSessionDelegate: NSObject, URLSessionDelegate, URLSessionDownloadDelegate, @unchecked Sendable {
+
+	private static let logger: Logger = .init(
+		subsystem: Bundle.main.logSubsystem,
+		category: String(describing: DownloadSessionDelegate.self)
+	)
+
+	private let _onProgress = Mutex<(@Sendable (_ taskId: Int) -> Void)?>(nil)
+	private let _onComplete = Mutex<(@Sendable (_ taskId: Int, _ error: Error?) -> Void)?>(nil)
+	private let _onFinishDownloading = Mutex<(@Sendable (_ fileName: String, _ location: URL) -> Void)?>(nil)
+
+	var onProgress: (@Sendable (_ taskId: Int) -> Void)? {
+		get { _onProgress.withLock { $0 } }
+		set { _onProgress.withLock { $0 = newValue } }
+	}
+
+	var onComplete: (@Sendable (_ taskId: Int, _ error: Error?) -> Void)? {
+		get { _onComplete.withLock { $0 } }
+		set { _onComplete.withLock { $0 = newValue } }
+	}
+
+	var onFinishDownloading: (@Sendable (_ fileName: String, _ location: URL) -> Void)? {
+		get { _onFinishDownloading.withLock { $0 } }
+		set { _onFinishDownloading.withLock { $0 = newValue } }
+	}
+
+	func urlSession(
+		_: URLSession,
+		downloadTask: URLSessionDownloadTask,
+		didWriteData _: Int64,
+		totalBytesWritten _: Int64,
+		totalBytesExpectedToWrite _: Int64
+	) {
+		onProgress?(downloadTask.taskIdentifier)
+	}
+
+	func urlSession(
+		_: URLSession,
+		task: URLSessionTask,
+		didCompleteWithError error: Error?
+	) {
+		if let error = error {
+			Self.logger.error("Download failed: \(error.localizedDescription)")
+		} else {
+			Self.logger.info("Task finished: \(task.taskIdentifier)")
+		}
+		onComplete?(task.taskIdentifier, error)
+	}
+
+	func urlSession(
+		_: URLSession,
+		downloadTask: URLSessionDownloadTask,
+		didFinishDownloadingTo location: URL
+	) {
+		let fileName = downloadTask.originalRequest?.url?.lastPathComponent ?? "defaultModel.gguf"
+		let destinationURL = Settings.dirUrl.appending(path: fileName)
+		let fileManager = FileManager.default
+		try? fileManager.removeItem(at: destinationURL)
+		do {
+			let folderExists: Bool = (try? Settings.dirUrl.checkResourceIsReachable()) ?? false
+			if !folderExists {
+				try fileManager.createDirectory(
+					at: Settings.dirUrl,
+					withIntermediateDirectories: false
+				)
+			}
+			try fileManager.moveItem(at: location, to: destinationURL)
+			onFinishDownloading?(fileName, destinationURL)
+		} catch {
+			Self.logger.error("Failed to move downloaded file from \(location.absoluteString) to \(destinationURL.absoluteString): \(error.localizedDescription)")
+		}
+	}
+}
+
+// MARK: - DownloadManager
+
+@MainActor @Observable
 /// Controls the download of LLMs
-public class DownloadManager: NSObject, ObservableObject {
-	
-    /// A `Logger` object for the `PromptInputField` object
-    nonisolated private static let logger: Logger = .init(
+public final class DownloadManager {
+
+    private static let logger: Logger = .init(
         subsystem: Bundle.main.logSubsystem,
         category: String(describing: DownloadManager.self)
     )
-    
+
 	/// Global instance of `DownloadManager`
-	static var shared: DownloadManager = DownloadManager()
-	
+	static let shared: DownloadManager = DownloadManager()
+
 	/// Property for currently downloading URL session
-	private var urlSession: URLSession
+	private var urlSession: URLSession!
+	/// Separated delegate for URLSession callbacks
+	private let sessionDelegate = DownloadSessionDelegate()
 	/// A `Bool` representing whether the model should be added to the model manager
 	private var shouldAddModel: Bool = true
-	/// Published property for download progress
-	@Published var tasks: [URLSessionTask] = []
-	/// Published property for last update
-	@Published var lastUpdatedAt = Date()
-	/// Published property for whether the model was downloaded
-	@Published var didFinishDownloadingModel: Bool = false
-	
-	override private init() {
-		let config: URLSessionConfiguration = URLSessionConfiguration.background(
+	/// Download progress
+	var tasks: [URLSessionTask] = []
+	/// Last progress update timestamp
+	var lastUpdatedAt = Date()
+	/// Whether the model was downloaded
+	var didFinishDownloadingModel: Bool = false
+
+	private init() {
+		let config = URLSessionConfiguration.background(
 			withIdentifier: "com.donaldfilimon.mlai.DownloadManager"
 		)
 		config.isDiscretionary = false
-		
+
 		// Warning: Make sure that the URLSession is created only once (if an URLSession still
 		// exists from a previous download, it doesn't create a new URLSession object but returns
 		// the existing one with the old delegate object attached)
-		// Initialize urlSession with a temporary value before super.init()
-		self.urlSession = URLSession.shared
-		super.init()
-		self.urlSession = URLSession(configuration: config, delegate: self, delegateQueue: OperationQueue())
+		self.urlSession = URLSession(
+			configuration: config,
+			delegate: sessionDelegate,
+			delegateQueue: OperationQueue()
+		)
+
+		// Wire delegate closures to update self on MainActor
+		sessionDelegate.onProgress = { @Sendable [weak self] _ in
+			Task { @MainActor in
+				guard let self else { return }
+				let now = Date()
+				if self.lastUpdatedAt.timeIntervalSince(now) > 10 {
+					self.lastUpdatedAt = now
+				}
+			}
+		}
+
+		sessionDelegate.onComplete = { @Sendable [weak self] taskId, _ in
+			Task { @MainActor in
+				guard let self else { return }
+				self.tasks.removeAll { $0.taskIdentifier == taskId }
+			}
+		}
+
+		sessionDelegate.onFinishDownloading = { @Sendable [weak self] fileName, destinationURL in
+			Task { @MainActor in
+				guard let self else { return }
+				if self.shouldAddModel {
+					if Settings.modelUrl == nil {
+						Settings.modelUrl = destinationURL
+					}
+					ModelManager.shared.add(destinationURL)
+				}
+				self.didFinishDownloadingModel = true
+				LengthyTasksController.shared.tasks = LengthyTasksController.shared.tasks.filter {
+					$0.name != "Downloading model \(fileName)"
+				}
+			}
+		}
+
 		// Update lists of tasks for UI
 		self.updateTasks()
 	}
-	
+
 	/// Function to download an LLM
-	@MainActor
 	public func downloadModel(
 		model: HuggingFaceModel
 	) async {
 		await downloadModel(url: model.url)
 	}
-	
+
 	/// Function to download an LLM
-	@MainActor
 	public func downloadModel(
 		url: URL
 	) async {
 		// Check if accessible
 		let isValid = await URL.verifyURL(url: url)
 		if isValid {
-			// If accessible
 			self.startDownload(url: url)
 		} else {
 			// If not accessible, try mirror
@@ -86,53 +201,36 @@ public class DownloadManager: NSObject, ObservableObject {
 			)
 		)
 	}
-	
+
 	/// Function to download the default large language model
-	@MainActor
 	public func downloadDefaultModel() async {
-		// Set to add model
 		self.shouldAddModel = true
-		// Get default model
 		let model: HuggingFaceModel = await DefaultModels.recommendedModel
         Self.logger.info("Trying to download \(model.name, privacy: .public)")
-		// Download model
 		await self.downloadModel(model: model)
 	}
-	
+
 	/// Function to download the default completions model
-	@MainActor
     public func downloadDefaultCompletionsModel() async {
-        // Set to not add model
         self.shouldAddModel = false
-        // Get default model
         guard let modelUrl = URL(string: "https://huggingface.co/mradermacher/Qwen3-1.7B-Base-GGUF/resolve/main/Qwen3-1.7B-Base.Q4_K_M.gguf") else { return }
         Self.logger.info("Trying to download \(modelUrl.deletingLastPathComponent().lastPathComponent, privacy: .public)")
-        // Download model
         await self.downloadModel(url: modelUrl)
-        // Add download location to settings
         let fileName: String = modelUrl.lastPathComponent
-        let destinationUrl: URL = Settings.dirUrl.appendingPathComponent(
-            fileName
-        )
+        let destinationUrl: URL = Settings.dirUrl.appendingPathComponent(fileName)
         InferenceSettings.completionsModelUrl = destinationUrl
     }
-	
-	private func startDownload(
-        url: URL
-    ) {
+
+	private func startDownload(url: URL) {
         Self.logger.info("Starting download for resource \"\(url, privacy: .public)\"")
-		// Ignore download if it's already in progress
-		if self.tasks.contains(where: {
-			$0.originalRequest?.url == url
-		}) {
+		if self.tasks.contains(where: { $0.originalRequest?.url == url }) {
 			return
 		}
 		let task: URLSessionTask = urlSession.downloadTask(with: url)
 		self.tasks.append(task)
 		task.resume()
 	}
-	
-	@MainActor
+
 	private func updateTasks() {
 		self.urlSession.getAllTasks { [weak self] tasks in
 			Task { @MainActor in
@@ -142,95 +240,8 @@ public class DownloadManager: NSObject, ObservableObject {
 			}
 		}
 	}
-}
 
-extension DownloadManager: URLSessionDelegate, URLSessionDownloadDelegate {
-	
-	nonisolated public func urlSession(
-		_: URLSession,
-		downloadTask: URLSessionDownloadTask,
-		didWriteData _: Int64,
-		totalBytesWritten _: Int64,
-		totalBytesExpectedToWrite _: Int64
-	) {
-		Task { @MainActor [weak self] in
-			guard let self else { return }
-			let now: Date = Date()
-			if self.lastUpdatedAt.timeIntervalSince(now) > 10 {
-				self.lastUpdatedAt = now
-			}
-		}
-	}
-	
-	nonisolated public func urlSession(
-		_: URLSession,
-		task: URLSessionTask,
-		didCompleteWithError error: Error?
-	) {
-		if let error = error {
-			Self.logger.error("Download failed: \(error.localizedDescription)")
-		} else {
-			Self.logger.info("Task finished: \(task.taskIdentifier)")
-		}
-
-		let taskId = task.taskIdentifier
-		Task { @MainActor [weak self] in
-			guard let self else { return }
-			self.tasks.removeAll(where: { $0.taskIdentifier == taskId })
-		}
-	}
-	
-	nonisolated public func urlSession(
-		_: URLSession,
-		downloadTask: URLSessionDownloadTask,
-		didFinishDownloadingTo location: URL
-	) {
-		// Move file to app resources
-		let fileName = downloadTask.originalRequest?.url?.lastPathComponent ?? "defaultModel.gguf"
-		let destinationURL = Settings.dirUrl.appending(
-			path: fileName
-		)
-		// Remove if exists
-		let fileManager = FileManager.default
-		try? fileManager.removeItem(at: destinationURL)
-		do {
-			// Check if dir exists
-			let folderExists: Bool = (
-				try? Settings.dirUrl.checkResourceIsReachable()
-			) ?? false
-			// If not, fix
-			if !folderExists {
-				try fileManager.createDirectory(
-					at: Settings.dirUrl,
-					withIntermediateDirectories: false
-				)
-			}
-			// Move the model to the directory
-			try fileManager.moveItem(at: location, to: destinationURL)
-			// Point to the model if needed
-			Task { @MainActor [weak self] in
-				guard let self else { return }
-				if self.shouldAddModel {
-					if Settings.modelUrl == nil {
-						Settings.modelUrl = destinationURL
-					}
-					ModelManager.shared.add(destinationURL)
-				}
-				self.didFinishDownloadingModel = true
-			}
-		} catch {
-			Self.logger.error("Failed to move downloaded file from \(location.absoluteString) to \(destinationURL.absoluteString): \(error.localizedDescription)")
-			return
-		}
-		// Remove lengthy task on main actor
-		Task { @MainActor in
-			LengthyTasksController.shared.tasks = LengthyTasksController.shared.tasks.filter {
-				$0.name != "Downloading model \(fileName)"
-			}
-		}
-	}
-	
-	/// A `View` that shows download progess
+	/// A `View` that shows download progress
 	public var progressView: some View {
 		Group {
 			ForEach(
@@ -243,5 +254,4 @@ extension DownloadManager: URLSessionDelegate, URLSessionDownloadDelegate {
 		}
 		.padding(.top)
 	}
-		
 }

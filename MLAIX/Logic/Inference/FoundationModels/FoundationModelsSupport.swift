@@ -142,15 +142,18 @@ final class FoundationModelsClient {
         }
         let stream = session.streamResponse(to: prompt)
         var fullText = ""
+        var lastLength = 0
         do {
             for try await partial in stream {
                 if Task.isCancelled {
                     throw FoundationModelsError.cancelled
                 }
                 let newContent = partial.content
-                if newContent.count > fullText.count {
-                    let delta = String(newContent.dropFirst(fullText.count))
+                if newContent.count > lastLength {
+                    let startIdx = newContent.index(newContent.startIndex, offsetBy: lastLength)
+                    let delta = String(newContent[startIdx...])
                     onPartial(delta)
+                    lastLength = newContent.count
                 }
                 fullText = newContent
             }

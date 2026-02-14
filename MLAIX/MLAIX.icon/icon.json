@@ -3,7 +3,7 @@
   "fill-specializations" : [
     {
       "value" : {
-        "solid" : "display-p3:0.41176,0.89020,0.75686,1.00000"
+        "automatic-gradient" : "display-p3:0.41176,0.89020,0.75686,1.00000"
       }
     },
     {
@@ -16,38 +16,13 @@
       "blur-material" : null,
       "layers" : [
         {
-          "fill" : "automatic",
-          "image-name-specializations" : [
-            {
-              "value" : "Untitled 12.png"
-            },
-            {
-              "idiom" : "watchOS",
-              "value" : "Untitled 12.png"
-            }
-          ],
-          "name" : "Untitled 12",
-          "position-specializations" : [
-            {
-              "idiom" : "watchOS",
-              "value" : {
-                "scale" : 1,
-                "translation-in-points" : [
-                  0,
-                  0
-                ]
-              }
-            }
-          ]
-        },
-        {
           "blend-mode-specializations" : [
             {
-              "value" : "normal"
+              "value" : "screen"
             },
             {
               "appearance" : "dark",
-              "value" : "normal"
+              "value" : "darken"
             }
           ],
           "fill-specializations" : [
@@ -56,99 +31,7 @@
             },
             {
               "appearance" : "dark",
-              "value" : {
-                "linear-gradient" : [
-                  "display-p3:0.19177,0.41089,0.55762,1.00000",
-                  "display-p3:0.40894,0.87988,0.75195,1.00000"
-                ],
-                "orientation" : {
-                  "start" : {
-                    "x" : 0.8198181754971493,
-                    "y" : 0.6953206578489385
-                  },
-                  "stop" : {
-                    "x" : 0.5,
-                    "y" : 0.42290288896623746
-                  }
-                }
-              }
-            }
-          ],
-          "glass" : true,
-          "hidden" : false,
-          "image-name-specializations" : [
-            {
-              "value" : "bubble.left.and.text.bubble.right.fill@10x.png"
-            },
-            {
-              "idiom" : "watchOS",
-              "value" : "bubble.left.and.text.bubble.right.fill@10x.png"
-            }
-          ],
-          "name" : "bubble.left.and.text.bubble.right.fill@10x",
-          "opacity-specializations" : [
-            {
-              "value" : 0.85
-            },
-            {
-              "appearance" : "dark",
-              "value" : 0.9
-            }
-          ],
-          "position-specializations" : [
-            {
-              "value" : {
-                "scale" : 0.85,
-                "translation-in-points" : [
-                  6.5,
-                  6.5
-                ]
-              }
-            },
-            {
-              "idiom" : "watchOS",
-              "value" : {
-                "scale" : 0.85,
-                "translation-in-points" : [
-                  6.5,
-                  6.5
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "blend-mode-specializations" : [
-            {
-              "value" : "normal"
-            },
-            {
-              "appearance" : "dark",
-              "value" : "normal"
-            }
-          ],
-          "fill-specializations" : [
-            {
-              "value" : "automatic"
-            },
-            {
-              "appearance" : "dark",
-              "value" : {
-                "linear-gradient" : [
-                  "display-p3:0.19177,0.41089,0.55762,1.00000",
-                  "display-p3:0.40894,0.87988,0.75195,1.00000"
-                ],
-                "orientation" : {
-                  "start" : {
-                    "x" : 0.8198181754971493,
-                    "y" : 0.6953206578489385
-                  },
-                  "stop" : {
-                    "x" : 0.5,
-                    "y" : 0.42290288896623746
-                  }
-                }
-              }
+              "value" : "none"
             }
           ],
           "glass" : true,
@@ -197,85 +80,8 @@
               "value" : {
                 "scale" : 0.85,
                 "translation-in-points" : [
-                  6.5,
-                  6.5
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "blend-mode-specializations" : [
-            {
-              "value" : "normal"
-            },
-            {
-              "appearance" : "dark",
-              "value" : "normal"
-            }
-          ],
-          "fill-specializations" : [
-            {
-              "value" : "automatic"
-            },
-            {
-              "appearance" : "dark",
-              "value" : {
-                "linear-gradient" : [
-                  "display-p3:0.19177,0.41089,0.55762,1.00000",
-                  "display-p3:0.40894,0.87988,0.75195,1.00000"
-                ],
-                "orientation" : {
-                  "start" : {
-                    "x" : 0.8198181754971493,
-                    "y" : 0.6953206578489385
-                  },
-                  "stop" : {
-                    "x" : 0.5,
-                    "y" : 0.42290288896623746
-                  }
-                }
-              }
-            }
-          ],
-          "glass" : true,
-          "hidden" : false,
-          "image-name-specializations" : [
-            {
-              "value" : "bubble.left.and.text.bubble.right.fill@10x.png"
-            },
-            {
-              "idiom" : "watchOS",
-              "value" : "bubble.left.and.text.bubble.right.fill@10x.png"
-            }
-          ],
-          "name" : "bubble.left.and.text.bubble.right.fill@10x",
-          "opacity-specializations" : [
-            {
-              "value" : 0.85
-            },
-            {
-              "appearance" : "dark",
-              "value" : 0.9
-            }
-          ],
-          "position-specializations" : [
-            {
-              "value" : {
-                "scale" : 0.85,
-                "translation-in-points" : [
-                  6.5,
-                  6.5
-                ]
-              }
-            },
-            {
-              "idiom" : "watchOS",
-              "value" : {
-                "scale" : 0.85,
-                "translation-in-points" : [
-                  6.5,
-                  6.5
+                  -5.360730825741257,
+                  -7.933743469331375
                 ]
               }
             }

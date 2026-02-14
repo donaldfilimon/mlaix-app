@@ -119,7 +119,7 @@ public extension AXUIElement {
 			Logger(subsystem: Bundle.main.logSubsystem, category: "AXUIElement").debug("Failed to cast selected text range to AXValue")
 			return nil
 		}
-		let selectedTextRange = unsafeBitCast(selectedTextRangeRef, to: AXValue.self)
+		let selectedTextRange = unsafeDowncast(selectedTextRangeRef, to: AXValue.self)
 		// The selectedTextRange is represented as a CFRange
 		var range = CFRange()
 		guard AXValueGetValue(selectedTextRange, .cfRange, &range) else {
@@ -142,7 +142,7 @@ public extension AXUIElement {
 			Logger(subsystem: Bundle.main.logSubsystem, category: "AXUIElement").debug("Failed to cast caret bounds to AXValue")
 			return nil
 		}
-		let caretBoundsValue = unsafeBitCast(caretBoundsRef, to: AXValue.self)
+		let caretBoundsValue = unsafeDowncast(caretBoundsRef, to: AXValue.self)
 		var caretRect = CGRect.zero
 		guard AXValueGetValue(caretBoundsValue, .cgRect, &caretRect) else {
 			Logger(subsystem: Bundle.main.logSubsystem, category: "AXUIElement").debug("Failed to extract CGRect from caret value")

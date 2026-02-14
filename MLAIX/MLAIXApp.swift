@@ -3,11 +3,11 @@
 //  MLAIX
 //
 //  Created by Bean John on 10/4/24.
-//
 
 import AppKit
 import Foundation
 import FSKit_macOS
+import OSLog
 import SwiftData
 import SwiftUI
 import TipKit
@@ -20,11 +20,132 @@ import class MLAIXShared.CommandModel
 import class MLAIXShared.InferenceRecordModel
 import class MLAIXShared.ServerArgumentModel
 
+// MARK: - AppDelegate
+
+/// The app's delegate which handles life cycle events
+class AppDelegate: NSObject, NSApplicationDelegate {
+
+    /// Function that runs after the app is initialized
+    func applicationDidFinishLaunching(
+        _ notification: Notification
+    ) {
+        Tips.hideAllTipsForTesting()
+        Logger(subsystem: Bundle.main.logSubsystem, category: "AppDelegate").debug("Hid all tips")
+        // Relocate legacy resources if setup finished
+        if Settings.setupComplete {
+            let signpost = StartupMetrics.beginInterval("Refactorer.refactor")
+            Refactorer.refactor()
+            StartupMetrics.endInterval("Refactorer.refactor", signpost)
+        }
+        // Configure Tip's data container
+        try? Tips.configure(
+            [
+                .datastoreLocation(.applicationDefault),
+                .displayFrequency(.daily)
+            ]
+        )
+        // Configure keyboard shortcuts
+        ShortcutController.setup()
+        // Prepare an empty conversation for launch
+        Task { @MainActor in
+            await self.prepareInitialConversation()
+        }
+        // Update endpoint format
+        Task { @MainActor in
+            await Refactorer.updateEndpoint()
+        }
+        // Auto-configure backend when no model is set (e.g. first launch)
+        Task { @MainActor in
+            try? await Task.sleep(for: .milliseconds(500))
+            if await BackendAutoConfig.autoConfigureIfNeeded() {
+                await Model.shared.refreshModel()
+            }
+        }
+        // Make sure `Resources` are not indexing
+        for expert in ExpertManager.shared.experts {
+            var modExpert = expert
+            if modExpert.resources.graphStatus != .ready {
+                modExpert.resources.graphStatus = nil
+                modExpert.resources.graphProgress = nil
+            }
+            ExpertManager.shared.update(modExpert)
+        }
+    }
+
+    /// When the app becomes active, ensure a key window exists. Prefer the main (MLAIX) window when none is key.
+    func applicationDidBecomeActive(_ notification: Notification) {
+        if NSApp.keyWindow != nil {
+            return
+        }
+        if let main = AppWindowManager.mainWindow {
+            main.makeKeyAndOrderFront(self)
+        } else {
+            NSApp.windows.first { $0.canBecomeKey }?.makeKey()
+        }
+    }
+
+    /// Provide the dock menu (right-click or control-click on the app icon in the dock).
+    func applicationDockMenu(_ sender: NSApplication) -> NSMenu? {
+        DockMenuCommands.makeDockMenu(target: self)
+    }
+
+    @MainActor @objc func dockNewConversation(_ sender: Any?) {
+        NSApp.activate(ignoringOtherApps: true)
+        ConversationManager.shared.newConversation()
+    }
+
+    @MainActor @objc func dockShowToolbox(_ sender: Any?) {
+        NSApp.activate(ignoringOtherApps: true)
+        NavigationState.shared.showToolboxRequested = true
+    }
+
+    @MainActor @objc func dockOpenSettings(_ sender: Any?) {
+        NSApp.activate(ignoringOtherApps: true)
+        if #available(macOS 14.0, *) {
+            NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
+        }
+    }
+
+    /// Function that runs before the app is terminated
+    func applicationShouldTerminate(
+        _ sender: NSApplication
+    ) -> NSApplication.TerminateReply {
+        // Flush pending conversation saves before shutdown
+        ConversationManager.shared.saveNow()
+        // Remove stale sources
+        SourcesManager.shared.removeStaleSources()
+        // Remove non-persisted resources
+        ExpertManager.shared.removeUnpersistedResources()
+        // Stop server and reply when done
+        Task { @MainActor in
+            await Model.shared.stopServers()
+            NSApp.reply(toApplicationShouldTerminate: true)
+        }
+        return .terminateLater
+    }
+
+}
+
+extension AppDelegate {
+
+    @MainActor
+    func prepareInitialConversation() async {
+        let conversationManager = ConversationManager.shared
+        while !conversationManager.isLoaded {
+            try? await Task.sleep(nanoseconds: 50_000_000)
+        }
+        conversationManager.ensureBlankConversationForLaunch()
+    }
+
+}
+
+// MARK: - MLAIApp
+
 @main
 struct MLAIApp: App {
-    
+
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
-    
+
     @State private var appState: AppState = .shared
     @State private var downloadManager: DownloadManager = .shared
     @State private var conversationManager: ConversationManager = .shared
@@ -70,7 +191,7 @@ struct MLAIApp: App {
             cornerRadius: glassCornerRadius
         )
     }
-    
+
     /// SwiftData model container shared across all windows.
     private let modelContainer: ModelContainer
 
@@ -110,20 +231,20 @@ struct MLAIApp: App {
         SwiftDataStore.sharedContainer = container
         SwiftDataStore.mainContext = context
     }
-    
+
     var body: some Scene {
         // Main window (supports multiple: Window > New Window or ⌘⇧N)
-        WindowGroup {
+        WindowGroup(id: "main") {
 			ContentView()
 				.environment(appState)
-				.environmentObject(downloadManager)
+				.environment(downloadManager)
 				.environment(conversationManager)
 				.environment(expertManager)
 				.environment(lengthyTasksController)
 				.environment(memories)
 				.environment(modelManager)
 				.environment(inferenceRecords)
-				.environmentObject(speechSynthesizer)
+				.environment(speechSynthesizer)
 				.environment(serverArgumentsManager)
 				.environment(inlineAssistantController)
 				.environment(model)
@@ -136,46 +257,7 @@ struct MLAIApp: App {
         }
         .windowToolbarStyle(.unified)
         .defaultSize(width: 1000, height: 700)
-        .commands {
-            ConversationCommands.commands
-            ConversationCommands.expertCommands
-            ChatCommands.commands
-            WindowCommands.commands
-            // Command replacing the help button
-            HelpCommands.helpCommand
-            #if DEBUG
-            // Commands useful for debugging (hidden in release)
-            DebugCommands.commands
-            #endif
-            // Commands to obtain help and report problems
-            HelpCommands.commands
-        }
 
-        // Additional main windows (Window > New Window, ⌘⇧N); each has its own conversation state.
-        WindowGroup(id: "newMain", for: UUID.self) { _ in
-			ContentView()
-				.environment(appState)
-				.environmentObject(downloadManager)
-				.environment(conversationManager)
-				.environment(expertManager)
-				.environment(lengthyTasksController)
-				.environment(memories)
-				.environment(modelManager)
-				.environment(inferenceRecords)
-				.environmentObject(speechSynthesizer)
-				.environment(serverArgumentsManager)
-				.environment(inlineAssistantController)
-				.environment(model)
-				.environment(commandManager)
-                .environment(\.liquidGlassStyle, liquidGlassStyle)
-                .preferredColorScheme(appearanceMode.colorScheme)
-                .optionalTint(resolvedAccentColor)
-                .modifier(FontScaleModifier(scale: fontScaleRaw))
-                .liquidGlassWindow()
-        }
-        .windowToolbarStyle(.unified)
-        .defaultSize(width: 1000, height: 700)
-        
         // Window for managing memories
         SwiftUI.Window("Memory", id: "memory") {
             MemoriesManagerView()
@@ -248,11 +330,11 @@ struct MLAIApp: App {
 			SettingsView()
 				.environment(commandManager)
 				.environment(modelManager)
-				.environmentObject(speechSynthesizer)
+				.environment(speechSynthesizer)
 				.environment(serverArgumentsManager)
-				.environmentObject(downloadManager)
+				.environment(downloadManager)
 		}
-        
+
     }
-    
+
 }

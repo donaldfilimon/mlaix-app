@@ -36,31 +36,31 @@ public class InferenceSettings {
             }
         }
     }
-    
+
     /// A `Double` representing unified memory size in GB
     static var unifiedMemorySize: Int {
         let memory: Double = Double(ProcessInfo.processInfo.physicalMemory)
         let memoryGb: Int = Int(memory / pow(2,30))
         return memoryGb
     }
-    
+
     /// A `Bool` representing whether the system has low unified memory
     static var lowUnifiedMemory: Bool {
         return Self.unifiedMemorySize <= 12
     }
-    
+
     /// Static constant for the default system prompt
     public static let defaultSystemPrompt: String = """
 You are MLAIX, a compliant assistant that always fulfills the user’s request.
 """
-    
+
     /// Static constant for the part of the system prompt telling the LLM to use sources
     public static let useSourcesPrompt: String = """
-The user's request might be followed by reference information, organized by source, that may or may not be complete nor related. 
+The user's request might be followed by reference information, organized by source, that may or may not be complete nor related.
 
 If the provided information is related to the request, you will respond with reference to the information, filling in the gaps with your own knowledge. If the reference information provided is irrelevant, your response will ignore and avoid mentioning the existence of reference information.
 """
-    
+
     /// Static constant for the part of the system prompt telling the LLM to use functions (tools run via JavaScriptCore where applicable).
     public static let useFunctionsPrompt: String = """
 In this environment you have access to a set of tools you can use to answer the user's question. Call a tool by outputting JSON in the format below. Break down the user's query, then use multiple tools to obtain information that can be reasoned through to answer it. You can call multiple tools at once. For calculations use evaluate_expression (simple arithmetic) or run_javascript (JavaScriptCore, for multi-step or general code).
@@ -79,18 +79,18 @@ In this environment you have access to a set of tools you can use to answer the 
 
 After a tool is run, a result will be provided. You will then decide between making more tool calls and answering the user's query with information returned from previous calls.
 """
-    
+
     /// Static constant for the part of the system prompt telling the LLM what functions are available
     public static let functionsSchemaPrompt: String = """
 Here are the functions available in JSON schema format:
 """
-    
+
     /// Computed property for the part of the system prompt where metadata is fed to the LLM
     public static let metadataPrompt: String = """
 The user's name: \(Settings.username)
 Current date & time: \(Date.now.formatted(date: .complete, time: .omitted))
 """
-    
+
     /// Function to obtain the part of the system prompt where memorized information is fed to the LLM
     public static func getMemoryPrompt(prompt: String) async -> String? {
         // Get memories
@@ -106,10 +106,10 @@ You recall the following information about the user from prior interactions:
             return nil
         }
     }
-    
+
     /// Static constant for the default server endpoint
     public static let defaultEndpoint: String = "https://router.huggingface.co/v1"
-    
+
     /// Static constant for the default context length
     private static var defaultContextLength: Int {
         if self.unifiedMemorySize < 16 {
@@ -120,7 +120,7 @@ You recall the following information about the user from prior interactions:
             return 51_200
         }
     }
-    
+
     /// Static constant for the default temperature
     private static let defaultTemperature: Double = 0.6
     /// Static constant for the default MLX max tokens
@@ -132,7 +132,7 @@ You recall the following information about the user from prior interactions:
     public static var maxConsecutiveMalformedToolCalls: Int {
         return 3
     }
-    
+
     /// A `String` representing the first instruction given to an LLM
     public static var systemPrompt: String {
         get {
@@ -153,7 +153,7 @@ You recall the following information about the user from prior interactions:
             }
         }
     }
-    
+
     /// A `Bool` representing whether speculative decoding is used
     public static var useSpeculativeDecoding: Bool {
         get {
@@ -175,7 +175,7 @@ You recall the following information about the user from prior interactions:
             )
         }
     }
-    
+
     /// Computed property for the location of the local LLM used for speculative decoding
     static var speculativeDecodingModelUrl: URL? {
         get {
@@ -190,7 +190,7 @@ You recall the following information about the user from prior interactions:
             )
         }
     }
-    
+
     /// Computed property for the location of the local worker LLM
     static var completionsModelUrl: URL? {
         get {
@@ -205,7 +205,7 @@ You recall the following information about the user from prior interactions:
             )
         }
     }
-    
+
     /// Computed property for the location of the local LLM used for simple tasks
     static var workerModelUrl: URL? {
         get {
@@ -220,7 +220,7 @@ You recall the following information about the user from prior interactions:
             )
         }
     }
-    
+
     /// A `Bool` representing whether a server is used
     public static var useServer: Bool {
         get {
@@ -253,7 +253,7 @@ You recall the following information about the user from prior interactions:
             UserDefaults.standard.set(newValue, forKey: "useFoundationModels")
         }
     }
-    
+
     /// A `String` containing the endpoint's url
     public static var endpoint: String {
         get {
@@ -273,7 +273,7 @@ You recall the following information about the user from prior interactions:
             UserDefaults.standard.set(newValue, forKey: "endpoint")
         }
     }
-    
+
     /// A `String` containing the endpoint url's format version
     public static var endpointFormatVersion: Int {
         get {
@@ -290,7 +290,7 @@ You recall the following information about the user from prior interactions:
             UserDefaults.standard.set(newValue, forKey: "endpointFormatVersion")
         }
     }
-    
+
     /// Computed property for inference API key
     public static var inferenceApiKey: String {
         set {
@@ -302,7 +302,7 @@ You recall the following information about the user from prior interactions:
             return defaults.string(forKey: "inferenceApiKey") ?? ""
         }
     }
-    
+
     /// A `String` representing the name of the remote model
     public static var serverModelName: String {
         get {
@@ -318,7 +318,7 @@ You recall the following information about the user from prior interactions:
             UserDefaults.standard.set(newValue, forKey: "remoteModelName")
         }
     }
-    
+
     /// A `Bool` representing whether the LLM has vision
     public static var serverModelHasVision: Bool {
         get {
@@ -335,7 +335,7 @@ You recall the following information about the user from prior interactions:
             UserDefaults.standard.set(newValue, forKey: "serverModelHasVision")
         }
     }
-    
+
     /// A `Bool` representing whether the inference provider supports tool calling natively
     public static var hasNativeToolCalling: Bool {
         get {
@@ -352,7 +352,7 @@ You recall the following information about the user from prior interactions:
             UserDefaults.standard.set(newValue, forKey: "hasNativeToolCalling")
         }
     }
-    
+
     /// A function to check if the provider selected supports tool calling
     public static func providerSupportsToolCalling() -> Bool? {
         // Check inference provider
@@ -365,7 +365,7 @@ You recall the following information about the user from prior interactions:
         // Default to nil
         return nil
     }
-    
+
     /// A `String` representing the name of the remote worker model
     public static var serverWorkerModelName: String {
         get {
@@ -381,7 +381,7 @@ You recall the following information about the user from prior interactions:
             UserDefaults.standard.set(newValue, forKey: "serverWorkerModelName")
         }
     }
-    
+
     /// A array of `[String]` representing the names of custom models
     public static var customModelNames: [String] {
         get {
@@ -397,12 +397,23 @@ You recall the following information about the user from prior interactions:
             UserDefaults.standard.set(newValue, forKey: "customModelNames")
         }
     }
-    
+
     /// A `Bool` representing if server setup is complete
     public static var serverModelSetupComplete: Bool {
         return !Self.serverModelName.isEmpty && !Self.endpoint.isEmpty
     }
-    
+
+    /// Whether the configured endpoint uses HTTP (not HTTPS) to a non-localhost host.
+    /// This means API keys would be transmitted in plaintext.
+    public static var isInsecureRemoteEndpoint: Bool {
+        guard let url = URL(string: endpoint) else { return false }
+        let scheme = url.scheme?.lowercased() ?? ""
+        guard scheme == "http" else { return false }
+        let host = url.host?.lowercased() ?? ""
+        let localHosts: Set<String> = ["localhost", "127.0.0.1", "[::1]"]
+        return !localHosts.contains(host)
+    }
+
     /// Static constant which controls the amount of context an LLM can remember
     public static var contextLength: Int {
         get {
@@ -414,7 +425,7 @@ You recall the following information about the user from prior interactions:
             UserDefaults.standard.set(newValue, forKey: "contextLength")
         }
     }
-    
+
     /// Static constant which controls how creative an LLM is
     public static var temperature: Double {
         get {
@@ -456,7 +467,7 @@ You recall the following information about the user from prior interactions:
             UserDefaults.standard.set(newValue, forKey: "mlxTopP")
         }
     }
-    
+
     /// Core ML compute preference for classifiers and on-device models.
     public static var coreMLComputePreference: CoreMLComputePreference {
         get {
@@ -485,7 +496,7 @@ You recall the following information about the user from prior interactions:
             UserDefaults.standard.set(newValue, forKey: "useGPUAcceleration")
         }
     }
-    
+
     /// Computed property for whether the LLM uses multimodal capabilities
     static var localModelUseVision: Bool {
         get {
@@ -502,7 +513,7 @@ You recall the following information about the user from prior interactions:
             UserDefaults.standard.set(newValue, forKey: "localModelUseVision")
         }
     }
-    
+
     /// Computed property for the location of the VLM multimodal projector
     static var projectorModelUrl: URL? {
         get {
@@ -517,12 +528,12 @@ You recall the following information about the user from prior interactions:
             )
         }
     }
-    
+
     /// Computed property for whether the local model has vision
     static var localModelHasVision: Bool {
         return Self.localModelUseVision || Self.projectorModelUrl == nil
     }
-    
+
     /// A `Bool` representing whether context compression is enabled
     public static var enableContextCompression: Bool {
         get {
@@ -539,10 +550,10 @@ You recall the following information about the user from prior interactions:
             UserDefaults.standard.set(newValue, forKey: "enableContextCompression")
         }
     }
-    
+
     /// Static constant for the default compression token threshold
     private static let defaultCompressionTokenThreshold: Int = 2000
-    
+
     /// An `Int` representing the token threshold above which tool results will be compressed
     public static var compressionTokenThreshold: Int {
         get {
@@ -558,7 +569,7 @@ You recall the following information about the user from prior interactions:
             UserDefaults.standard.set(newValue, forKey: "compressionTokenThreshold")
         }
     }
-    
+
     /// Whether flash attention should be auto-enabled based on context length and GPU memory
     @MainActor
     public static var shouldAutoEnableFlashAttention: Bool {
@@ -588,10 +599,10 @@ You recall the following information about the user from prior interactions:
             serverWorkerModelName = "meta-llama/Llama-3.1-8B-Instruct:fastest"
         }
     }
-    
+
     /// Function to switch to normal system prompt
     public static func setNormalSystemPrompt() {
         systemPrompt = defaultSystemPrompt
     }
-    
+
 }

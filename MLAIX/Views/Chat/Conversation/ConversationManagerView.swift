@@ -107,9 +107,7 @@ struct ConversationManagerView: View {
                         Label("Keyboard Shortcuts", systemImage: "keyboard")
                     }
                     .keyboardShortcut("k", modifiers: [.command, .shift])
-                    Button {
-                        openSettingsIfAvailable()
-                    } label: {
+                    SettingsLink {
                         Label("Settings…", systemImage: "gearshape")
                     }
                     .keyboardShortcut(",", modifiers: .command)
@@ -342,13 +340,6 @@ struct ConversationManagerView: View {
         }
         Task {
             await self.model.setSystemPrompt(prompt)
-        }
-    }
-
-    /// Opens the app Settings window when available (macOS 14+).
-    private func openSettingsIfAvailable() {
-        if #available(macOS 14.0, *) {
-            NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
         }
     }
 }

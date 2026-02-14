@@ -102,7 +102,7 @@ struct MLAIXShortcutsProvider: AppShortcutsProvider {
         )
         AppShortcut(
             intent: AskMLAIXIntent(),
-            phrases: ["Ask \(.applicationName) \(\.$prompt)"],
+            phrases: ["Ask \(.applicationName) a question"],
             shortTitle: "Ask MLAIX",
             systemImageName: "bubble.left.and.bubble.right"
         )

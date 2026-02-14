@@ -1,13 +1,13 @@
 {
-  "originHash" : "1d17d8087ef365a0828c48d0277b232f55ee4bac6b88b0ac83ebe9daa6eb1ad7",
+  "originHash" : "3666ecf68805c1de358e7f0e6b58e0bc0a90b910e1240c4bcd07f7cdb97f1d99",
   "pins" : [
     {
       "identity" : "axswift",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/tmandry/AXSwift/",
       "state" : {
-        "revision" : "81dcc36aced905d6464cc25e35f8d13184bbf21c",
-        "version" : "0.3.2"
+        "branch" : "main",
+        "revision" : "e18a18453d135ad45809a384ee5139e05ea52def"
       }
     },
     {
@@ -15,8 +15,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/mchakravarty/CodeEditorView",
       "state" : {
-        "revision" : "aba6c189bb2f6fd9d7b8e9f5739aeb3c8c7e3254",
-        "version" : "0.15.4"
+        "branch" : "main",
+        "revision" : "5386056ab53d43363083cb96069715a9608aa048"
       }
     },
     {
@@ -33,6 +33,7 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/johnbean393/Default-Models",
       "state" : {
+        "branch" : "main",
         "revision" : "d5bc71875649c4febfba9b78b456b9cb6c90f23e"
       }
     },
@@ -41,6 +42,7 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/johnbean393/EventSource",
       "state" : {
+        "branch" : "main",
         "revision" : "a6c5d1b77bf9161866e36b5c9f018871ff42f747"
       }
     },
@@ -49,6 +51,7 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/johnbean393/ExtractKit-macOS",
       "state" : {
+        "branch" : "main",
         "revision" : "d2374e0fc535340fb2fe2f4825c5ae41035f4c7c"
       }
     },
@@ -66,6 +69,7 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/johnbean393/GoogleSearch",
       "state" : {
+        "branch" : "main",
         "revision" : "8578671e3bc7277cff15949b142375ab581b216c"
       }
     },
@@ -74,8 +78,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/raspu/Highlightr",
       "state" : {
-        "revision" : "05e7fcc63b33925cd0c1faaa205cdd5681e7bbef",
-        "version" : "2.3.0"
+        "branch" : "master",
+        "revision" : "da9bb2e4604da001f1d1a1adaa55f6a38509b405"
       }
     },
     {
@@ -83,8 +87,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/sindresorhus/KeyboardShortcuts",
       "state" : {
-        "revision" : "1aef85578fdd4f9eaeeb8d53b7b4fc31bf08fe27",
-        "version" : "2.4.0"
+        "branch" : "main",
+        "revision" : "6395c6dbcd7f69f9858baa7c7d697542ff9d09ca"
       }
     },
     {
@@ -92,6 +96,7 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/colinc86/LaTeXSwiftUI",
       "state" : {
+        "branch" : "main",
         "revision" : "c45e0fd45f64923c49c5904a9f9626bc8939f05f"
       }
     },
@@ -100,6 +105,7 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/sindresorhus/LaunchAtLogin-Modern",
       "state" : {
+        "branch" : "main",
         "revision" : "a04ec1c363be3627734f6dad757d82f5d4fa8fcc"
       }
     },
@@ -135,8 +141,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/ml-explore/mlx-swift-lm",
       "state" : {
-        "revision" : "360c5052b81cc154b04ee0933597a4ad6db4b8ae",
-        "version" : "2.30.3"
+        "branch" : "main",
+        "revision" : "361cd14889d5cf46fb555b712a69faae12e8919e"
       }
     },
     {
@@ -144,8 +150,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/gonzalezreal/NetworkImage",
       "state" : {
-        "revision" : "2849f5323265386e200484b0d0f896e73c3411b9",
-        "version" : "6.0.1"
+        "branch" : "main",
+        "revision" : "2849f5323265386e200484b0d0f896e73c3411b9"
       }
     },
     {
@@ -162,8 +168,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/vpeschenkov/SecureDefaults",
       "state" : {
-        "revision" : "1d241ecbea917c6c1d8d2940bd42282588289004",
-        "version" : "1.2.3"
+        "branch" : "master",
+        "revision" : "1d241ecbea917c6c1d8d2940bd42282588289004"
       }
     },
     {
@@ -171,7 +177,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/donaldfilimon/similarity-search-kit",
       "state" : {
-        "revision" : "759a31901768db084031031bdde0ad3f83ebea65"
+        "branch" : "main",
+        "revision" : "9bec54706c8124bb9b20a3a06d566066a9f55712"
       }
     },
     {
@@ -179,8 +186,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/JohnSundell/Splash",
       "state" : {
-        "revision" : "7f4df436eb78fe64fe2c32c58006e9949fa28ad8",
-        "version" : "0.16.0"
+        "branch" : "master",
+        "revision" : "2e3f17c2d09689c8bf175c4a84ff7f2ad3353301"
       }
     },
     {
@@ -188,8 +195,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/stephencelis/SQLite.swift",
       "state" : {
-        "revision" : "0c08856385fe24f7b76d8c51842d78a196e8e817",
-        "version" : "0.15.5"
+        "branch" : "master",
+        "revision" : "fcc6077f1f59aa2ae2a68c5628fac336d578ed52"
       }
     },
     {
@@ -242,8 +249,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/gonzalezreal/swift-markdown-ui",
       "state" : {
-        "revision" : "5f613358148239d0292c0cef674a3c2314737f9e",
-        "version" : "2.4.1"
+        "branch" : "main",
+        "revision" : "8371aeb32f35795a9e559029fb08613355733626"
       }
     },
     {
@@ -287,8 +294,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/SwiftfulThinking/SwiftfulLoadingIndicators",
       "state" : {
-        "revision" : "85858c0246dcd781228301f9928519f75ce89758",
-        "version" : "0.0.4"
+        "branch" : "main",
+        "revision" : "eae1c40bb29234f0a8f6614af1a80550994fc6b9"
       }
     },
     {
@@ -305,8 +312,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/markiv/SwiftUI-Shimmer",
       "state" : {
-        "revision" : "0226e21f9bf355d40e07e5f5e1c33679d50e167f",
-        "version" : "1.5.1"
+        "branch" : "main",
+        "revision" : "0226e21f9bf355d40e07e5f5e1c33679d50e167f"
       }
     },
     {
@@ -314,8 +321,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/xnth97/SymbolPicker",
       "state" : {
-        "revision" : "8bb08c982235b8e601bc500a41e770d7e198759b",
-        "version" : "1.6.2"
+        "branch" : "main",
+        "revision" : "8bb08c982235b8e601bc500a41e770d7e198759b"
       }
     },
     {
@@ -323,8 +330,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/danielsaidi/WebViewKit",
       "state" : {
-        "revision" : "bae09cfa4bae29f22dcf9d98f197aba50b5dc4bb",
-        "version" : "0.5.0"
+        "branch" : "main",
+        "revision" : "9254639fd766d8ea7e9a93e9446abec49c140960"
       }
     },
     {
