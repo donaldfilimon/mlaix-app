@@ -8,15 +8,15 @@ echo "=== MLAIX Pre-Release Verification ==="
 
 echo ""
 echo "1. Building MLAIX (macOS, release)..."
-swift build -c release --product MLAIX
+swift build -c release --product MLAIX --no-static-swift-stdlib
 
 echo ""
 echo "2. Building MLAIXiOS..."
-swift build --product MLAIXiOS
+swift build --product MLAIXiOS --no-static-swift-stdlib
 
 echo ""
 echo "3. Building MLAIXtvos..."
-swift build --product MLAIXtvos
+swift build --product MLAIXtvos --no-static-swift-stdlib
 
 echo ""
 echo "4. Running tests..."

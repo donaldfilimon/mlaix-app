@@ -23,6 +23,8 @@ security find-identity -p codesigning -v   # Find your signing identity
 ./setup.sh <SIGNING_IDENTITY>              # Download and sign marp
 ```
 
+**Static linking warning:** If you see "Swift compiler no longer supports statically linking the Swift libraries" during `swift build`, add `--no-static-swift-stdlib` (e.g. `swift build --no-static-swift-stdlib`). This option is not available for `swift test`. The warning comes from dependencies with older deployment targets and can be safely ignored.
+
 ## Key Architecture
 
 ### SwiftPM Module Layout
