@@ -66,6 +66,7 @@ public enum MLXRunner {
         case invalidResponse
         case generationFailed(String)
         case modelLoadFailed(String)
+        case cancelled
 
         public var errorDescription: String? {
             switch self {
@@ -77,6 +78,8 @@ public enum MLXRunner {
                 return "MLX generation failed: \(message)"
             case .modelLoadFailed(let message):
                 return "Failed to load MLX model: \(message)"
+            case .cancelled:
+                return "MLX generation was cancelled."
             }
         }
     }
@@ -118,11 +121,10 @@ public enum MLXRunner {
         request: Request,
         progressHandler: (@Sendable (String) -> Void)? = nil
     ) async throws -> Response {
-        do {
-            let modelUrl = URL(fileURLWithPath: request.modelPath)
+        let modelUrl = URL(fileURLWithPath: request.modelPath)
 
-            // Check cache first
-            let container: ModelContainer
+        let container: ModelContainer
+        do {
             if let cached = await modelCache.get(request.modelPath) {
                 container = cached
             } else {
@@ -135,45 +137,40 @@ public enum MLXRunner {
                 container = loadedContainer
                 logger.info("MLX model loaded successfully")
             }
+        } catch {
+            logger.error("MLX model load failed: \(error.localizedDescription, privacy: .public)")
+            throw MLXError.modelLoadFailed(error.localizedDescription)
+        }
 
-            // Build chat messages for UserInput
-            let chatMessages: [Chat.Message] = request.messages.map { msg in
-                let role: Chat.Message.Role = switch msg.role {
-                case "system": .system
-                case "assistant": .assistant
-                case "tool": .tool
-                default: .user
-                }
-                return Chat.Message(role: role, content: msg.content)
+        let chatMessages: [Chat.Message] = request.messages.map { msg in
+            let role: Chat.Message.Role = switch msg.role {
+            case "system": .system
+            case "assistant": .assistant
+            case "tool": .tool
+            default: .user
             }
+            return Chat.Message(role: role, content: msg.content)
+        }
+        let userInput = UserInput(chat: chatMessages)
 
-            let userInput = UserInput(chat: chatMessages)
-
-            // Prepare input (tokenize with chat template)
+        do {
             let lmInput = try await container.prepare(input: userInput)
-
-            // Count prompt tokens
             let promptTokenCount = lmInput.text.tokens.size
-
-            // Configure generation parameters
             let generateParameters = GenerateParameters(
                 maxTokens: request.maxTokens,
                 temperature: Float(request.temperature),
                 topP: Float(request.topP)
             )
-
-            // Generate via AsyncStream
             let stream = try await container.generate(
                 input: lmInput,
                 parameters: generateParameters
             )
-
             var outputText = ""
             var completionTokens = 0
-
             for await generation in stream {
-                if Task.isCancelled { break }
-
+                if Task.isCancelled {
+                    throw MLXError.cancelled
+                }
                 switch generation {
                 case .chunk(let text):
                     outputText += text
@@ -184,21 +181,19 @@ public enum MLXRunner {
                     completionTokens = info.generationTokenCount
 
                 case .toolCall:
-                    // Tool calls not handled at this level
                     break
                 }
             }
-
             return Response(
                 text: outputText,
                 promptTokens: promptTokenCount,
                 completionTokens: completionTokens,
                 error: nil
             )
+        } catch let err as MLXError {
+            throw err
         } catch {
-            logger.error(
-                "Native MLX generation failed: \(error.localizedDescription, privacy: .public)"
-            )
+            logger.error("MLX generation failed: \(error.localizedDescription, privacy: .public)")
             throw MLXError.generationFailed(error.localizedDescription)
         }
     }

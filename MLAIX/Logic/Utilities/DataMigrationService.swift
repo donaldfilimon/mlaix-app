@@ -19,7 +19,13 @@ public struct DataMigrationService {
         subsystem: Bundle.main.logSubsystem,
         category: "DataMigration"
     )
-    private static let migrationKey = "didMigrateToSwiftData_v1"
+    /// UserDefaults key used to mark that JSON → SwiftData migration has completed.
+    public static let migrationKey = "didMigrateToSwiftData_v1"
+
+    /// Whether migration has already run; managers use this to decide whether to load from SwiftData.
+    public static var didMigrateToSwiftData: Bool {
+        UserDefaults.standard.bool(forKey: migrationKey)
+    }
 
     /// Run migration if needed. Call from app startup.
     public static func migrateIfNeeded(context: ModelContext) {

@@ -57,6 +57,7 @@ enum FoundationModelsError: LocalizedError {
     case emptyResponse
     case contextExhausted
     case streamingFailed(String)
+    case cancelled
 
     var errorDescription: String? {
         switch self {
@@ -68,6 +69,8 @@ enum FoundationModelsError: LocalizedError {
                 return "Foundation Models context window has been exhausted."
             case .streamingFailed(let reason):
                 return "Foundation Models streaming failed: \(reason)"
+            case .cancelled:
+                return "Foundation Models request was cancelled."
         }
     }
 }
@@ -127,19 +130,35 @@ final class FoundationModelsClient {
     // MARK: - Streaming Response
 
     /// Streams a response token by token, calling `onPartial` with each new delta.
+    /// Respects task cancellation; throws `FoundationModelsError.cancelled` if cancelled mid-stream.
     func respondStreaming(
         to prompt: String,
         onPartial: @Sendable (String) -> Void
     ) async throws -> String {
+        turnCount += 1
+        if turnCount > maxTurns {
+            resetSession(systemPrompt: lastSystemPrompt)
+            turnCount = 1
+        }
         let stream = session.streamResponse(to: prompt)
         var fullText = ""
-        for try await partial in stream {
-            let newContent = partial.content
-            if newContent.count > fullText.count {
-                let delta = String(newContent.dropFirst(fullText.count))
-                onPartial(delta)
+        do {
+            for try await partial in stream {
+                if Task.isCancelled {
+                    throw FoundationModelsError.cancelled
+                }
+                let newContent = partial.content
+                if newContent.count > fullText.count {
+                    let delta = String(newContent.dropFirst(fullText.count))
+                    onPartial(delta)
+                }
+                fullText = newContent
             }
-            fullText = newContent
+        } catch {
+            if Task.isCancelled {
+                throw FoundationModelsError.cancelled
+            }
+            throw error
         }
         let trimmed = fullText.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else {

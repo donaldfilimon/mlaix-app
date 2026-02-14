@@ -79,18 +79,36 @@ extension Model {
             let systemPrompt = InferenceSettings.systemPrompt
             FoundationModelsClient.shared.updateSystemPrompt(systemPrompt)
 
-            let responseText = try await FoundationModelsClient.shared.respondStreaming(
-                to: prompt,
-                onPartial: { [weak self] delta in
-                    Task { @MainActor in
-                        self?.handleCompletionProgress(
-                            showPreview: showPreview,
-                            partialResponse: delta,
-                            handleResponseUpdate: handleResponseUpdate
-                        )
+            func doStream() async throws -> String {
+                try await FoundationModelsClient.shared.respondStreaming(
+                    to: prompt,
+                    onPartial: { [weak self] delta in
+                        Task { @MainActor in
+                            self?.handleCompletionProgress(
+                                showPreview: showPreview,
+                                partialResponse: delta,
+                                handleResponseUpdate: handleResponseUpdate
+                            )
+                        }
                     }
+                )
+            }
+
+            let responseText: String
+            do {
+                responseText = try await doStream()
+            } catch let err as FoundationModelsError {
+                if case .cancelled = err { throw LlamaServerError.cancelled }
+                FoundationModelsClient.shared.resetSession(systemPrompt: systemPrompt)
+                do {
+                    responseText = try await doStream()
+                } catch let retryErr as FoundationModelsError {
+                    if case .cancelled = retryErr { throw LlamaServerError.cancelled }
+                    throw retryErr
+                } catch let retryError {
+                    throw retryError
                 }
-            )
+            }
 
             let elapsed = CFAbsoluteTimeGetCurrent() - start
             let estimatedTokens = max(1, responseText.count / 4)

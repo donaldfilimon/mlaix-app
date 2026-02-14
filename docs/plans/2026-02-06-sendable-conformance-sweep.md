@@ -8,9 +8,15 @@
 
 **Tech Stack:** Swift 6.2, Swift Testing (`@Test`, `#expect`), SwiftPM (`swift build`, `swift test`)
 
+### Plan status (as of 2026-02)
+
+- **Tasks 1–2 obsolete:** `LogLevel.swift` and `Notifications.swift` have been removed from the codebase. Skip Task 1 and Task 2.
+- **Tasks 3–5 done:** `EvaluationDetails` (and `Chunk`, `State`), `ChatParameters` (and nested types), and `ModelFamily` already conform to `Sendable` / `@unchecked Sendable` in the repo, and `SendableConformanceTests` cover them. No further code changes needed for these tasks.
+- **Task 6:** Run full `swift build` and `swift test` for verification; update MEMORY.md if that file exists and documents Sendable gaps.
+
 ---
 
-### Task 1: Add Sendable to LogLevel and OSLogLevel
+### Task 1: Add Sendable to LogLevel and OSLogLevel — OBSOLETE (file removed)
 
 **Files:**
 - Modify: `MLAIX/Types/LogLevel.swift:5` and `:32`
@@ -23,14 +29,14 @@ Create `MLAIXTests/SendableConformanceTests.swift`:
 ```swift
 //
 //  SendableConformanceTests.swift
-//  MLAITests
+//  MLAIXTests
 //
 //  Tests verifying Sendable conformance for value types.
 //
 
 import Foundation
 import Testing
-@testable import MLAI
+@testable import MLAIX
 
 // MARK: - LogLevel Sendable Tests
 
@@ -112,7 +118,7 @@ git commit -m "feat: add Sendable to LogLevel and OSLogLevel with tests"
 
 ---
 
-### Task 2: Add Sendable to Notifications enum
+### Task 2: Add Sendable to Notifications enum — OBSOLETE (file removed)
 
 **Files:**
 - Modify: `MLAIX/Types/Notifications.swift:10`
@@ -186,7 +192,7 @@ git commit -m "feat: add Sendable to Notifications enum with tests"
 
 ---
 
-### Task 3: Add Sendable to EvaluationDetails, Chunk, and State
+### Task 3: Add Sendable to EvaluationDetails, Chunk, and State — DONE (in repo)
 
 **Files:**
 - Modify: `MLAIX/Types/EvaluationDetails.swift:11`, `:15`, `:22`
@@ -298,7 +304,7 @@ git commit -m "feat: add Sendable to EvaluationDetails and nested types with tes
 
 ---
 
-### Task 4: Add Sendable to ChatParameters and nested types
+### Task 4: Add Sendable to ChatParameters and nested types — DONE (in repo)
 
 **Files:**
 - Modify: `MLAIX/Logic/Inference/llama.cpp/Types/ChatParameters.swift:12`, `:230`, `:291`, `:316`, `:320`
@@ -425,7 +431,7 @@ git commit -m "feat: add Sendable to ChatParameters and nested types with tests"
 
 ---
 
-### Task 5: Add Sendable to ModelFamily (unchecked)
+### Task 5: Add Sendable to ModelFamily (unchecked) — DONE (in repo)
 
 **Files:**
 - Modify: `MLAIX/Types/Model/ModelFamily.swift:11`
@@ -503,18 +509,16 @@ git commit -m "feat: add @unchecked Sendable to ModelFamily with tests"
 
 ---
 
-### Task 6: Final build verification and memory update
+### Task 6: Final build verification
 
 **Step 1: Full build + test**
 
 Run: `swift build 2>&1 | tail -5 && swift test 2>&1 | tail -5`
-Expected: 0 warnings, ~250 tests passing.
+Expected: 0 warnings, 479 tests in 65 suites passing.
 
-**Step 2: Update MEMORY.md**
+**Step 2: Update MEMORY.md (optional)**
 
-Update the Sendable Gaps section to reflect all gaps are closed.
-
-**Step 3: Commit**
+If the repo has a root-level `MEMORY.md` with a Sendable Gaps section, update it to reflect that gaps are closed. Otherwise skip.
 
 ```bash
 git add -A && git commit -m "chore: update MEMORY.md after Sendable sweep"
@@ -534,4 +538,4 @@ git add -A && git commit -m "chore: update MEMORY.md after Sendable sweep"
 | 6 | Verification | Build + test sweep | 0 |
 | **Total** | **11 types** | | **~18 new tests** |
 
-Expected final state: **~248 tests**, **37+ suites**, **0 warnings**.
+Expected final state: **479 tests in 65 suites**, **0 warnings**. (Achieved; Tasks 1–2 obsolete, Tasks 3–5 implemented.)

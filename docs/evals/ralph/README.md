@@ -33,18 +33,6 @@ Regression evaluations for MLAIX, covering UI behavior, concurrency, build stabi
 
 ## Running Evals
 
-### Via Script (recommended)
-
-```bash
-# Full run — builds, tests, records results
-./scripts/ralph-loop.sh
-
-# Dry run — validates schema without executing
-./scripts/ralph-loop.sh --dry-run
-```
-
-Requires `jq` (`brew install jq`) and a Swift toolchain.
-
 ### Via Subagent
 
 The `ralph-loop` Cursor subagent (`.cursor/agents/ralph-loop.md`) can execute evals interactively. It reads `prompts.json`, runs the `command` from each entry, and records results.
@@ -122,7 +110,7 @@ Commands reference one of three test targets:
 ## Ralph-Loop Compatibility Notes
 
 - **conc-002**: Swift 6 strict concurrency is enabled in `Package.swift` (`.enableUpcomingFeature("StrictConcurrency")`).
-- **build-001**: Run `./scripts/pre-release.sh` or `swift build -c release && swift test`.
+- **build-001**: Run `swift build -c release && swift test`.
 - **Package name**: `MLAIX` (not `MLAI`). Test targets: `MLAIXTests`, `MLAIXSharedTests`, `MLAIXiOSTests`.
 
 ## Current Status

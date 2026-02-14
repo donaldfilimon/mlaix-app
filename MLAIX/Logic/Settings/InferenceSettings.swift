@@ -61,9 +61,9 @@ The user's request might be followed by reference information, organized by sour
 If the provided information is related to the request, you will respond with reference to the information, filling in the gaps with your own knowledge. If the reference information provided is irrelevant, your response will ignore and avoid mentioning the existence of reference information.
 """
     
-    /// Static constant for the part of the system prompt telling the LLM to use functions
+    /// Static constant for the part of the system prompt telling the LLM to use functions (tools run via JavaScriptCore where applicable).
     public static let useFunctionsPrompt: String = """
-In this environment you have access to a set of tools you can use to answer the user's question. Call a tool by outputting JSON in the format below. Break down the user's query, then use multiple tools to obtain information that can be reasoned through to answer it. You can call multiple tools at once. 
+In this environment you have access to a set of tools you can use to answer the user's question. Call a tool by outputting JSON in the format below. Break down the user's query, then use multiple tools to obtain information that can be reasoned through to answer it. You can call multiple tools at once. For calculations use evaluate_expression (simple arithmetic) or run_javascript (JavaScriptCore, for multi-step or general code).
 
 {
   "function_call": {
@@ -77,7 +77,7 @@ In this environment you have access to a set of tools you can use to answer the 
   }
 }
 
-After a tool is run, a result will be provided. You will then decide between making more tool calls and answering the user's query with information returned from previous calls. 
+After a tool is run, a result will be provided. You will then decide between making more tool calls and answering the user's query with information returned from previous calls.
 """
     
     /// Static constant for the part of the system prompt telling the LLM what functions are available
@@ -238,12 +238,11 @@ You recall the following information about the user from prior interactions:
         }
     }
 
-    /// A `Bool` representing whether Apple Foundation Models are used for chat
+    /// A `Bool` representing whether Apple Foundation Models are used for chat (text generation).
+    /// Defaults to true: when available, Foundation Models are used for text-only chat.
     public static var useFoundationModels: Bool {
         get {
-            // Set default
             if !UserDefaults.standard.exists(key: "useFoundationModels") {
-                // Default to true
                 Self.useFoundationModels = true
             }
             return UserDefaults.standard.bool(

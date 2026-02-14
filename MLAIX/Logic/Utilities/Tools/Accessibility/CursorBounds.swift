@@ -55,11 +55,3 @@ public class CursorBounds {
     }
 	
 }
-
-@MainActor
-public class CursorBoundsConfig {
-    public static let shared = CursorBoundsConfig()
-    public var logLevel: LogLevel = .info
-
-    private init() {} // Prevent external instantiation
-}

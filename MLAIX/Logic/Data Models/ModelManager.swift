@@ -8,12 +8,18 @@
 import Foundation
 import FSKit_macOS
 import Observation
-import os.log
+import OSLog
 import SwiftUI
 
 @MainActor
 @Observable
 public class ModelManager {
+	
+	/// A `Logger` object for the ``ModelManager`` object
+	private static let logger: Logger = .init(
+		subsystem: Bundle.main.logSubsystem,
+		category: String(describing: ModelManager.self)
+	)
 	
 	init() {
 		self.patchFileIntegrity()
@@ -72,7 +78,7 @@ public class ModelManager {
 				options: .atomic
 			)
 		} catch {
-			os_log("error = %@", error.localizedDescription)
+			Self.logger.error("Failed to save models: \(error.localizedDescription)")
 		}
 	}
 	

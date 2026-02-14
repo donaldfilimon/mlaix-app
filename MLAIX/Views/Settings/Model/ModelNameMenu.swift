@@ -55,11 +55,7 @@ struct ModelNameMenu: View {
                     await self.refreshModelNames()
                 }
             }
-            .onReceive(
-                NotificationCenter.default.publisher(
-                    for: Notifications.changedInferenceConfig.name
-                )
-            ) { output in
+            .onChange(of: NavigationState.shared.inferenceConfigChanged) { _, _ in
                 // Refresh selection
                 self.localModelsListId = UUID()
             }

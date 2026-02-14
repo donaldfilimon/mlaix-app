@@ -43,6 +43,7 @@ struct ConversationSidebarButtons: View {
 			) {
 				self.conversationState.newConversation()
 			}
+			.accessibilityIdentifier("newConversationButton")
 		}
 		.padding(.leading, 5)
 		.padding(.trailing, 4)

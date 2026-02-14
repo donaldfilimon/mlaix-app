@@ -10,6 +10,7 @@ import Testing
 
 @testable import MLAIX
 
+@Suite(.serialized)
 struct ConversationPersistenceTests {
 
     @Test @MainActor
@@ -26,57 +27,56 @@ struct ConversationPersistenceTests {
     @Test @MainActor
     func conversationManagerDebouncedSaveWritesToDisk() async throws {
         let containerUrl = try TestUtilities.makeTempContainerUrl()
+        defer { try? FileManager.default.removeItem(at: containerUrl) }
         let manager = ConversationManager(containerUrl: containerUrl)
 
         await TestUtilities.waitForLoaded(manager)
 
         manager.newConversation()
 
-        try await Task.sleep(for: .milliseconds(700))
+        try await TestUtilities.wait(TestUtilities.saveDebounceWait)
 
         let rawData = try Data(contentsOf: manager.datastoreUrl)
         let decoded = try JSONDecoder().decode([Conversation].self, from: rawData)
 
-        #expect(!decoded.isEmpty)
+        #expect(!decoded.isEmpty, "Debounced save should have written at least one conversation to disk")
     }
 
     @Test @MainActor
     func saveNowFlushesImmediately() async throws {
         let containerUrl = try TestUtilities.makeTempContainerUrl()
+        defer { try? FileManager.default.removeItem(at: containerUrl) }
         let manager = ConversationManager(containerUrl: containerUrl)
 
         await TestUtilities.waitForLoaded(manager)
 
         manager.newConversation()
-        // saveNow bypasses the 350ms debounce
         manager.saveNow()
 
         let rawData = try Data(contentsOf: manager.datastoreUrl)
         let decoded = try JSONDecoder().decode([Conversation].self, from: rawData)
 
-        #expect(!decoded.isEmpty)
+        #expect(!decoded.isEmpty, "saveNow() should flush conversations to disk immediately")
     }
 
     @Test @MainActor
     func multipleRapidSavesCoalesceIntoOne() async throws {
         let containerUrl = try TestUtilities.makeTempContainerUrl()
+        defer { try? FileManager.default.removeItem(at: containerUrl) }
         let manager = ConversationManager(containerUrl: containerUrl)
 
         await TestUtilities.waitForLoaded(manager)
 
-        // Create 5 conversations rapidly — each triggers save() via didSet
         for _ in 0..<5 {
             manager.newConversation()
         }
 
-        // Wait for debounce to flush
-        try await Task.sleep(for: .milliseconds(700))
+        try await TestUtilities.wait(TestUtilities.saveDebounceWait)
 
         let rawData = try Data(contentsOf: manager.datastoreUrl)
         let decoded = try JSONDecoder().decode([Conversation].self, from: rawData)
 
-        // 1 from initial load (empty container auto-creates) + 5 from the loop
-        #expect(decoded.count == 6)
+        #expect(decoded.count == 6, "Expected 1 from initial load plus 5 new conversations (got \(decoded.count))")
     }
 
     @Test @MainActor

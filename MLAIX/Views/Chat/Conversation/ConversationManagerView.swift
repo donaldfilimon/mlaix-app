@@ -8,15 +8,19 @@
 import SwiftUI
 
 struct ConversationManagerView: View {
-    
+
     @Environment(\.appearsActive) private var appearsActive
     @Environment(\.colorScheme) private var colorScheme
-    
+    @Environment(\.openWindow) private var openWindow
+
     @AppStorage("remoteModelName") private var serverModelName: String = InferenceSettings.serverModelName
-    
+
     @Environment(Model.self) private var model
     @State private var canvasController: CanvasController = .init()
-    
+    @State private var selectedPrimarySection: PrimarySection? = .conversations
+    @State private var selectedToolId: String?
+    @State private var showToolbox: Bool = false
+
     @Environment(AppState.self) private var appState
     @Environment(ExpertManager.self) private var expertManager
     @Environment(ConversationManager.self) private var conversationManager
@@ -48,9 +52,19 @@ struct ConversationManagerView: View {
     
     var body: some View {
         NavigationSplitView {
-            conversationList
+            PrimarySidebarView(selection: $selectedPrimarySection)
+        } content: {
+            NavigationContentColumn(
+                section: selectedPrimarySection,
+                selectedToolId: $selectedToolId
+            )
         } detail: {
-            conversationView
+            NavigationDetailColumn(
+                section: selectedPrimarySection,
+                selectedToolId: selectedToolId,
+                conversationView: { AnyView(conversationView) },
+                noConversationView: { AnyView(noSelectedConversation) }
+            )
         }
         .navigationTitle("")
         .toolbar {
@@ -65,11 +79,44 @@ struct ConversationManagerView: View {
                         self.conversationManager.update(selectedConversation)
                     }
             }
-            ToolbarItem(id: "canvas", placement: .primaryAction) {
+            ToolbarItemGroup(placement: .primaryAction) {
+                Button {
+                    self.conversationState.newConversation()
+                } label: {
+                    Label("New Conversation", systemImage: "square.and.pencil")
+                }
+                .buttonStyle(.plain)
+                .keyboardShortcut("n", modifiers: .command)
+                .help("New Conversation (⌘N)")
+                .accessibilityIdentifier("toolbar.newConversation")
+                Button {
+                    showToolbox = true
+                } label: {
+                    Label("Toolbox", systemImage: "wrench.and.screwdriver")
+                }
+                .buttonStyle(.plain)
+                .keyboardShortcut("t", modifiers: .command)
+                .help("Toolbox (⌘T)")
+                .accessibilityIdentifier("toolbar.toolbox")
                 canvasToggle
-            }
-            ToolbarItem(id: "share", placement: .primaryAction) {
                 MessageShareMenu()
+                Menu {
+                    Button {
+                        NavigationState.shared.showKeyboardShortcutsRequested = true
+                    } label: {
+                        Label("Keyboard Shortcuts", systemImage: "keyboard")
+                    }
+                    .keyboardShortcut("k", modifiers: [.command, .shift])
+                    Button {
+                        openSettingsIfAvailable()
+                    } label: {
+                        Label("Settings…", systemImage: "gearshape")
+                    }
+                    .keyboardShortcut(",", modifiers: .command)
+                } label: {
+                    Label("More", systemImage: "ellipsis.circle")
+                }
+                .help("More actions")
             }
         }
         .toolbarBackground(.visible, for: .windowToolbar)
@@ -143,6 +190,15 @@ struct ConversationManagerView: View {
             }
             NavigationState.shared.commandSelectedExpertId = nil
         }
+        .onChange(of: NavigationState.shared.showToolboxRequested) { _, newValue in
+            guard newValue else { return }
+            showToolbox = true
+            NavigationState.shared.showToolboxRequested = false
+        }
+        .sheet(isPresented: $showToolbox) {
+            ToolboxLibraryView(isPresented: $showToolbox)
+                .frame(maxWidth: 500, minHeight: 600)
+        }
         .onReceive(
             NotificationCenter.default.publisher(
                 for: NSApplication.willTerminateNotification
@@ -155,21 +211,6 @@ struct ConversationManagerView: View {
         }
         .environment(model)
         .environment(canvasController)
-    }
-    
-    var conversationList: some View {
-        VStack(
-            alignment: .leading,
-            spacing: 3
-        ) {
-            ConversationNavigationListView()
-            Spacer()
-            ConversationSidebarButtons()
-        }
-        .padding(.vertical, 7)
-        .padding(.horizontal, 8)
-        .liquidGlassPanel(cornerRadius: 16)
-        .padding(.leading, 6)
     }
     
     var conversationView: some View {
@@ -194,17 +235,32 @@ struct ConversationManagerView: View {
     }
     
     var noSelectedConversation: some View {
-        HStack {
-            Text("Hit")
+        VStack(spacing: 28) {
+            ContentUnavailableView(
+                "No conversation selected",
+                systemImage: "bubble.left.and.text.bubble.right",
+                description: Text("Start a new chat or pick one from the list.")
+            )
+            .symbolVariant(.fill)
             Button {
                 self.conversationState.newConversation()
             } label: {
-                Text("Command ⌘ + N")
+                Label("New Conversation", systemImage: "square.and.pencil")
             }
-            Text("to start a conversation.")
+            .buttonStyle(.borderedProminent)
+            .controlSize(.large)
+            .keyboardShortcut("n", modifiers: .command)
+            .accessibilityIdentifier("noConversation.newConversationButton")
         }
-        .liquidGlassPanel(cornerRadius: 16)
-        .padding()
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(.regularMaterial.opacity(0.6))
+        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .strokeBorder(.quaternary, lineWidth: 0.5)
+        )
+        .padding(24)
+        .accessibilityIdentifier("noConversationSelected")
     }
     
     var canvasToggle: some View {
@@ -215,6 +271,7 @@ struct ConversationManagerView: View {
                 .foregroundStyle(toolbarTextColor)
                 .symbolRenderingMode(.monochrome)
         }
+        .buttonStyle(.plain)
         .disabled({
             let hasAssistantMessages = self.selectedConversation?.messages.contains {
                 $0.getSender() == .assistant
@@ -287,5 +344,11 @@ struct ConversationManagerView: View {
             await self.model.setSystemPrompt(prompt)
         }
     }
-    
+
+    /// Opens the app Settings window when available (macOS 14+).
+    private func openSettingsIfAvailable() {
+        if #available(macOS 14.0, *) {
+            NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
+        }
+    }
 }

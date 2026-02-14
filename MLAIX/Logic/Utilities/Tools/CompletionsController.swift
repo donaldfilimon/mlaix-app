@@ -262,7 +262,7 @@ public class CompletionsController {
 		if let focusedElementRef = ActiveApplicationInspector.getFocusedElement() {
 			let properties: [String: Any] = ActiveApplicationInspector.getAllProperties(for: focusedElementRef)
 			if let axFrame = properties["AXFrame"] {
-				let axFrameValue = axFrame as! AXValue
+				let axFrameValue = unsafeBitCast(axFrame as AnyObject, to: AXValue.self)
 				var rect = CGRect.zero
 				if AXValueGetValue(axFrameValue, .cgRect, &rect) {
 					return rect

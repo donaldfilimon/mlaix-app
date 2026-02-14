@@ -47,8 +47,11 @@ enum ActiveApplicationInspector {
 		guard result == .success else {
 			throw InspectorError.accessibilityError("Could not get focused window")
 		}
-		// Direct force cast is safe here since we checked result == .success
-		return windowRef as! AXUIElement
+		guard let windowRef else {
+			throw InspectorError.accessibilityError("Could not cast focused window to AXUIElement")
+		}
+		let window = unsafeBitCast(windowRef, to: AXUIElement.self)
+		return window
 	}
 	
 	/// Function to get the focused element in the app window
@@ -64,8 +67,11 @@ enum ActiveApplicationInspector {
 		guard result == .success else {
 			throw InspectorError.accessibilityError("Could not get focused element")
 		}
-		// Direct force cast is safe here since we checked result == .success
-		return focusedRef as! AXUIElement
+		guard let focusedRef else {
+			throw InspectorError.accessibilityError("Could not cast focused element to AXUIElement")
+		}
+		let focused = unsafeBitCast(focusedRef, to: AXUIElement.self)
+		return focused
 	}
 	
 	/// Function to get all properties of an Accessibility UI element
@@ -167,8 +173,8 @@ enum ActiveApplicationInspector {
 		if CFGetTypeID(cfType) != AXValueGetTypeID() {
 			return nil
 		}
-		// Now it's safe to treat it as an AXValue
-		let axValue = cfType as! AXValue
+		// Now it's safe to treat it as an AXValue (CF type, use unsafeBitCast)
+		let axValue = unsafeBitCast(cfType, to: AXValue.self)
 		// Verify the AXValue type is a CFRange
 		let axValueType = AXValueGetType(axValue)
 		guard axValueType == .cfRange else {
@@ -183,37 +189,5 @@ enum ActiveApplicationInspector {
 		}
 	}
 	
-	public static func printFocusedElementFontInfo() {
-		// Create a system-wide accessibility element.
-		let systemWideElement = AXUIElementCreateSystemWide()
-		// Try to get the currently focused element.
-		var focusedElement: AnyObject?
-		let result = AXUIElementCopyAttributeValue(systemWideElement,
-												   kAXFocusedUIElementAttribute as CFString,
-												   &focusedElement)
-		guard result == .success, let focused = focusedElement else {
-			Logger(subsystem: Bundle.main.logSubsystem, category: "ActiveApplicationInspector").error("Could not retrieve the focused UI element")
-			return
-		}
-		// Convert the focused element to AXUIElement.
-		let element = unsafeDowncast(focused, to: AXUIElement.self)
-		// Access the font attributes. Note that not all apps expose these.
-		var fontFamilyValue: CFTypeRef?
-		let familyResult = AXUIElementCopyAttributeValue(element,
-														 "AXFontFamily" as CFString,
-														 &fontFamilyValue)
-		
-		var fontSizeValue: CFTypeRef?
-		let sizeResult = AXUIElementCopyAttributeValue(element,
-													   "AXFontSize" as CFString,
-													   &fontSizeValue)
-		if familyResult == .success, sizeResult == .success,
-		   let fontFamily = fontFamilyValue as? String,
-		   let fontSize = fontSizeValue as? CGFloat {
-			Logger(subsystem: Bundle.main.logSubsystem, category: "ActiveApplicationInspector").debug("Font: \(fontFamily, privacy: .public), Size: \(fontSize)")
-		} else {
-			Logger(subsystem: Bundle.main.logSubsystem, category: "ActiveApplicationInspector").debug("Focused element does not expose font information")
-		}
-	}
 	
 }

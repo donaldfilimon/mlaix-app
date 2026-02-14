@@ -144,11 +144,7 @@ struct ModelSelectorDropdown: View {
                 }
             }
         }
-        .onReceive(
-            NotificationCenter.default.publisher(
-                for: Notifications.changedInferenceConfig.name
-            )
-        ) { output in
+        .onChange(of: NavigationState.shared.inferenceConfigChanged) { _, _ in
             self.localModelsListId = UUID()
             Task { @MainActor in
                 if InferenceSettings.useServer {

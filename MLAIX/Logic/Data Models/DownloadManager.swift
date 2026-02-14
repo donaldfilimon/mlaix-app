@@ -15,7 +15,7 @@ import SwiftUI
 public class DownloadManager: NSObject, ObservableObject {
 	
     /// A `Logger` object for the `PromptInputField` object
-    private static let logger: Logger = .init(
+    nonisolated private static let logger: Logger = .init(
         subsystem: Bundle.main.logSubsystem,
         category: String(describing: DownloadManager.self)
     )
@@ -168,9 +168,9 @@ extension DownloadManager: URLSessionDelegate, URLSessionDownloadDelegate {
 		didCompleteWithError error: Error?
 	) {
 		if let error = error {
-			os_log("Download error: %@", type: .error, String(describing: error))
+			Self.logger.error("Download failed: \(error.localizedDescription)")
 		} else {
-			os_log("Task finished: %@", type: .info, task)
+			Self.logger.info("Task finished: \(task.taskIdentifier)")
 		}
 
 		let taskId = task.taskIdentifier
@@ -219,7 +219,7 @@ extension DownloadManager: URLSessionDelegate, URLSessionDownloadDelegate {
 				self.didFinishDownloadingModel = true
 			}
 		} catch {
-			os_log("FileManager copy error at %@ to %@ error: %@", type: .error, location.absoluteString, destinationURL.absoluteString, error.localizedDescription)
+			Self.logger.error("Failed to move downloaded file from \(location.absoluteString) to \(destinationURL.absoluteString): \(error.localizedDescription)")
 			return
 		}
 		// Remove lengthy task on main actor

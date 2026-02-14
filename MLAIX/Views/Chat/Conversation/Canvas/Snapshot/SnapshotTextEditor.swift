@@ -56,6 +56,7 @@ struct SnapshotTextEditor: View {
 			position: Bindable(canvasController).position,
 			messages: self.$messages
 		)
+		.frame(maxWidth: .infinity, maxHeight: .infinity)
 		.environment(
 			\.codeEditorTheme, colorScheme == .dark ? Theme.defaultDark : Theme.defaultLight
 		)

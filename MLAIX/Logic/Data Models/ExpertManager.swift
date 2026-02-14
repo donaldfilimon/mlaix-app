@@ -7,7 +7,7 @@
 
 import Foundation
 import Observation
-import os.log
+import OSLog
 import SwiftUI
 
 @MainActor
@@ -127,7 +127,7 @@ public class ExpertManager {
                 options: .atomic
             )
         } catch {
-            os_log("error = %@", error.localizedDescription)
+            Self.logger.error("Failed to save experts: \(error.localizedDescription)")
         }
     }
     

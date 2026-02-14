@@ -91,6 +91,27 @@ struct ExtensionStringTests {
         #expect(result == "")
     }
 
+    @Test(arguments: [
+        ("<think>a</think>", "a"),
+        ("<thought>b</thought>", "b"),
+        ("x <think>\nc\n</think> y", "c"),
+        (" <think>  d  </think> ", "d")
+    ])
+    func testReasoningProcessParameterized(input: String, expected: String) {
+        let result = input.reasoningProcess
+        #expect(result == expected, "input: '\(input)'")
+    }
+
+    @Test(arguments: [
+        ("<think>a</think>", ""),
+        ("pre <think>mid</think> post", "pre  post"),
+        (" <think>only</think> ", "")
+    ])
+    func testReasoningRemovedParameterized(input: String, expected: String) {
+        let result = input.reasoningRemoved
+        #expect(result == expected, "input: '\(input)'")
+    }
+
     // MARK: - parseChartNumericValue
 
     @Test func testParseChartNumericValuePlainNumber() {

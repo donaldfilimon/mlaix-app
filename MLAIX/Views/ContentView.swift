@@ -10,7 +10,6 @@ import SwiftUI
 
 struct ContentView: View {
 
-	@Environment(\.openWindow) private var openWindow
 	@EnvironmentObject private var downloadManager: DownloadManager
 	@Environment(ExpertManager.self) private var expertManager
 	@Environment(ConversationManager.self) private var conversationManager
@@ -41,18 +40,7 @@ struct ContentView: View {
 				conversationState.newConversation()
 			}
 		}
-		.onChange(of: NavigationState.shared.showKeyboardShortcutsRequested) { _, newValue in
-			guard newValue else { return }
-			openWindow(id: "keyboardShortcuts")
-			NavigationState.shared.showKeyboardShortcutsRequested = false
-		}
-		#if DEBUG
-		.onChange(of: NavigationState.shared.showScriptTestingRequested) { _, newValue in
-			guard newValue else { return }
-			openWindow(id: "scriptTesting")
-			NavigationState.shared.showScriptTestingRequested = false
-		}
-		#endif
+		.observeWindowCommands()
     }
 }
 

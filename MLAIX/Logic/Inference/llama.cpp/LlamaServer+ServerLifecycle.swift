@@ -155,7 +155,7 @@ extension LlamaServer {
             process.arguments = formattedArguments
         }
         
-        Self.logger.notice("Starting llama.cpp server \(self.process.arguments!.joined(separator: " "), privacy: .public)")
+        Self.logger.notice("Starting llama.cpp server \((self.process.arguments ?? []).joined(separator: " "), privacy: .public)")
         
         process.standardInput = FileHandle.nullDevice
         

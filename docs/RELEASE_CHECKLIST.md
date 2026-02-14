@@ -4,12 +4,10 @@ Pre-release verification for MLAIX production builds (macOS, iOS/iPadOS, tvOS).
 
 ## Build & Test
 
-**Quick run:** `./scripts/pre-release.sh`
-
 - [ ] `swift build -c release --product MLAIX` succeeds
 - [ ] `swift build --product MLAIXiOS` succeeds
 - [ ] `swift build --product MLAIXtvos` succeeds
-- [ ] `swift test` — all tests pass (336+ tests)
+- [ ] `swift test` — all tests pass (464+ tests in 64 suites)
 - [ ] `swift run MLAIX` — macOS app launches and core flows work
 
 ## Code Quality
@@ -21,7 +19,6 @@ Pre-release verification for MLAIX production builds (macOS, iOS/iPadOS, tvOS).
 
 ## Configuration
 
-- [ ] `./setup.sh <SIGNING_IDENTITY>` run for marp binary
 - [ ] Signing identity valid for distribution
 - [ ] Entitlements correct for sandbox / network / file access
 
@@ -29,7 +26,8 @@ Pre-release verification for MLAIX production builds (macOS, iOS/iPadOS, tvOS).
 
 - [ ] Local model inference works
 - [ ] Remote API (OpenAI-compatible) works with user key
-- [ ] Foundation Models (macOS 26+) when available
+- [ ] Foundation Models (macOS 26+) when available (session management, retry on failure)
+- [ ] MLX models (when selected); cache clears on model refresh
 - [ ] Experts / RAG indexing and retrieval
 - [ ] Function calling (arithmetic, web search, etc.)
 - [ ] Deep Research agent

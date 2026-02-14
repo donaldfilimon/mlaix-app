@@ -7,10 +7,6 @@
 
 import Foundation
 
-protocol FileMonitorDelegate: AnyObject {
-    func didReceive(changes: String)
-}
-
 final class FileMonitor {
     
     let url: URL
@@ -19,8 +15,6 @@ final class FileMonitor {
     let source: DispatchSourceFileSystemObject
     
     let onChange: () -> Void
-    
-    weak var delegate: FileMonitorDelegate?
     
     init(
         url: URL,
@@ -36,7 +30,8 @@ final class FileMonitor {
             queue: DispatchQueue.main
         )
         
-        source.setEventHandler {
+        source.setEventHandler { [weak self] in
+            guard let self else { return }
             let event = self.source.data
             self.process(event: event)
         }
@@ -57,9 +52,7 @@ final class FileMonitor {
         guard event.contains(.extend) else {
             return
         }
-        let newData = self.fileHandle.readDataToEndOfFile()
-        let string = String(data: newData, encoding: .utf8) ?? ""
-        self.delegate?.didReceive(changes: string)
+        _ = self.fileHandle.readDataToEndOfFile()
         onChange()
     }
     

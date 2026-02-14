@@ -104,14 +104,15 @@ struct MLAIApp: App {
             preconditionFailure("SwiftData container failed: disk and in-memory initialization both failed.")
         }
         self.modelContainer = container
-        // Run one-time JSON → SwiftData migration
+        // Run one-time JSON → SwiftData migration and expose container/context to app
         let context = ModelContext(container)
         DataMigrationService.migrateIfNeeded(context: context)
+        SwiftDataStore.sharedContainer = container
+        SwiftDataStore.mainContext = context
     }
     
     var body: some Scene {
-        
-        // Main window
+        // Main window (supports multiple: Window > New Window or ⌘⇧N)
         WindowGroup {
 			ContentView()
 				.environment(appState)
@@ -149,46 +150,85 @@ struct MLAIApp: App {
             // Commands to obtain help and report problems
             HelpCommands.commands
         }
+
+        // Additional main windows (Window > New Window, ⌘⇧N); each has its own conversation state.
+        WindowGroup(id: "newMain", for: UUID.self) { _ in
+			ContentView()
+				.environment(appState)
+				.environmentObject(downloadManager)
+				.environment(conversationManager)
+				.environment(expertManager)
+				.environment(lengthyTasksController)
+				.environment(memories)
+				.environment(modelManager)
+				.environment(inferenceRecords)
+				.environmentObject(speechSynthesizer)
+				.environment(serverArgumentsManager)
+				.environment(inlineAssistantController)
+				.environment(model)
+				.environment(commandManager)
+                .environment(\.liquidGlassStyle, liquidGlassStyle)
+                .preferredColorScheme(appearanceMode.colorScheme)
+                .optionalTint(resolvedAccentColor)
+                .modifier(FontScaleModifier(scale: fontScaleRaw))
+                .liquidGlassWindow()
+        }
+        .windowToolbarStyle(.unified)
+        .defaultSize(width: 1000, height: 700)
         
         // Window for managing memories
         SwiftUI.Window("Memory", id: "memory") {
             MemoriesManagerView()
                 .environment(memories)
                 .frame(minWidth: 500, maxWidth: 600, maxHeight: 550)
+                .observeWindowCommands()
         }
         .windowResizability(.contentSize)
         .windowIdealSize(.fitToContent)
-        
+
         // Window for Tool: Models
         SwiftUI.Window("Models", id: "models") {
             ModelExplorerView()
+                .observeWindowCommands()
         }
-        
+
         // Window for Tool: Dashboard
         SwiftUI.Window("Dashboard", id: "dashboard") {
             DashboardView()
                 .environment(inferenceRecords)
+                .observeWindowCommands()
         }
-        
+
         // Window for Tool: Detector
         SwiftUI.Window("Detector", id: "detector") {
             DetectorView()
+                .observeWindowCommands()
         }
 
         // Window for Tool: Diagrammer
         SwiftUI.Window("Diagrammer", id: "diagrammer") {
             DiagrammerView()
                 .environment(model)
+                .observeWindowCommands()
         }
 
         // Window for Tool: Slide Studio
         SwiftUI.Window("Slide Studio", id: "slideStudio") {
             SlideStudioView()
+                .observeWindowCommands()
         }
-        
+
+        // Window for Tool: Node Editor (visual scripting)
+        SwiftUI.Window("Node Editor", id: "nodeEditor") {
+            NodeEditorView()
+                .frame(minWidth: 720, minHeight: 480)
+                .observeWindowCommands()
+        }
+
         // Keyboard Shortcuts reference
         SwiftUI.Window("Keyboard Shortcuts", id: "keyboardShortcuts") {
             KeyboardShortcutsView()
+                .observeWindowCommands()
         }
         .windowResizability(.contentSize)
         .defaultPosition(.center)
@@ -198,6 +238,7 @@ struct MLAIApp: App {
         SwiftUI.Window("Script Testing", id: "scriptTesting") {
             ScriptTestingView()
                 .frame(minWidth: 640, minHeight: 400)
+                .observeWindowCommands()
         }
         .windowResizability(.contentSize)
         #endif

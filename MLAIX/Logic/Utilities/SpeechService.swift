@@ -9,13 +9,26 @@ import AVFoundation
 import Foundation
 import OSLog
 import SwiftUI
+import Synchronization
 
-// @unchecked Sendable: NSObject subclass with delegate callbacks; cannot safely make Sendable
+/// Thread-safe delegate for AVSpeechSynthesizer callbacks.
+/// Closures are protected by Mutex to prevent data races between @MainActor
+/// setter calls and AVFoundation's arbitrary-thread delegate callbacks.
 class SpeechSynthesizerDelegate: NSObject, AVSpeechSynthesizerDelegate, @unchecked Sendable {
 	private static let logger = Logger(subsystem: Bundle.main.logSubsystem, category: "SpeechSynthesizerDelegate")
 	
-	var onSpeechFinished: (() -> Void)?
-	var onSpeechStart: (() -> Void)?
+	private let _onSpeechFinished = Mutex<(@Sendable () -> Void)?>(nil)
+	private let _onSpeechStart = Mutex<(@Sendable () -> Void)?>(nil)
+	
+	var onSpeechFinished: (@Sendable () -> Void)? {
+		get { _onSpeechFinished.withLock { $0 } }
+		set { _onSpeechFinished.withLock { $0 = newValue } }
+	}
+	
+	var onSpeechStart: (@Sendable () -> Void)? {
+		get { _onSpeechStart.withLock { $0 } }
+		set { _onSpeechStart.withLock { $0 = newValue } }
+	}
 	
 	func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didFinish utterance: AVSpeechUtterance) {
 		onSpeechFinished?()
@@ -65,12 +78,12 @@ final class SpeechSynthesizer: NSObject, ObservableObject {
 		return voices.first?.identifier
 	}
 	
-	var lastCancelation: (() -> Void)? = {}
+	var lastCancelation: (@Sendable () -> Void)? = {}
 	
 	/// Function to perform TTS on a `String`
 	public func speak(
 		text: String,
-		onFinished: @escaping () -> Void = {}
+		onFinished: @escaping @Sendable () -> Void = {}
 	) async {
 		// Get voice
 		guard let voiceIdentifier: String = getVoiceIdentifier() else {
@@ -78,15 +91,19 @@ final class SpeechSynthesizer: NSObject, ObservableObject {
 			return
 		}
 		lastCancelation = onFinished
-		delegate.onSpeechFinished = { [weak self] in
-			withAnimation {
-				self?.isSpeaking = false
+		delegate.onSpeechFinished = { @Sendable [weak self] in
+			Task { @MainActor in
+				withAnimation {
+					self?.isSpeaking = false
+				}
+				onFinished()
 			}
-			onFinished()
 		}
-		delegate.onSpeechStart = { [weak self] in
-			withAnimation(.linear) {
-				self?.isSpeaking = true
+		delegate.onSpeechStart = { @Sendable [weak self] in
+			Task { @MainActor in
+				withAnimation(.linear) {
+					self?.isSpeaking = true
+				}
 			}
 		}
 		let utterance = AVSpeechUtterance(string: text)

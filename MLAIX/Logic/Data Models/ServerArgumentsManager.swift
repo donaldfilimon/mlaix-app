@@ -6,13 +6,21 @@
 //
 
 import Foundation
+import MLAIXShared
 import Observation
-import os.log
+import OSLog
+import SwiftData
 import SwiftUI
 
 @MainActor
 @Observable
 public class ServerArgumentsManager {
+    
+    /// A `Logger` object for the ``ServerArgumentsManager`` object
+    private static let logger: Logger = .init(
+        subsystem: Bundle.main.logSubsystem,
+        category: String(describing: ServerArgumentsManager.self)
+    )
     
     init() {
         self.patchFileIntegrity()
@@ -44,39 +52,67 @@ public class ServerArgumentsManager {
         }.reduce([], +)
     }
     
-    /// Function to save serverArguments to disk
+    /// Saves server arguments to disk (SwiftData when migrated, otherwise JSON).
     public func save() {
+        if DataMigrationService.didMigrateToSwiftData, let context = SwiftDataStore.mainContext {
+            saveToSwiftData(context: context)
+            return
+        }
         do {
-            // Save data
-            let rawData: Data = try JSONEncoder().encode(
-                self.serverArguments
-            )
-            try rawData.write(
-                to: self.datastoreUrl,
-                options: .atomic
-            )
+            let rawData = try JSONEncoder().encode(self.serverArguments)
+            try rawData.write(to: self.datastoreUrl, options: .atomic)
         } catch {
-            os_log("error = %@", error.localizedDescription)
+            Self.logger.error("Failed to save server arguments: \(error.localizedDescription)")
         }
     }
-    
-    /// Function to load serverArguments from disk
-    public func load() {
+
+    private func saveToSwiftData(context: ModelContext) {
         do {
-            // Load data
-            let rawData: Data = try Data(
-                contentsOf: self.datastoreUrl
-            )
-            let decoder: JSONDecoder = JSONDecoder()
-            self.serverArguments = try decoder.decode(
-                [ServerArgument].self,
-                from: rawData
-            )
+            var descriptor = FetchDescriptor<ServerArgumentModel>(sortBy: [SortDescriptor(\.flag)])
+            descriptor.fetchLimit = 0
+            let existing = try context.fetch(descriptor)
+            for model in existing {
+                context.delete(model)
+            }
+            for arg in serverArguments {
+                let model = ServerArgumentModel(
+                    id: arg.id,
+                    flag: arg.flag,
+                    value: arg.value,
+                    isActive: arg.isActive
+                )
+                context.insert(model)
+            }
+            try context.save()
         } catch {
-            // Indicate error
-            Logger(subsystem: Bundle.main.logSubsystem, category: "ServerArgumentsManager").error("Failed to load serverArguments: \(error.localizedDescription, privacy: .public)")
-            // Make new datastore
+            Self.logger.error("Failed to save server arguments to SwiftData: \(error.localizedDescription)")
+        }
+    }
+
+    /// Loads server arguments from disk (SwiftData when migrated, otherwise JSON).
+    public func load() {
+        if DataMigrationService.didMigrateToSwiftData, let context = SwiftDataStore.mainContext {
+            loadFromSwiftData(context: context)
+            return
+        }
+        do {
+            let rawData = try Data(contentsOf: self.datastoreUrl)
+            let decoder = JSONDecoder()
+            self.serverArguments = try decoder.decode([ServerArgument].self, from: rawData)
+        } catch {
+            Self.logger.error("Failed to load serverArguments: \(error.localizedDescription, privacy: .public)")
             self.newDatastore()
+        }
+    }
+
+    private func loadFromSwiftData(context: ModelContext) {
+        do {
+            let descriptor = FetchDescriptor<ServerArgumentModel>(sortBy: [SortDescriptor(\.flag)])
+            let models = try context.fetch(descriptor)
+            serverArguments = models.map { ServerArgument(id: $0.id, isActive: $0.isActive, flag: $0.flag, value: $0.value) }
+        } catch {
+            Self.logger.error("Failed to load server arguments from SwiftData: \(error.localizedDescription)")
+            newDatastore()
         }
     }
     

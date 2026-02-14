@@ -36,6 +36,11 @@ struct MLXRunnerTests {
         #expect(error.errorDescription?.contains("Failed to load") == true)
     }
 
+    @Test func errorCancelledDescription() {
+        let error = MLXRunner.MLXError.cancelled
+        #expect(error.errorDescription?.contains("cancelled") == true)
+    }
+
     @Test func errorConformsToLocalizedError() {
         let error: any Error = MLXRunner.MLXError.invalidResponse
         #expect(error is LocalizedError)

@@ -6,11 +6,8 @@ Steps to prepare MLAIX for production release (macOS, iOS, tvOS).
 
 - Xcode or Swift 6.2+ toolchain
 - Apple Developer account (for signing and distribution)
-- `./setup.sh <SIGNING_IDENTITY>` run for marp binary (Slide Studio)
 
 ## Pre-Release Verification
-
-**Quick run:** `./scripts/pre-release.sh` — builds all products and runs tests.
 
 ### 1. Build All Products
 
@@ -24,14 +21,16 @@ swift build --product MLAIXtvos
 
 ```bash
 swift test
-# Expect: 332+ tests in 59 suites passing
+# Expect: 464+ tests in 64 suites passing
 ```
 
 ### 3. Manual Verification
 
 - [ ] `swift run MLAIX` — macOS app launches
 - [ ] Local model inference works (if model installed)
+- [ ] MLX model inference works when an MLX model is selected (cache clears on model refresh)
 - [ ] Remote API works with user-provided key
+- [ ] Apple Foundation Models (macOS 26+) when available
 - [ ] Experts, function calling, Deep Research functional
 - [ ] Debug menu and Script Testing **not** visible in release build
 
@@ -54,17 +53,11 @@ For iOS: Update `MLAIXiOS/Info.plist` if present.
 
 ## Signing and Notarization (macOS)
 
-1. **Sign marp binary** (required for Slide Studio):
-   ```bash
-   security find-identity -p codesigning -v
-   ./setup.sh "Apple Development: Your Name (TEAM_ID)"
-   ```
-
-2. **Sign the app** (for distribution outside App Store):
+1. **Sign the app** (for distribution outside App Store):
    - Use Xcode: Product → Archive → Distribute App
    - Or `codesign` for ad-hoc distribution
 
-3. **Notarization** (for Gatekeeper):
+2. **Notarization** (for Gatekeeper):
    - Required for DMG/zip distribution
    - Use `xcrun notarytool` or Xcode Organizer
 

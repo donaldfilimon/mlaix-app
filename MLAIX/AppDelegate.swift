@@ -67,22 +67,57 @@ public class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
             ExpertManager.shared.update(modExpert)
         }
     }
-    
+
+    /// When the app becomes active, ensure a key window exists. Prefer the main (MLAIX) window when none is key.
+    public func applicationDidBecomeActive(_ notification: Notification) {
+        if NSApp.keyWindow != nil {
+            return
+        }
+        if let main = AppWindowManager.mainWindow {
+            main.makeKeyAndOrderFront(nil)
+        } else {
+            NSApp.windows.first { $0.canBecomeKey }?.makeKey()
+        }
+    }
+
+    /// Provide the dock menu (right-click or control-click on the app icon in the dock).
+    public func applicationDockMenu(_ sender: NSApplication) -> NSMenu? {
+        DockMenuCommands.makeDockMenu(target: self)
+    }
+
+    @objc func dockNewConversation(_ sender: Any?) {
+        NSApp.activate(ignoringOtherApps: true)
+        ConversationManager.shared.newConversation()
+    }
+
+    @objc func dockShowToolbox(_ sender: Any?) {
+        NSApp.activate(ignoringOtherApps: true)
+        NavigationState.shared.showToolboxRequested = true
+    }
+
+    @objc func dockOpenSettings(_ sender: Any?) {
+        NSApp.activate(ignoringOtherApps: true)
+        if #available(macOS 14.0, *) {
+            NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
+        }
+    }
+
     /// Function that runs before the app is terminated
     public func applicationShouldTerminate(
         _ sender: NSApplication
     ) -> NSApplication.TerminateReply {
         // Flush pending conversation saves before shutdown
         ConversationManager.shared.saveNow()
-        // Stop server
-        Task {
-            await Model.shared.stopServers()
-        }
         // Remove stale sources
         SourcesManager.shared.removeStaleSources()
         // Remove non-persisted resources
         ExpertManager.shared.removeUnpersistedResources()
-        return .terminateNow
+        // Stop server and reply when done
+        Task { @MainActor in
+            await Model.shared.stopServers()
+            NSApp.reply(toApplicationShouldTerminate: true)
+        }
+        return .terminateLater
     }
     
 }

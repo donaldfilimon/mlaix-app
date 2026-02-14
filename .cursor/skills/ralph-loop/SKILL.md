@@ -10,11 +10,7 @@ Regression eval workflow for MLAIX. Run the Ralph Loop to verify code changes ha
 
 ## Quick Run
 
-```bash
-./scripts/ralph-loop.sh
-```
-
-Or invoke the `ralph-loop` subagent (`.cursor/agents/ralph-loop.md`) to run evals interactively.
+Invoke the `ralph-loop` subagent (`.cursor/agents/ralph-loop.md`) to run evals interactively.
 
 ## Manifest
 

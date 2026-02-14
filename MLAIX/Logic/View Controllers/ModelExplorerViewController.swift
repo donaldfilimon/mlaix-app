@@ -43,9 +43,10 @@ import Observation
 				.filter { model in
 					return model.modelFamily == family
 				}
+			guard let first = modelsInFamily.first else { continue }
 			let newModelFamily: ModelFamily = ModelFamily(
 				name: family.rawValue,
-				family: modelsInFamily.first!.modelFamily,
+				family: first.modelFamily,
 				models: modelsInFamily
 			)
 			newModelFamilies.append(newModelFamily)

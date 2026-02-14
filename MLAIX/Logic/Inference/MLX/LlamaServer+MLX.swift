@@ -105,6 +105,9 @@ extension LlamaServer {
                 progressHandler: progressHandler
             )
         } catch let error as MLXRunner.MLXError {
+            if case .cancelled = error {
+                throw LlamaServerError.cancelled
+            }
             Self.mlxLogger.error("MLX inference failed: \(error.localizedDescription, privacy: .public)")
             throw LlamaServerError.errorResponse(error.localizedDescription)
         } catch {

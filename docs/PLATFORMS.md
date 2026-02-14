@@ -6,7 +6,7 @@ MLAIX supports multiple Apple platforms with different feature sets.
 
 | Platform | Status | Features |
 |----------|--------|----------|
-| **macOS** | Full | Local models (llama.cpp), remote API, Apple Foundation Models, Experts, function calling, Deep Research, all tools |
+| **macOS** | Full | Local models (llama.cpp), MLX (native Swift), remote API, Apple Foundation Models (macOS 26+; session management, retry on context exhaustion), Experts, function calling, Deep Research, all tools. Commands, inference records, and server arguments use SwiftData when migrated from JSON. |
 | **iOS / iPadOS** | Mobile | Remote API only (OpenAI-compatible). Chat, Markdown rendering. |
 | **tvOS** | Placeholder | Coming soon. Placeholder app for future support. |
 
@@ -53,7 +53,7 @@ The `MLAIXShared` library provides unified SwiftUI and SwiftData code across pla
 - **Structured errors**: `SharedChatError` for API/network failures
 - **Keychain**: `KeychainHelper` for secure storage
 
-MLAIXiOS persists chat history via SwiftData and uses Keychain for API keys. SwiftData container initialization uses a file-based store first; if that fails (e.g. sandbox or permissions), it falls back to an in-memory store so the app can still run.
+MLAIXiOS persists chat history via SwiftData and uses Keychain for API keys. SwiftData container initialization uses a file-based store first; if that fails (e.g. sandbox or permissions), it falls back to an in-memory store so the app can still run. On macOS, a one-time JSON→SwiftData migration runs for commands, inference records, server arguments, memories, and function selections; after that, the corresponding managers use SwiftData. Conversations on macOS remain JSON-backed.
 
 ## Testing
 

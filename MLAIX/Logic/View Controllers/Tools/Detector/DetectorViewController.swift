@@ -5,7 +5,6 @@
 //  Created by John Bean on 2/23/25.
 //
 
-import Accelerate
 import Foundation
 import FSKit_macOS
 import Observation

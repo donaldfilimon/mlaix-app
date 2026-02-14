@@ -4,9 +4,9 @@ This document describes how to run, write, and organize tests in the MLAIX proje
 
 ## Overview
 
-- **Framework**: Swift Testing (`import Testing`, `@Test` functions)
+- **Framework**: Swift Testing (`import Testing`, `@Test` functions) for unit tests
 - **Test targets**: `MLAIXTests`, `MLAIXiOSTests`, `MLAIXSharedTests`
-- **Total tests**: 364 across 62 suites
+- **Total tests**: 479 across 65 suites (unit tests). XCUI tests in `MLAIXUITests` use XCTest and are run from Xcode.
 
 ## Running Tests
 
@@ -34,8 +34,7 @@ Some tests require a display and simulate UI interaction:
 
 ```bash
 MLAIX_UI_INTERACTION_TESTS=1 swift test
-# Or use the convenience script:
-./scripts/run-ui-tests.sh
+
 ```
 
 ## Test Organization
@@ -70,10 +69,15 @@ MLAIX_UI_INTERACTION_TESTS=1 swift test
 - **SharedChatErrorTests** — Error descriptions, LocalizedError
 - **ThemePresetTests** — ThemePreset enum, accentHex format
 - **AppearanceSettingsTests** — Appearance mode, font scale, theme presets
+- **FoundationModelsSupportTests** — Availability status, error descriptions (including `.cancelled`)
+- **MLXRunnerTests** — MLXError descriptions, Availability, Request/Response Codable, clearModelCache
 
 ### Functions & Agents
 - **FunctionTypesTests** — Function categories, parameters, schemas
 - **PromptAnalyzerTests** — Text vs image routing
+
+### Navigation & UI
+- **PrimarySectionTests** — PrimarySection enum (title, subtitle, systemImage, Identifiable)
 
 ### Other
 - **KnownModelConcurrencyTests** — Thread safety
@@ -100,16 +104,27 @@ struct MyFeatureTests {
 
 ### Patterns
 
-- **Parameterized tests**: `@Test(arguments: [(a, b), ...])` for multiple inputs
+- **Parameterized tests**: `@Test(arguments: [(a, b), ...])` or `@Test(arguments: Enum.allCases)` for multiple inputs
 - **Async tests**: `@Test func testAsync() async { ... }`
 - **MainActor tests**: `@Test @MainActor` for UI/manager code
-- **Descriptive failures**: `#expect(x == y, "context when it fails")`
+- **Descriptive failures**: `#expect(x == y, "context when it fails")` so failures are easy to diagnose
+- **File I/O tests**: Use `@Suite(.serialized)` so persistence tests run one at a time and avoid flakiness; clean up temp dirs with `defer { try? FileManager.default.removeItem(at: url) }`
 
 ### Shared Helpers
 
 `TestUtilities.swift` provides:
-- `makeTempContainerUrl()` — Unique temp directory for test data
-- `waitForLoaded(_ manager: ConversationManager)` — Wait for manager to finish loading
+
+- **Timing**: `saveDebounceWait` (500ms, use after triggering ConversationManager save), `pollInterval`, `wait(_ duration)`
+- **Temp directory**: `makeTempContainerUrl()` — unique temp dir (caller cleans up; use `defer` or `withTempDirectory`)
+- **Temp directory with cleanup**: `withTempDirectory { url in ... }` — runs the closure and removes the dir afterward
+- **Managers**: `waitForLoaded(_ manager: ConversationManager)` — wait until the manager has finished loading
+- **Async conditions**: `waitUntil(timeout:interval:condition:)` — poll until a condition is true or timeout
+
+### Modern Swift Conventions
+
+- **Unit tests**: Swift Testing only (`import Testing`, `@Test`, `#expect`). No XCTest in MLAIXTests / MLAIXiOSTests / MLAIXSharedTests.
+- **UI tests**: `MLAIXUITests` uses XCTest (XCUI) because Swift Testing does not provide XCUI APIs; run from Xcode with MLAIX as host.
+- **Observation**: Production code uses `@Observable` for view models and state; `ObservableObject` + `@Published` only where required (e.g. `NSObject` subclasses such as `DownloadManager`, `SpeechSynthesizer`).
 
 ### Conventions
 
@@ -126,7 +141,7 @@ Regression evals live in `docs/evals/ralph/`. See `docs/evals/ralph/README.md` f
 
 - **LlamaServer / Model inference**: Largely untested (integration-heavy; consider mocking)
 - **ExpertManager**: Limited unit tests
-- **UI / SwiftUI views**: No XCUITest coverage; desktop interaction tests are opt-in
+- **XCUI (macOS)**: MLAIXUITests target; run from Xcode with MLAIX as host app. Covers launch, sidebar, toolbar, and New Conversation flow. See `MLAIXUITests/README.md`. Desktop interaction tests in MLAIXTests are opt-in (`MLAIX_UI_INTERACTION_TESTS=1`).
 - **Ralph evals**: Proxy scoring only; consider live model-backed scoring for accuracy
 
 ## Related

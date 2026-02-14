@@ -1,5 +1,5 @@
 {
-  "originHash" : "9098cc93b84608a3d042dd84055d74ca9a1cfab6f6a701e8836c3fcb1f0710dd",
+  "originHash" : "1d17d8087ef365a0828c48d0277b232f55ee4bac6b88b0ac83ebe9daa6eb1ad7",
   "pins" : [
     {
       "identity" : "axswift",
@@ -33,7 +33,6 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/johnbean393/Default-Models",
       "state" : {
-        "branch" : "main",
         "revision" : "d5bc71875649c4febfba9b78b456b9cb6c90f23e"
       }
     },
@@ -42,7 +41,6 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/johnbean393/EventSource",
       "state" : {
-        "branch" : "main",
         "revision" : "a6c5d1b77bf9161866e36b5c9f018871ff42f747"
       }
     },
@@ -51,7 +49,6 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/johnbean393/ExtractKit-macOS",
       "state" : {
-        "branch" : "main",
         "revision" : "d2374e0fc535340fb2fe2f4825c5ae41035f4c7c"
       }
     },
@@ -69,7 +66,6 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/johnbean393/GoogleSearch",
       "state" : {
-        "branch" : "main",
         "revision" : "8578671e3bc7277cff15949b142375ab581b216c"
       }
     },
@@ -96,7 +92,6 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/colinc86/LaTeXSwiftUI",
       "state" : {
-        "branch" : "main",
         "revision" : "c45e0fd45f64923c49c5904a9f9626bc8939f05f"
       }
     },
@@ -105,7 +100,6 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/sindresorhus/LaunchAtLogin-Modern",
       "state" : {
-        "branch" : "main",
         "revision" : "a04ec1c363be3627734f6dad757d82f5d4fa8fcc"
       }
     },
@@ -177,7 +171,6 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/donaldfilimon/similarity-search-kit",
       "state" : {
-        "branch" : "mlai-resources",
         "revision" : "759a31901768db084031031bdde0ad3f83ebea65"
       }
     },

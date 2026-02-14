@@ -7,12 +7,18 @@
 
 import Foundation
 import Observation
-import os.log
+import OSLog
 import SwiftUI
 
 @MainActor
 @Observable
 public class SourcesManager {
+	
+	/// A `Logger` object for the ``SourcesManager`` object
+	private static let logger: Logger = .init(
+		subsystem: Bundle.main.logSubsystem,
+		category: String(describing: SourcesManager.self)
+	)
 	
 	init() {
 		self.patchFileIntegrity()
@@ -50,7 +56,7 @@ public class SourcesManager {
 				options: .atomic
 			)
 		} catch {
-			os_log("error = %@", error.localizedDescription)
+			Self.logger.error("Failed to save sources: \(error.localizedDescription)")
 		}
 	}
 	

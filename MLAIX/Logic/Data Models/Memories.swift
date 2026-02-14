@@ -97,19 +97,31 @@ public class Memories {
             guard let self else { return }
             let signpost = StartupMetrics.beginInterval("Memories.loadDatastore")
             defer { StartupMetrics.endInterval("Memories.loadDatastore", signpost) }
-            let rawData: Data
+            var rawData: Data
             do {
                 rawData = try await Task.detached {
                     try Data(contentsOf: targetUrl)
                 }.value
             } catch {
-                self.newDatastore()
-                self.loadTask = nil
-                return
+                // After SwiftData migration the main file is archived; try backup so we don't lose data
+                if DataMigrationService.didMigrateToSwiftData {
+                    let backupUrl = targetUrl.appendingPathExtension("migrated")
+                    do {
+                        rawData = try await Task.detached { try Data(contentsOf: backupUrl) }.value
+                    } catch {
+                        self.newDatastore()
+                        self.loadTask = nil
+                        return
+                    }
+                } else {
+                    self.newDatastore()
+                    self.loadTask = nil
+                    return
+                }
             }
-            let decoder: JSONDecoder = JSONDecoder()
-            let memories = (try? decoder.decode([Memory].self, from: rawData)) ?? []
-            self.memories = memories
+            let decoder = JSONDecoder()
+            let decoded = (try? decoder.decode([Memory].self, from: rawData)) ?? []
+            self.memories = decoded
             self.isLoaded = true
             self.loadTask = nil
         }
@@ -130,17 +142,23 @@ public class Memories {
         }
     }
     
-    /// Function to load memories
+    /// Function to load memories (with fallback to .migrated backup after SwiftData migration).
     private func load() {
         do {
-            let rawData: Data = try Data(contentsOf: Self.datastoreUrl)
-            let decoder: JSONDecoder = JSONDecoder()
-            self.memories = try decoder.decode(
-                [Memory].self,
-                from: rawData
-            )
+            let rawData = try Data(contentsOf: Self.datastoreUrl)
+            let decoder = JSONDecoder()
+            self.memories = try decoder.decode([Memory].self, from: rawData)
             self.isLoaded = true
         } catch {
+            if DataMigrationService.didMigrateToSwiftData {
+                let backupUrl = Self.datastoreUrl.appendingPathExtension("migrated")
+                do {
+                    let rawData = try Data(contentsOf: backupUrl)
+                    self.memories = (try? JSONDecoder().decode([Memory].self, from: rawData)) ?? []
+                    self.isLoaded = true
+                    return
+                } catch { /* fall through to newDatastore */ }
+            }
             Self.logger.error("Failed to load memories: \(error.localizedDescription, privacy: .public)")
             self.newDatastore()
         }
@@ -158,7 +176,7 @@ public class Memories {
                 options: .atomic
             )
         } catch {
-            os_log("error = %@", error.localizedDescription)
+            Self.logger.error("Failed to save memories: \(error.localizedDescription)")
         }
     }
     

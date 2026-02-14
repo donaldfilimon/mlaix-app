@@ -49,10 +49,12 @@ public class Accessibility {
 		let systemWideElement = AXUIElementCreateSystemWide()
 		var focusedApp: AnyObject?
 		var error = AXUIElementCopyAttributeValue(systemWideElement, kAXFocusedApplicationAttribute as CFString, &focusedApp)
-		guard error == .success, let focusedAppElement = focusedApp as! AXUIElement? else { return nil }
+		guard error == .success, let focusedApp else { return nil }
+		let focusedAppElement = unsafeBitCast(focusedApp, to: AXUIElement.self)
 		var focusedUIElement: AnyObject?
 		error = AXUIElementCopyAttributeValue(focusedAppElement, kAXFocusedUIElementAttribute as CFString, &focusedUIElement)
-		guard error == .success, let focusedElement = focusedUIElement as! AXUIElement? else { return nil }
+		guard error == .success, let focusedUIElement else { return nil }
+		let focusedElement = unsafeBitCast(focusedUIElement, to: AXUIElement.self)
 		var selectedTextValue: AnyObject?
 		error = AXUIElementCopyAttributeValue(focusedElement, kAXSelectedTextAttribute as CFString, &selectedTextValue)
 		guard error == .success, let selectedText = selectedTextValue as? String else { return nil }

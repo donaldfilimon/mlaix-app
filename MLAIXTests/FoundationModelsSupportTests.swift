@@ -102,6 +102,11 @@ struct FoundationModelsSupportTests {
         #expect(error.errorDescription?.contains("streaming failed") == true)
     }
 
+    @Test func errorCancelledDescription() {
+        let error = FoundationModelsError.cancelled
+        #expect(error.errorDescription?.contains("cancelled") == true)
+    }
+
     @Test func errorConformsToLocalizedError() {
         let error: any Error = FoundationModelsError.emptyResponse
         #expect(error is LocalizedError)
@@ -112,7 +117,8 @@ struct FoundationModelsSupportTests {
             .sessionUnavailable,
             .emptyResponse,
             .contextExhausted,
-            .streamingFailed("test")
+            .streamingFailed("test"),
+            .cancelled
         ]
         for error in errors {
             #expect(error.errorDescription != nil)

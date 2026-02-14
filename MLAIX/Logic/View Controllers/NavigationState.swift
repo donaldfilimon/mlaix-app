@@ -35,6 +35,12 @@ public final class NavigationState {
 	public var inferenceConfigChanged: Bool = false
 	/// Show keyboard shortcuts window
 	public var showKeyboardShortcutsRequested: Bool = false
+	/// Show toolbox sheet
+	public var showToolboxRequested: Bool = false
+	/// Open a window by id (e.g. "models", "dashboard"); observer should call openWindow and clear.
+	public var windowToOpen: String?
+	/// When true, observer should call openWindow(id: "newMain", value: UUID()) to open another main window.
+	public var openNewMainWindowRequested: Bool = false
 	/// Show script testing window (debug only)
 	public var showScriptTestingRequested: Bool = false
 

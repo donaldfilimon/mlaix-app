@@ -1,4 +1,4 @@
-# MLAI Codebase: Research on Additions and Improvements
+# MLAIX Codebase: Research on Additions and Improvements
 
 Research conducted across the MLAIX/ codebase, Package.swift, tests, and evals. Organized by category with actionable recommendations.
 
@@ -20,7 +20,7 @@ Added `initial: false` where handlers perform save/sync/notification actions tha
 
 ### 2.1 Replace `print()` with `Logger` / `OSLog` ✅ Done
 
-Migrated ~40 call sites to `Logger` across views, logic, data models, inference, accessibility, and extensions. Extension+URL already uses Logger. Remaining `print()` only in MLXRunner (Python), llama-server-watchdog (CLI), and commented ServerHealth.
+Migrated ~40 call sites to `Logger` across views, logic, data models, inference, accessibility, and extensions. Extension+URL already uses Logger. Remaining `print()` only in llama-server-watchdog (CLI) and commented ServerHealth. MLXRunner uses Logger (native Swift MLX).
 
 ### 2.2 Deprecated API with migration path ✅ N/A
 
@@ -78,7 +78,7 @@ Heavy use of `static let shared` (Model, ConversationManager, ExpertManager, etc
 ### 6.1 Current coverage
 
 - 21 test files in MLAIXTests/, plus MLAIXiOSTests, MLAIXSharedTests
-- 336+ tests in 59 suites (Swift Testing)
+- 479 tests in 65 suites (Swift Testing)
 - Areas: Extension+String (reasoningProcess, reasoningRemoved), Extension+Collection (transpose, variance), PromptInputSync, ConversationPersistence, KnownModel, Message/Source, Expert, Function types, InferenceSettings, PromptAnalyzer, TrainingDataCollector, CoreMLTrainer, BackendAutoConfig, JavaScriptRunner, SettingsModelSupport, iOS chat state, SharedAPIConfig, SharedChatError, KeychainHelper, etc.
 
 ### 6.2 Gaps
@@ -110,7 +110,7 @@ No `TODO` or `FIXME` comments found. Either the codebase is clean or such marker
 
 - `#available(macOS 15, *)` — used for SwiftUI features, SF Symbols
 - `#available(macOS 15.2, *)` — Foundation Models (Image Playground)
-- `#available(macOS 26.0, *)` — Apple Intelligence / FoundationModels framework
+- `#available(macOS 26.0, *)` — Apple Intelligence / FoundationModels framework (chat); Foundation Models streaming uses session management and retry on failure.
 
 **Recommendation:** Keep version checks; consider extracting into helpers (e.g. `enum PlatformCapabilities`) for clarity.
 
@@ -154,18 +154,13 @@ No `TODO` or `FIXME` comments found. Either the codebase is clean or such marker
 
 ---
 
-## 12. SwiftData Migration (Optional)
+## 12. SwiftData (Current State)
 
-**Current:** Conversations and messages are persisted as JSON via `ConversationManager` (Codable + `datastoreUrl`).
+**Done:** One-time JSON → SwiftData migration via `DataMigrationService` (inference records, memories, commands, server arguments, function selections). After migration, `CommandManager`, `InferenceRecords`, and `ServerArgumentsManager` load/save from SwiftData when `DataMigrationService.didMigrateToSwiftData` is true; they use `SwiftDataStore.mainContext` and keep the same public API. `Memories` loads from the `.migrated` backup if the main JSON is missing so data is not lost; it still persists as JSON (memory type depends on SimilaritySearchKit).
 
-**SwiftData option:** For richer querying, relationships, and system integration:
+**Conversations:** Still persisted as JSON via `ConversationManager` (Codable + `datastoreUrl`). Moving conversations to SwiftData would require a bridge from/to existing `Conversation`/`Message` types and schema design.
 
-1. Add `import SwiftData` and `@Model` to `Conversation` and `Message` (convert from struct to class).
-2. Create `ModelContainer` with schema for `Conversation` and `Message`.
-3. Replace `ConversationManager` JSON load/save with `ModelContext` fetch/insert/delete.
-4. Use `@Query` in SwiftUI views for reactive updates.
-
-**Trade-offs:** SwiftData is built on Core Data; migration requires schema design and data migration. JSON is simpler and already works. Consider SwiftData only if query/relationship needs justify the refactor.
+**Optional next step:** Use SwiftData for conversations (e.g. `SharedConversation`/`SharedChatMessage` in MLAIXShared) if query/relationship needs justify the refactor.
 
 ---
 
@@ -206,5 +201,5 @@ No `TODO` or `FIXME` comments found. Either the codebase is clean or such marker
 - **Short-term:** ✅ `initial: false` on onChange where needed. Dependency pins pending.
 - **Production:** ✅ Debug hidden, critical force unwraps fixed, CI workflow, release checklist.
 - **Medium-term:** Broader @Observable migration, expand tests, refine evals.
-- **Long-term:** ✅ Multi-platform (macOS, iOS, tvOS), MLAIXShared library, SwiftData persistence, Keychain for API keys.
-- **Recent:** ✅ iOS SwiftData persistence, Keychain for API keys, SharedChatError, New Chat button, Extension+String/Collection tests, docs/TESTING.md, 332+ tests.
+- **Long-term:** ✅ Multi-platform (macOS, iOS, tvOS), MLAIXShared library, SwiftData persistence (commands, inference records, server args when migrated), Keychain for API keys.
+- **Recent:** ✅ iOS SwiftData persistence, Keychain for API keys, SharedChatError, New Chat button, Extension+String/Collection tests, docs/TESTING.md, 464+ tests in 64 suites. ✅ Foundation Models: session turn limit, retry on context exhaustion, task cancellation. ✅ MLX: load vs generation error mapping, cancellation, `clearModelCache()` on model refresh.

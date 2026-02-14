@@ -2,18 +2,16 @@
 
 ## Project Structure & Module Organization
 
-- `MLAIX/`: main macOS app source (Swift/SwiftUI) for the MLAIX app. Key subfolders include `Logic/`, `Views/`, `Types/`, `Extensions/`, plus assets in `MLAIX/Assets.xcassets` and resources in `MLAIX/Resources`.
-- `MLAIX/Logic/Utilities/Services/`: extracted service helpers (ContextCompressor, SpeechService, Tavily).
+- `MLAIX/`: main macOS app source (Swift/SwiftUI) for the MLAIX app. Key subfolders include `Logic/`, `Views/`, `Types/`, `Extensions/`, `Views/Tools/` (Detector, Diagrammer, Node Editor, Slide Studio, etc.), plus assets and resources.
+- `MLAIX/Logic/Utilities/`: utility helpers (ContextCompressor, SpeechService, Tavily, GraphRAG).
 - `MLAIXTests/`: unit tests using Swift Testing.
 - `Docs Images/`, `Markdown/`, `Features/`, `About/`: documentation and site content.
-- `scripts/` and `setup.sh`: local setup helpers (signing, tooling).
 
 ## Build, Test, and Development Commands
 
 - `swift build`: build the SwiftPM target (`MLAIX`).
-- `swift run MLAIX`: run the MLAI app via SwiftPM.
-- `swift test`: run unit tests in `MLAIXTests/`.
-- `./setup.sh <CODE_SIGNING_IDENTITY>`: download/sign Marp.
+- `swift run MLAIX`: run the MLAIX app via SwiftPM.
+- `swift test`: run unit tests (479 tests in 65 suites across `MLAIXTests/`, `MLAIXiOSTests/`, `MLAIXSharedTests/`).
 
 ## Coding Style & Naming Conventions
 

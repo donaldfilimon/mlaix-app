@@ -82,34 +82,3 @@ struct ChatFieldStyle: TextFieldStyle {
 	}
 	
 }
-
-struct ChatButtonStyle: ButtonStyle {
-    
-    let cornerRadius = 30.0
-    var rect: RoundedRectangle {
-        RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-    }
-    
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .bold()
-            .cornerRadius(cornerRadius)
-            .background(
-                LinearGradient(
-                    colors: [
-                        Color.textBackground,
-                        Color.textBackground.opacity(0.5)
-                    ],
-                    startPoint: .leading,
-                    endPoint: .trailing
-                )
-            )
-            .mask(rect)
-            .overlay(
-                rect
-                    .stroke(style: StrokeStyle(lineWidth: 1))
-                    .foregroundStyle(Color.primary)
-            )
-    }
-    
-}

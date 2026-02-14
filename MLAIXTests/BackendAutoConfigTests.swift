@@ -26,7 +26,8 @@ struct BackendAutoConfigTests {
             foundationModels: false,
             mlx: false,
             recommendedBackend: .local,
-            canAutoConnect: true
+            canAutoConnect: true,
+            suggestedRemoteEndpoint: nil
         )
         #expect(avail.local == true)
         #expect(avail.remote == false)
@@ -69,10 +70,11 @@ struct BackendAutoConfigTests {
             foundationModels: false,
             mlx: true,
             recommendedBackend: .mlx,
-            canAutoConnect: true
+            canAutoConnect: true,
+            suggestedRemoteEndpoint: nil
         )
         #expect(avail.mlx == true)
-        #expect(avail.recommendedBackend == .mlx)
+        #expect(avail.recommendedBackend == BackendAutoConfig.BackendAvailability.RecommendedBackend.mlx)
     }
 
     @Test func testBackendAvailabilityMLXFieldFalse() {
@@ -82,7 +84,8 @@ struct BackendAutoConfigTests {
             foundationModels: false,
             mlx: false,
             recommendedBackend: .none,
-            canAutoConnect: false
+            canAutoConnect: false,
+            suggestedRemoteEndpoint: nil
         )
         #expect(avail.mlx == false)
     }
@@ -96,7 +99,8 @@ struct BackendAutoConfigTests {
             foundationModels: true,
             mlx: true,
             recommendedBackend: .foundationModels,
-            canAutoConnect: true
+            canAutoConnect: true,
+            suggestedRemoteEndpoint: nil
         )
         #expect(avail.local == true)
         #expect(avail.remote == true)
@@ -112,7 +116,8 @@ struct BackendAutoConfigTests {
             foundationModels: false,
             mlx: false,
             recommendedBackend: .none,
-            canAutoConnect: false
+            canAutoConnect: false,
+            suggestedRemoteEndpoint: nil
         )
         #expect(avail.local == false)
         #expect(avail.remote == false)
@@ -129,7 +134,8 @@ struct BackendAutoConfigTests {
             foundationModels: true,
             mlx: false,
             recommendedBackend: .foundationModels,
-            canAutoConnect: true
+            canAutoConnect: true,
+            suggestedRemoteEndpoint: nil
         )
         #expect(avail.foundationModels == true)
         #expect(avail.recommendedBackend == .foundationModels)
@@ -142,7 +148,8 @@ struct BackendAutoConfigTests {
             foundationModels: false,
             mlx: false,
             recommendedBackend: .remote,
-            canAutoConnect: true
+            canAutoConnect: true,
+            suggestedRemoteEndpoint: nil
         )
         #expect(avail.remote == true)
         #expect(avail.recommendedBackend == .remote)
@@ -155,7 +162,8 @@ struct BackendAutoConfigTests {
             foundationModels: false,
             mlx: false,
             recommendedBackend: .local,
-            canAutoConnect: true
+            canAutoConnect: true,
+            suggestedRemoteEndpoint: nil
         )
         #expect(avail.local == true)
         #expect(avail.recommendedBackend == .local)
@@ -168,10 +176,11 @@ struct BackendAutoConfigTests {
             foundationModels: false,
             mlx: true,
             recommendedBackend: .mlx,
-            canAutoConnect: true
+            canAutoConnect: true,
+            suggestedRemoteEndpoint: nil
         )
         #expect(avail.mlx == true)
-        #expect(avail.recommendedBackend == .mlx)
+        #expect(avail.recommendedBackend == BackendAutoConfig.BackendAvailability.RecommendedBackend.mlx)
     }
 
     @Test func testBackendAvailabilityIsSendable() {
@@ -181,7 +190,8 @@ struct BackendAutoConfigTests {
             foundationModels: false,
             mlx: true,
             recommendedBackend: .local,
-            canAutoConnect: true
+            canAutoConnect: true,
+            suggestedRemoteEndpoint: nil
         )
         let check: @Sendable () -> Bool = { avail.local }
         #expect(check() == true)

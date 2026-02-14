@@ -55,6 +55,7 @@ struct CanvasPreviewEditor: View {
 				switch selectedSnapshot.type {
 					case .text:
 						SnapshotTextEditor()
+							.frame(maxWidth: .infinity, maxHeight: .infinity)
 					case .site:
 						WebView(url: selectedSnapshot.site!.url)
 				}

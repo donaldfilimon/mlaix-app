@@ -27,6 +27,7 @@ extension Model {
     public func refreshModel() async {
         // Restart servers if needed
         await self.stopServers()
+        await MLXRunner.clearModelCache()
         self.mainModelServer = LlamaServer(
             modelType: .regular,
             systemPrompt: self.systemPrompt

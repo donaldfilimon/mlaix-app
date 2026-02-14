@@ -8,7 +8,7 @@
 import Foundation
 import FSKit_macOS
 import Observation
-import os.log
+import OSLog
 import SwiftUI
 
 @MainActor
@@ -16,7 +16,7 @@ import SwiftUI
 public class ConversationManager {
     
     /// A `Logger` object for the `ConversationManager` object
-    private static let logger: Logger = .init(
+    nonisolated private static let logger: Logger = .init(
         subsystem: Bundle.main.logSubsystem,
         category: String(describing: ConversationManager.self)
     )
@@ -138,7 +138,7 @@ public class ConversationManager {
                     options: .atomic
                 )
             } catch {
-                os_log("error = %@", error.localizedDescription)
+                Self.logger.error("Failed to save conversations: \(error.localizedDescription)")
             }
         }
     }
@@ -156,7 +156,7 @@ public class ConversationManager {
                 options: .atomic
             )
         } catch {
-            os_log("error = %@", error.localizedDescription)
+            Self.logger.error("Failed to save conversations: \(error.localizedDescription)")
         }
     }
     

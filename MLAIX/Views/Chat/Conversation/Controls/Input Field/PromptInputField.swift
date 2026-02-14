@@ -122,6 +122,15 @@ struct PromptInputField: View {
             .onAppear {
                 self.isFocused = true
                 self.setupKeyEventMonitor()
+                // Retry focus after layout so the NSView is in the window hierarchy (fixes keyboard not working)
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+                    self.isFocused = true
+                }
+            }
+            .onReceive(NotificationCenter.default.publisher(for: NSWindow.didBecomeKeyNotification)) { notification in
+                guard let window = notification.object as? NSWindow, window.isMainWindow else { return }
+                // Restore focus to prompt when main window becomes key so keyboard works
+                self.isFocused = true
             }
             .onDisappear {
                 self.removeKeyEventMonitor()
@@ -243,10 +252,12 @@ struct PromptInputField: View {
         self.isFocused && event.window?.isMainWindow == true
     }
 
+    /// Return (36) and Numpad Enter (76) both send or insert newline depending on Settings.useCommandReturn.
     private func isReturnKey(_ event: NSEvent) -> Bool {
         (event.keyCode == 36) || (event.keyCode == 76) // 36 = Return, 76 = Numpad Enter
     }
 
+    /// When useCommandReturn is false: Return/Enter sends, Shift+Return inserts newline. When true: Command+Return sends, Return inserts newline.
     private func returnKeyAction(for event: NSEvent) -> ReturnKeyAction {
         let isCommandKeyDown = event.modifierFlags.contains(.command)
         let isShiftKeyDown = event.modifierFlags.contains(.shift)
