@@ -11,6 +11,7 @@ import DefaultModels
 struct PerformanceGaugeView: View {
 	
 	let gpu: GPUInfoDevice? = try? .init()
+	@State private var gpuMonitor = GPUMonitor.shared
 	
 	var name: String {
 		return self.gpu?.name ?? "Unknown GPU"
@@ -40,6 +41,67 @@ struct PerformanceGaugeView: View {
 				Text("GPU rich")
 			}
 			guage
+			gpuUtilizationSection
+		}
+		.onAppear {
+			gpuMonitor.startMonitoring()
+		}
+		.onDisappear {
+			gpuMonitor.stopMonitoring()
+		}
+	}
+	
+	// MARK: - GPU Utilization Indicator
+	
+	private var gpuUtilizationSection: some View {
+		HStack(spacing: 12) {
+			// Circular utilization indicator
+			ZStack {
+				Circle()
+					.stroke(Color.secondary.opacity(0.3), lineWidth: 3)
+				Circle()
+					.trim(from: 0, to: gpuMonitor.currentUtilization / 100.0)
+					.stroke(
+						utilizationColor,
+						style: StrokeStyle(lineWidth: 3, lineCap: .round)
+					)
+					.rotationEffect(.degrees(-90))
+				Text("\(Int(gpuMonitor.currentUtilization))%")
+					.font(.system(size: 8, weight: .medium, design: .monospaced))
+			}
+			.frame(width: 32, height: 32)
+			
+			VStack(alignment: .leading, spacing: 2) {
+				Text(gpuMonitor.gpuName)
+					.font(.caption)
+					.foregroundStyle(.secondary)
+				Text(gpuMonitor.formattedMemoryUsage)
+					.font(.caption2)
+					.foregroundStyle(.tertiary)
+			}
+			
+			Spacer()
+			
+			// Memory pressure badge
+			if gpuMonitor.memoryPressure != .nominal {
+				Text(gpuMonitor.memoryPressure.rawValue.uppercased())
+					.font(.system(size: 9, weight: .semibold, design: .monospaced))
+					.padding(.horizontal, 6)
+					.padding(.vertical, 2)
+					.background(
+						gpuMonitor.memoryPressure == .critical ? Color.red.opacity(0.2) : Color.yellow.opacity(0.2)
+					)
+					.clipShape(Capsule())
+			}
+		}
+		.padding(.top, 4)
+	}
+	
+	private var utilizationColor: Color {
+		switch gpuMonitor.currentUtilization {
+		case 0..<50: return .green
+		case 50..<80: return .yellow
+		default: return .red
 		}
 	}
 	

@@ -16,7 +16,7 @@ struct MarkdownScatterPlotView: View {
         category: String(describing: MarkdownScatterPlotView.self)
     )
 	
-	@EnvironmentObject private var controller: MarkdownDataViewController
+	@Environment(MarkdownDataViewController.self) private var controller
 	
 	@State private var selectedPoint: Point? = nil
 	

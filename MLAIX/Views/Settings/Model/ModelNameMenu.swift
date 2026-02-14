@@ -22,7 +22,7 @@ struct ModelNameMenu: View {
     @State private var isManagingCustomModel: Bool = false
     
     @State private var localModelsListId: UUID = UUID()
-    @EnvironmentObject private var modelManager: ModelManager
+    @Environment(ModelManager.self) private var modelManager
     
     var showLocal: Bool {
         return modelTypes.contains(.local) && !modelManager.models.isEmpty
@@ -55,11 +55,7 @@ struct ModelNameMenu: View {
                     await self.refreshModelNames()
                 }
             }
-            .onReceive(
-                NotificationCenter.default.publisher(
-                    for: Notifications.changedInferenceConfig.name
-                )
-            ) { output in
+            .onChange(of: NavigationState.shared.inferenceConfigChanged) { _, _ in
                 // Refresh selection
                 self.localModelsListId = UUID()
             }
@@ -150,11 +146,8 @@ struct ModelNameMenu: View {
                 Divider()
                 Button {
                     InferenceSettings.useSpeculativeDecoding.toggle()
-                    // Send notification to reload model
-                    NotificationCenter.default.post(
-                        name: Notifications.changedInferenceConfig.name,
-                        object: nil
-                    )
+                    // Signal inference config change
+                    NavigationState.shared.inferenceConfigChanged = true
                 } label: {
                     if InferenceSettings.useSpeculativeDecoding {
                         Text("Disable Speculative Decoding")
@@ -200,11 +193,8 @@ struct ModelNameMenu: View {
             if self.modelTypes != [.remote] {
                 Button {
                     InferenceSettings.useServer.toggle()
-                    // Send notification to reload model
-                    NotificationCenter.default.post(
-                        name: Notifications.changedInferenceConfig.name,
-                        object: nil
-                    )
+                    // Signal inference config change
+                    NavigationState.shared.inferenceConfigChanged = true
                 } label: {
                     if InferenceSettings.useServer {
                         Text("Disable Remote Model")
@@ -251,11 +241,8 @@ struct ModelNameMenu: View {
             } else {
                 InferenceSettings.speculativeDecodingModelUrl = modelFile.url
             }
-            // Send notification to reload model
-            NotificationCenter.default.post(
-                name: Notifications.changedInferenceConfig.name,
-                object: nil
-            )
+            // Signal inference config change
+            NavigationState.shared.inferenceConfigChanged = true
         }
         
     }
@@ -268,11 +255,8 @@ struct ModelNameMenu: View {
         var body: some View {
             Button {
                 self.serverModelName = modelName
-                // Send notification to reload model
-                NotificationCenter.default.post(
-                    name: Notifications.changedInferenceConfig.name,
-                    object: nil
-                )
+                // Signal inference config change
+                NavigationState.shared.inferenceConfigChanged = true
             } label: {
                 if modelName == serverModelName {
                     Label(

@@ -12,16 +12,16 @@ import ImagePlayground
 struct ConversationView: View {
 	private static let logger = Logger(subsystem: Bundle.main.logSubsystem, category: String(describing: ConversationView.self))
 	
-	@StateObject private var promptController: PromptController = .init()
+	@State private var promptController: PromptController = .init()
 	
-	@EnvironmentObject private var conversationManager: ConversationManager
-	@EnvironmentObject private var expertManager: ExpertManager
+	@Environment(ConversationManager.self) private var conversationManager
+	@Environment(ExpertManager.self) private var expertManager
 	@Environment(ConversationState.self) private var conversationState
 	
 	var body: some View {
 		messages
 			.imagePlaygroundSheet(
-				isPresented: $promptController.isGeneratingImage,
+				isPresented: Bindable(promptController).isGeneratingImage,
 				concepts: [
 					ImagePlaygroundConcept.extracted(
 						from: promptController.imageConcept ?? "",
@@ -33,7 +33,7 @@ struct ConversationView: View {
 			} onCancellation: {
 				cancelImageGeneration()
 			}
-			.environmentObject(promptController)
+			.environment(promptController)
 	}
 	
 	var messages: some View {

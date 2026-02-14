@@ -11,7 +11,7 @@ import SwiftUI
 
 struct CompletionsTutorialView: View {
 	
-	@EnvironmentObject private var completionsSetupViewModel: CompletionsSetupViewModel
+	@Environment(CompletionsSetupViewModel.self) private var completionsSetupViewModel
 	
 	let chunks: [String] = "The quick brown fox jumps over the lazy dog."
 		.split(separator: " ")

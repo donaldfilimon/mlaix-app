@@ -25,7 +25,6 @@ struct InferenceSettingsView: View {
     @State private var isSelectingCoreMLClassifier: Bool = false
     @State private var isTrainingCoreMLClassifier: Bool = false
     @State private var mlxAvailability: MLXRunner.Availability? = nil
-    @State private var isCheckingMLXAvailability: Bool = false
     
     @State private var isConfiguringServerArguments: Bool = false
     
@@ -86,7 +85,7 @@ struct InferenceSettingsView: View {
         .formStyle(.grouped)
         .scrollIndicators(.never)
         .task {
-            await refreshMLXAvailability()
+            mlxAvailability = await MLXRunner.checkAvailability()
         }
         .sheet(isPresented: $isEditingSystemPrompt) {
             SystemPromptEditor(
@@ -101,14 +100,6 @@ struct InferenceSettingsView: View {
         return Settings.isMLXModelURL(modelUrl)
     }
 
-    @MainActor
-    private func refreshMLXAvailability() async {
-        guard !isCheckingMLXAvailability else { return }
-        isCheckingMLXAvailability = true
-        let availability = await MLXRunner.checkAvailability()
-        mlxAvailability = availability
-        isCheckingMLXAvailability = false
-    }
     
     var model: some View {
         let isUsingFoundationModels = useFoundationModels && FoundationModelsSupport.isAvailable
@@ -272,11 +263,8 @@ struct InferenceSettingsView: View {
             )
         }
         .onChange(of: useSpeculativeDecoding, initial: false) { _, _ in
-            // Send notification to reload model
-            NotificationCenter.default.post(
-                name: Notifications.changedInferenceConfig.name,
-                object: nil
-            )
+            // Signal inference config change
+            NavigationState.shared.inferenceConfigChanged = true
         }
     }
     
@@ -400,25 +388,14 @@ struct InferenceSettingsView: View {
                 Text("MLX Runtime")
                     .font(.title3)
                     .bold()
-                Text(isUsingMLXModel ? "MLX is used for local MLX models." : "Select an MLX model to enable MLX inference.")
+                Text(isUsingMLXModel ? "Native Swift MLX is used for local MLX models." : "Select an MLX model to enable MLX inference.")
                     .font(.caption)
                 if let availability = mlxAvailability {
-                    Text(availability.pythonAvailable ? "Python: Available" : "Python: Not Found")
+                    Text(availability.nativeAvailable ? "Native Swift MLX: Available" : "Native Swift MLX: Not Available")
                         .font(.caption)
-                        .foregroundStyle(availability.pythonAvailable ? .green : .secondary)
-                    Text(availability.mlxAvailable ? "mlx-lm: Available" : "mlx-lm: Not Found")
-                        .font(.caption)
-                        .foregroundStyle(availability.mlxAvailable ? .green : .secondary)
-                    if availability.mlxAvailable, let version = availability.mlxVersion, !version.isEmpty {
-                        Text("mlx-lm version: \(version)")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    } else if availability.pythonAvailable && !availability.mlxAvailable {
-                        Text("Install `mlx-lm` with `pip install mlx-lm`.")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    } else if !availability.pythonAvailable {
-                        Text("Install Python 3 to enable MLX inference.")
+                        .foregroundStyle(availability.nativeAvailable ? .green : .secondary)
+                    if availability.nativeAvailable {
+                        Text("Using built-in MLX framework (no Python required).")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
@@ -429,12 +406,6 @@ struct InferenceSettingsView: View {
                 }
             }
             Spacer()
-            Button {
-                Task { await refreshMLXAvailability() }
-            } label: {
-                Text(isCheckingMLXAvailability ? "Checking..." : "Check")
-            }
-            .disabled(isCheckingMLXAvailability)
         }
     }
 
@@ -601,10 +572,7 @@ struct InferenceSettingsView: View {
                 Toggle("", isOn: $useGPUAcceleration)
             }
             .onChange(of: useGPUAcceleration, initial: false) { _, _ in
-                NotificationCenter.default.post(
-                    name: Notifications.changedInferenceConfig.name,
-                    object: nil
-                )
+                NavigationState.shared.inferenceConfigChanged = true
             }
             PerformanceGaugeView()
         }

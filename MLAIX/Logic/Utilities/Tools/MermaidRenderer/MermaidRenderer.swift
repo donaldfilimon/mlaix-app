@@ -7,7 +7,11 @@
 
 import Foundation
 import OSLog
+import Synchronization
 
+// @unchecked Sendable: Process and FileMonitor are not Sendable, but access is serialized
+// through the render() method's continuation pattern. The mutable state is only modified
+// within a single render call at a time.
 public class MermaidRenderer: @unchecked Sendable {
     
     /// The mermaid child process to render the preview

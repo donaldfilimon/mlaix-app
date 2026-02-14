@@ -9,8 +9,8 @@ import SwiftUI
 
 struct DiagrammerView: View {
 	
-	@EnvironmentObject private var model: Model
-	@StateObject private var diagrammerViewController: DiagrammerViewController = .init()
+	@Environment(Model.self) private var model
+	@State private var diagrammerViewController: DiagrammerViewController = .init()
 	
     var body: some View {
 		Group {
@@ -23,7 +23,7 @@ struct DiagrammerView: View {
 					DiagrammerPreviewEditorView()
 			}
 		}
-		.environmentObject(diagrammerViewController)
+		.environment(diagrammerViewController)
     }
 	
 }

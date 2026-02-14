@@ -9,7 +9,7 @@ import SwiftUI
 
 struct ConversationSidebarButtons: View {
 	
-	@EnvironmentObject private var lengthyTasksController: LengthyTasksController
+	@Environment(LengthyTasksController.self) private var lengthyTasksController
 	@Environment(ConversationState.self) private var conversationState
 	
 	@State private var isViewingToolbox: Bool = false
@@ -43,6 +43,7 @@ struct ConversationSidebarButtons: View {
 			) {
 				self.conversationState.newConversation()
 			}
+			.accessibilityIdentifier("newConversationButton")
 		}
 		.padding(.leading, 5)
 		.padding(.trailing, 4)

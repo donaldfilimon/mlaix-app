@@ -7,31 +7,33 @@
 
 import Foundation
 import FSKit_macOS
-import os.log
+import Observation
+import OSLog
 import SwiftUI
 
 @MainActor
-public class ConversationManager: ObservableObject {
+@Observable
+public class ConversationManager {
     
     /// A `Logger` object for the `ConversationManager` object
-    private static let logger: Logger = .init(
+    nonisolated private static let logger: Logger = .init(
         subsystem: Bundle.main.logSubsystem,
         category: String(describing: ConversationManager.self)
     )
     
     init(containerUrl: URL = Settings.containerUrl) {
         self.containerUrl = containerUrl
-        let signpost = StartupMetrics.begin("ConversationManager.init")
+        let signpost = StartupMetrics.beginInterval("ConversationManager.init")
         self.patchFileIntegrity()
         self.loadAsync()
-        StartupMetrics.end("ConversationManager.init", signpost)
+        StartupMetrics.endInterval("ConversationManager.init", signpost)
     }
     
     /// Static constant for the global `ConversationManager` object
     static public let shared: ConversationManager = .init()
     
     /// Published property for all conversations
-    @Published public var conversations: [Conversation] = [] {
+    public var conversations: [Conversation] = [] {
         didSet {
             if self.isLoaded {
                 self.save()
@@ -40,7 +42,7 @@ public class ConversationManager: ObservableObject {
     }
     
     /// Published state tracking whether the datastore has been loaded
-    @Published private(set) var isLoaded: Bool = false
+    private(set) var isLoaded: Bool = false
     
     /// Task handling the asynchronous datastore load
     private var loadTask: Task<Void, Never>?
@@ -107,10 +109,7 @@ public class ConversationManager: ObservableObject {
             messages: []
         )
         self.conversations = [newConversation] + self.conversations
-        NotificationCenter.default.post(
-            name: Notifications.newConversation.name,
-            object: nil
-        )
+        NavigationState.shared.newConversationRequested = true
         Self.logger.notice("Created a new conversation")
     }
     /// Function to save conversations to disk
@@ -139,7 +138,7 @@ public class ConversationManager: ObservableObject {
                     options: .atomic
                 )
             } catch {
-                os_log("error = %@", error.localizedDescription)
+                Self.logger.error("Failed to save conversations: \(error.localizedDescription)")
             }
         }
     }
@@ -157,7 +156,7 @@ public class ConversationManager: ObservableObject {
                 options: .atomic
             )
         } catch {
-            os_log("error = %@", error.localizedDescription)
+            Self.logger.error("Failed to save conversations: \(error.localizedDescription)")
         }
     }
     
@@ -170,8 +169,8 @@ public class ConversationManager: ObservableObject {
         }
         let targetUrl: URL = fromBackup ? self.backupDatastoreUrl : self.datastoreUrl
         self.loadTask = Task.detached(priority: .userInitiated) {
-            let signpost = StartupMetrics.begin("ConversationManager.loadDatastore")
-            defer { StartupMetrics.end("ConversationManager.loadDatastore", signpost) }
+            let signpost = StartupMetrics.beginInterval("ConversationManager.loadDatastore")
+            defer { StartupMetrics.endInterval("ConversationManager.loadDatastore", signpost) }
             let conversations: [Conversation]
             do {
                 let rawData: Data = try Data(contentsOf: targetUrl)
@@ -292,10 +291,7 @@ public class ConversationManager: ObservableObject {
     /// Ensures a blank conversation exists and is selected on launch
     public func ensureBlankConversationForLaunch() {
         if let blankConversation = self.conversations.first(where: { $0.messages.isEmpty }) {
-            NotificationCenter.default.post(
-                name: Notifications.switchToConversation.name,
-                object: blankConversation.id
-            )
+            NavigationState.shared.switchToConversationId = blankConversation.id
         } else {
             self.newConversation()
         }

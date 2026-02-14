@@ -72,7 +72,9 @@ extension Color {
 
 		// Convert SwiftUI Color to NSColor to CIColor
 		let osColor: NSColor = NSColor(self)
-		let ciColor: CIColor = CIColor(color: osColor)!
+		guard let ciColor = CIColor(color: osColor) else {
+			return 0.5 // Default mid-luminance for unconvertible colors
+		}
 
 		// Extract RGB values
 		let red: CGFloat = ciColor.red

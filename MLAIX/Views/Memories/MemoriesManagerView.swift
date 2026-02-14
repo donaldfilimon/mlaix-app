@@ -9,7 +9,7 @@ import SwiftUI
 
 struct MemoriesManagerView: View {
     
-    @EnvironmentObject private var memories: Memories
+    @Environment(Memories.self) private var memories
     
     @State private var query: String = ""
     
@@ -69,7 +69,7 @@ struct MemoriesManagerView: View {
     
     struct MemoryRowView: View {
         
-        @EnvironmentObject private var memories: Memories
+    @Environment(Memories.self) private var memories
     
         var memory: Memory
         

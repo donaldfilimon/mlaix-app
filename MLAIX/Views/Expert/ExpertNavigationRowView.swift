@@ -9,7 +9,7 @@ import SwiftUI
 
 struct ExpertNavigationRowView: View {
 	
-	@EnvironmentObject private var expertManager: ExpertManager
+	@Environment(ExpertManager.self) private var expertManager
 	
 	@State private var isEditing: Bool = false
 	@State private var isDeleting: Bool = false

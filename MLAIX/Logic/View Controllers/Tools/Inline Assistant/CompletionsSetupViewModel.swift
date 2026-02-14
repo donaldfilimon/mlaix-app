@@ -6,12 +6,13 @@
 //
 
 import Foundation
+import Observation
 import SwiftUI
 
 @MainActor
-public class CompletionsSetupViewModel: ObservableObject {
+@Observable public class CompletionsSetupViewModel {
 	
-	@Published public var step: Step = .nextTokenTutorial
+	public var step: Step = .nextTokenTutorial
 	
 	public enum Step: CaseIterable {
 		case nextTokenTutorial

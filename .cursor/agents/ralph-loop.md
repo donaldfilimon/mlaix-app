@@ -90,14 +90,6 @@ swift test --filter PromptDesktopInteractionTests
    - Copy results to `docs/evals/ralph/results.scored.json`
    - Overwrite `docs/evals/ralph/summary.md` with the latest summary
 
-## Quick Run
-
-You can also run the shell script directly:
-```bash
-./scripts/ralph-loop.sh
-```
-This performs the same steps non-interactively.
-
 ## Interpretation
 
 - **PASS**: All critical and high severity prompts pass. Medium failures are warnings.

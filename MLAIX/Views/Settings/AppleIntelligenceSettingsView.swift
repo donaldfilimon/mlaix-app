@@ -23,10 +23,7 @@ struct AppleIntelligenceSettingsView: View {
         }
         .formStyle(.grouped)
         .onChange(of: useFoundationModels, initial: false) { _, _ in
-            NotificationCenter.default.post(
-                name: Notifications.changedInferenceConfig.name,
-                object: nil
-            )
+            NavigationState.shared.inferenceConfigChanged = true
         }
     }
 

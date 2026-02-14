@@ -5,20 +5,19 @@
 //
 
 import Cocoa
-import AppKit
 import ApplicationServices
-import Accessibility
 import OSLog
 
 // MARK: - Helper Function
 
-/// Safely casts a `CFTypeRef` to a desired type.
+/// Safely casts a `CFTypeRef` to a desired CoreFoundation type using `unsafeBitCast`.
 /// - Parameters:
-///   - value: The value to cast.
-///   - type: The desired type.
-/// - Returns: The casted value if successful, otherwise `nil`.
-private func castCF<T, U>(_ value: T, to type: U.Type = U.self) -> U? {
-    return value as? U
+///   - value: The value to cast (must be a `CFTypeRef?`).
+///   - type: The desired CF type.
+/// - Returns: The casted value if the input is non-nil, otherwise `nil`.
+private func castCF<U>(_ value: CFTypeRef?, to type: U.Type = U.self) -> U? {
+    guard let value = value else { return nil }
+    return unsafeBitCast(value, to: U.self)
 }
 
 public extension AXUIElement {
@@ -82,7 +81,8 @@ public extension AXUIElement {
 		// If no bounds were retrieved, return nil
 		guard let bounds = bounds else { return nil }
 		// Extract the CGRect from the returned AXValue
-		AXValueGetValue(bounds as! AXValue, .cgRect, &cursorRect)
+		let boundsValue = unsafeBitCast(bounds, to: AXValue.self)
+		AXValueGetValue(boundsValue, .cgRect, &cursorRect)
 		// Return the computed caret bounds
 		return cursorRect
 	}
@@ -99,10 +99,11 @@ public extension AXUIElement {
 			kAXFocusedUIElementAttribute as CFString,
 			&focusedElement
 		)
-		guard focusedResult == .success, let element = focusedElement as! AXUIElement? else {
+		guard focusedResult == .success, let focusedElement else {
 			Logger(subsystem: Bundle.main.logSubsystem, category: "AXUIElement").debug("Failed to get focused element")
 			return nil
 		}
+		let element = unsafeBitCast(focusedElement, to: AXUIElement.self)
 		// Retrieve the 'kAXSelectedTextRangeAttribute' from the focused element
 		var selectedTextRangeRef: AnyObject?
 		let rangeResult = AXUIElementCopyAttributeValue(
@@ -114,8 +115,11 @@ public extension AXUIElement {
 			Logger(subsystem: Bundle.main.logSubsystem, category: "AXUIElement").debug("Failed to get selected text range")
 			return nil
 		}
-		// Force cast is used here since the value is guaranteed to be an AXValue
-		let selectedTextRange = selectedTextRangeRef as! AXValue
+		guard let selectedTextRangeRef else {
+			Logger(subsystem: Bundle.main.logSubsystem, category: "AXUIElement").debug("Failed to cast selected text range to AXValue")
+			return nil
+		}
+		let selectedTextRange = unsafeDowncast(selectedTextRangeRef, to: AXValue.self)
 		// The selectedTextRange is represented as a CFRange
 		var range = CFRange()
 		guard AXValueGetValue(selectedTextRange, .cfRange, &range) else {
@@ -134,8 +138,11 @@ public extension AXUIElement {
 			Logger(subsystem: Bundle.main.logSubsystem, category: "AXUIElement").debug("Failed to get caret bounding rectangle")
 			return nil
 		}
-		// Force cast is used here as the returned value is guaranteed to be an AXValue
-		let caretBoundsValue = caretBoundsRef as! AXValue
+		guard let caretBoundsRef else {
+			Logger(subsystem: Bundle.main.logSubsystem, category: "AXUIElement").debug("Failed to cast caret bounds to AXValue")
+			return nil
+		}
+		let caretBoundsValue = unsafeDowncast(caretBoundsRef, to: AXValue.self)
 		var caretRect = CGRect.zero
 		guard AXValueGetValue(caretBoundsValue, .cgRect, &caretRect) else {
 			Logger(subsystem: Bundle.main.logSubsystem, category: "AXUIElement").debug("Failed to extract CGRect from caret value")
@@ -220,7 +227,6 @@ public extension AXUIElement {
         }
         // Get the screen's height and origin
         let screenHeight = screen.frame.height
-//        let screenOriginY = screen.frame.origin.y
         // Adjust the Y coordinate relative to the screen's origin
         let adjustedY = screenHeight - mouseLocation.y
         // Create a CGRect at the mouse location with a default size
@@ -253,42 +259,4 @@ public extension AXUIElement {
         return nil
     }
     
-    /// Retrieves the total length of the text in the focused element.
-    /// - Returns: The total length of the text, or `nil` if unavailable.
-    private func getTotalTextLength() -> Int? {
-		let kAXValueAttribute = "AXValue"
-        var rawValue: CFTypeRef?
-        let error = AXUIElementCopyAttributeValue(
-            self,
-            kAXValueAttribute as CFString,
-            &rawValue
-        )
-        guard error == .success else {
-            return nil
-        }
-        if let stringValue = rawValue as? String {
-            return stringValue.count
-        }
-        if let attributedString = rawValue as? NSAttributedString {
-            return attributedString.string.count
-        }
-        return nil
-    }
-    
-    /// Retrieves a CGRect attribute from the AXUIElement.
-    /// - Parameter attribute: The AX attribute to retrieve.
-    /// - Returns: The `CGRect` value of the attribute, or `nil` if unavailable.
-    private func getAttributeRect(attribute: String) -> CGRect? {var attributeValue: CFTypeRef?
-        let error = AXUIElementCopyAttributeValue(self, attribute as CFString, &attributeValue)
-        guard error == .success,
-              let axValue = castCF(attributeValue, to: AXValue.self) else {
-            return nil
-        }
-        
-        var rect = CGRect.zero
-        if AXValueGetValue(axValue, .cgRect, &rect) {
-            return rect
-        }
-        return nil
-    }
 }

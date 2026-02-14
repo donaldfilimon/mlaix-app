@@ -17,7 +17,7 @@ struct FileDragProvider: NSViewRepresentable {
     @MainActor
     class NSViewType: NSView, NSFilePromiseProviderDelegate, NSDraggingSource {
         
-        nonisolated(unsafe) var filePromise: FilePromise
+        var filePromise: FilePromise
         var preview: NSImage
         
         @available(*, unavailable)
@@ -60,13 +60,16 @@ struct FileDragProvider: NSViewRepresentable {
             hasDraggingSession = false
         }
         
-        func filePromiseProvider(_ filePromiseProvider: NSFilePromiseProvider, fileNameForType fileType: String) -> String {
-            filePromise.name
+        nonisolated func filePromiseProvider(_ filePromiseProvider: NSFilePromiseProvider, fileNameForType fileType: String) -> String {
+            MainActor.assumeIsolated {
+                filePromise.name
+            }
         }
         
-        func filePromiseProvider(_ filePromiseProvider: NSFilePromiseProvider, writePromiseTo url: URL, completionHandler: @escaping (Error?) -> Void) {
+        nonisolated func filePromiseProvider(_ filePromiseProvider: NSFilePromiseProvider, writePromiseTo url: URL, completionHandler: @escaping (Error?) -> Void) {
+            let promise = MainActor.assumeIsolated { filePromise }
             do {
-                try filePromise.writeToURL(url)
+                try promise.writeToURL(url)
                 completionHandler(nil)
             } catch let error {
                 completionHandler(error)
@@ -102,10 +105,10 @@ extension View {
     
 }
 
-struct FilePromise {
+struct FilePromise: Sendable {
     
     var name: String
     var type: UTType
-    var writeToURL: (URL) throws -> Void
+    var writeToURL: @Sendable (URL) throws -> Void
     
 }

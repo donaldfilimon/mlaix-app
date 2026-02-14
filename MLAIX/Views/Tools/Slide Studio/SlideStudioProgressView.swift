@@ -10,7 +10,7 @@ import SwiftUI
 
 struct SlideStudioProgressView: View {
 	
-	@EnvironmentObject private var slideStudioViewController: SlideStudioViewController
+	@Environment(SlideStudioViewController.self) private var slideStudioViewController
 	
     var body: some View {
 		VStack(

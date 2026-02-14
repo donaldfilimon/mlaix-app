@@ -6,11 +6,13 @@
 //
 
 import Foundation
-import os.log
+import Observation
+import OSLog
 import SwiftUI
 
 @MainActor
-public class ExpertManager: ObservableObject {
+@Observable
+public class ExpertManager {
     
     init() {
         self.patchFileIntegrity()
@@ -27,7 +29,7 @@ public class ExpertManager: ObservableObject {
     )
     
     /// Published property for all experts
-    @Published public var experts: [Expert] = [] {
+    public var experts: [Expert] = [] {
         didSet {
             self.save()
         }
@@ -125,7 +127,7 @@ public class ExpertManager: ObservableObject {
                 options: .atomic
             )
         } catch {
-            os_log("error = %@", error.localizedDescription)
+            Self.logger.error("Failed to save experts: \(error.localizedDescription)")
         }
     }
     

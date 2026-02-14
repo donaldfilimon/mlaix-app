@@ -7,4 +7,5 @@
 
 import QuickLookThumbnailing
 
+// External system type: cannot add Sendable conformance directly
 extension QLThumbnailRepresentation: @retroactive @unchecked Sendable {}

@@ -21,7 +21,7 @@ struct ModelListView: View {
     var modelType: ModelType
 	
 	@Binding var isPresented: Bool
-	@EnvironmentObject private var modelManager: ModelManager
+	@Environment(ModelManager.self) private var modelManager
 	
 	@Environment(\.openWindow) var openWindow
 	
@@ -48,11 +48,12 @@ struct ModelListView: View {
 			.padding(.bottom, 3)
 		}
 		.padding(7)
-		.environmentObject(modelManager)
+		.environment(modelManager)
 	}
 	
 	var list: some View {
-		List(
+		@Bindable var modelManager = modelManager
+		return List(
 			$modelManager.models,
 			editActions: .move
 		) { model in
@@ -131,11 +132,8 @@ struct ModelListView: View {
 		} else {
 			let _ = modelManager.addModel()
 		}
-		// Send notification to reload model
-		NotificationCenter.default.post(
-			name: Notifications.changedInferenceConfig.name,
-			object: nil
-		)
+		// Signal inference config change
+		NavigationState.shared.inferenceConfigChanged = true
 	}
     
     /// Function to get the url of the current model type

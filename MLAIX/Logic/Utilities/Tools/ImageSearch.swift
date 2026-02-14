@@ -14,8 +14,8 @@ public class ImageSearch {
 		let title: String
 		let urlString: String
 		
-		var url: URL {
-			return URL(string: self.urlString)!
+		var url: URL? {
+			return URL(string: self.urlString)
 		}
 		
 		public enum CodingKeys: String, CodingKey {

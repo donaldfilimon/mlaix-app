@@ -7,6 +7,7 @@
 
 import Foundation
 import OSLog
+import Synchronization
 
 // MARK: - OpenRouter API Response Structures
 
@@ -401,8 +402,8 @@ public struct KnownModel: Identifiable, Codable, Sendable {
     
     // MARK: - Model Cache
     
-    /// Cached models from OpenRouter API
-    nonisolated(unsafe) private static var cachedModels: [KnownModel]?
+    /// Cached models from OpenRouter API (thread-safe via Mutex)
+    private static let cachedModelsStorage = Mutex<[KnownModel]?>(nil)
     
     /// File URL for persistent cache storage
     private static var cacheFileURL: URL {
@@ -417,7 +418,7 @@ public struct KnownModel: Identifiable, Codable, Sendable {
     /// Note: Returns empty array if models haven't been fetched yet
     /// Call `initializeModelCache()` at app startup to load from file and refresh from API
     public static var availableModels: [KnownModel] {
-        return cachedModels ?? []
+        return cachedModelsStorage.withLock { $0 } ?? []
     }
     
     /// Loads models from the cached JSON file
@@ -449,7 +450,7 @@ public struct KnownModel: Identifiable, Codable, Sendable {
     public static func initializeModelCache() async {
         // First, try to load from file for immediate availability
         if let fileModels = loadModelsFromFile() {
-            cachedModels = fileModels
+            cachedModelsStorage.withLock { $0 = fileModels }
         }
         
         // Then refresh from API in background
@@ -460,7 +461,7 @@ public struct KnownModel: Identifiable, Codable, Sendable {
     public static func refreshModelCache() async {
         do {
             let models = try await getAvailableModels()
-            cachedModels = models
+            cachedModelsStorage.withLock { $0 = models }
             
             // Save to file for next launch
             saveModelsToFile(models)
@@ -469,17 +470,18 @@ public struct KnownModel: Identifiable, Codable, Sendable {
             Self.logger.error("Failed to refresh model cache from API: \(error.localizedDescription, privacy: .public)")
             
             // If we don't have any cached models and API fails, try file as fallback
-            if cachedModels == nil, let fileModels = loadModelsFromFile() {
-                cachedModels = fileModels
-            } else if cachedModels == nil {
-                cachedModels = []
+            let hasCached = cachedModelsStorage.withLock { $0 != nil }
+            if !hasCached, let fileModels = loadModelsFromFile() {
+                cachedModelsStorage.withLock { $0 = fileModels }
+            } else if !hasCached {
+                cachedModelsStorage.withLock { $0 = [] }
             }
         }
     }
     
     /// Clears the model cache (both in-memory and file)
     public static func clearModelCache() {
-        cachedModels = nil
+        cachedModelsStorage.withLock { $0 = nil }
         try? FileManager.default.removeItem(at: self.cacheFileURL)
     }
     

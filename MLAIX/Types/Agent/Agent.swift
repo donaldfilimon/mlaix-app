@@ -6,9 +6,10 @@
 //
 
 import Foundation
+import Observation
 import SwiftUI
 
-public protocol Agent: ObservableObject {
+public protocol Agent: AnyObject, Observable {
     
     /// A `String` containing the name of the agent
     var name: String { get }

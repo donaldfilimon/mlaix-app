@@ -13,7 +13,7 @@ struct DiagrammerPreviewEditorView: View {
 	
 	@Environment(\.dismissWindow) private var dismissWindow
 	@Environment(\.colorScheme) private var colorScheme: ColorScheme
-	@EnvironmentObject private var diagrammerViewController: DiagrammerViewController
+	@Environment(DiagrammerViewController.self) private var diagrammerViewController
 	
 	@State private var position: CodeEditor.Position = CodeEditor.Position()
 	@State private var messages: Set<TextLocated<LanguageSupport.Message>> = Set()
@@ -55,15 +55,17 @@ struct DiagrammerPreviewEditorView: View {
 	
 	/// The code editor theme based on the current color scheme
 	private var editorTheme: Theme {
-		// Access the static properties on the main actor to satisfy concurrency requirements
+		// nonisolated(unsafe): Theme (external type) is not Sendable; read-only constants
+		// accessed only on the main actor via the View body.
 		nonisolated(unsafe) let darkTheme = Theme.defaultDark
 		nonisolated(unsafe) let lightTheme = Theme.defaultLight
 		return colorScheme == .dark ? darkTheme : lightTheme
 	}
 
 	var editor: some View {
-		CodeEditor(
-            text: self.$diagrammerViewController.mermaidCode,
+		@Bindable var diagrammerViewController = diagrammerViewController
+		return CodeEditor(
+            text: $diagrammerViewController.mermaidCode,
 			position: self.$position,
 			messages: self.$messages
 		)

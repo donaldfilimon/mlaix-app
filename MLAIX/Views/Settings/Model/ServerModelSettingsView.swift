@@ -8,21 +8,21 @@
 import SwiftUI
 
 struct ServerModelSettingsView: View {
-    
+
 	@AppStorage("useServer") private var useServer: Bool = InferenceSettings.useServer
 	@AppStorage("endpoint") private var serverEndpoint: String = InferenceSettings.endpoint
 
 	@State private var inferenceApiKey: String = InferenceSettings.inferenceApiKey
-	
+
 	@AppStorage("remoteModelName") private var serverModelName: String = InferenceSettings.serverModelName
-    
+
     @AppStorage("serverModelHasVision") private var serverModelHasVision: Bool = InferenceSettings.serverModelHasVision
     @AppStorage("hasNativeToolCalling") private var hasNativeToolCalling: Bool = InferenceSettings.hasNativeToolCalling
-    
+
 	@AppStorage("serverWorkerModelName") private var serverWorkerModelName: String = InferenceSettings.serverWorkerModelName
-	
+
     var popularEndpointsTip: PopularEndpointsTip = .init()
-    
+
 	/// A `Bool` representing if the endpoint is valid
 	var endpointUrlIsValid: Bool {
 		let paths: [String] = ["", "/models", "/chat/completions"]
@@ -31,7 +31,7 @@ struct ServerModelSettingsView: View {
 		}
 		return !pathsAreValid.contains(false)
 	}
-	
+
 	var body: some View {
 		Section {
 			useServerToggle
@@ -54,7 +54,7 @@ struct ServerModelSettingsView: View {
 			Text("Remote Model")
 		}
 	}
-	
+
 	var useServerToggle: some View {
 		HStack(alignment: .top) {
 			VStack(alignment: .leading) {
@@ -72,14 +72,11 @@ struct ServerModelSettingsView: View {
 			.disabled(serverEndpoint.isEmpty || !endpointUrlIsValid)
 		}
 		.onChange(of: useServer, initial: false) { _, _ in
-			// Send notification to reload model
-			NotificationCenter.default.post(
-				name: Notifications.changedInferenceConfig.name,
-				object: nil
-			)
+			// Signal inference config change
+			NavigationState.shared.inferenceConfigChanged = true
 		}
 	}
-	
+
 	var serverEndpointEditor: some View {
 		HStack(alignment: .top) {
 			VStack(alignment: .leading) {
@@ -131,6 +128,13 @@ struct ServerModelSettingsView: View {
 						.foregroundStyle(.red)
 						.padding(.top, 4)
 				}
+				if self.endpointUrlIsValid && InferenceSettings.isInsecureRemoteEndpoint {
+					Text("Warning: This endpoint uses HTTP. Your API key may be sent in plaintext.")
+						.font(.callout)
+						.fontWeight(.bold)
+						.foregroundStyle(.orange)
+						.padding(.top, 4)
+				}
 			}
             .padding(.top, 10)
 		}
@@ -139,7 +143,7 @@ struct ServerModelSettingsView: View {
             self.checkProviderForToolCalling()
         }
 	}
-	
+
 	var inferenceApiKeyEditor: some View {
 		HStack(alignment: .center) {
 			VStack(alignment: .leading) {
@@ -159,7 +163,7 @@ struct ServerModelSettingsView: View {
 				}
 		}
 	}
-    
+
     var serverModelHasVisionToggle: some View {
         HStack(alignment: .top) {
             VStack(alignment: .leading) {
@@ -177,7 +181,7 @@ struct ServerModelSettingsView: View {
             .disabled(serverEndpoint.isEmpty || !endpointUrlIsValid)
         }
     }
-    
+
     var hasNativeToolCallingToggle: some View {
         HStack(alignment: .top) {
             VStack(alignment: .leading) {
@@ -195,7 +199,7 @@ struct ServerModelSettingsView: View {
             .disabled(serverEndpoint.isEmpty || !endpointUrlIsValid)
         }
     }
-    
+
     private func checkProviderForToolCalling() {
         // Return if invalid or blank
         if !self.endpointUrlIsValid || self.serverEndpoint.isEmpty {
@@ -223,5 +227,5 @@ struct ServerModelSettingsView: View {
             }
         }
     }
-    
+
 }

@@ -11,6 +11,7 @@ public final class CodeFunctions: Sendable {
 
     static let functions: [AnyFunctionBox] = {
         var baseFunctions: [AnyFunctionBox] = [
+            CodeFunctions.evaluateExpression,
             CodeFunctions.runJavaScript,
             CodeFunctions.runCommand
         ]
@@ -21,10 +22,31 @@ public final class CodeFunctions: Sendable {
         return baseFunctions
     }()
     
-    /// A ``Function`` for running JavaScript
+    /// A ``Function`` for evaluating a single arithmetic expression via JavaScriptCore (safe, no side effects).
+    static let evaluateExpression = Function<EvaluateExpressionParams, String>(
+        name: "evaluate_expression",
+        description: "Evaluates a single arithmetic expression using JavaScriptCore and returns the result. Use for calculations: only numbers and operators + - * / % ( ) are allowed. Example: (2 + 3) * 4 returns 20. For multi-step or general JavaScript use run_javascript instead.",
+        clearance: .regular,
+        params: [
+            FunctionParameter(
+                label: "expression",
+                description: "The arithmetic expression to evaluate, e.g. (10 + 5) * 2",
+                datatype: .string,
+                isRequired: true
+            )
+        ],
+        run: { params in
+            try JavaScriptRunner.evaluateExpression(params.expression)
+        }
+    )
+    struct EvaluateExpressionParams: FunctionParams {
+        let expression: String
+    }
+
+    /// A ``Function`` for running JavaScript (JavaScriptCore). Use for calculations, transforms, or any JS code.
     static let runJavaScript = Function<RunJavaScriptParams, String>(
         name: "run_javascript",
-        description: "Runs JavaScript code and returns the result. Useful for performing calculations with many steps or performing transformations on data.",
+        description: "Runs JavaScript code via JavaScriptCore and returns the result. Use for calculations with many steps, data transformations, or any valid JavaScript. For simple arithmetic use evaluate_expression instead.",
         clearance: .dangerous,
         params: [
             FunctionParameter(
@@ -35,7 +57,7 @@ public final class CodeFunctions: Sendable {
             )
         ],
         run: { params in
-            return try JavaScriptRunner.executeJavaScript(params.code)
+            try JavaScriptRunner.executeJavaScript(params.code)
         }
     )
     struct RunJavaScriptParams: FunctionParams {

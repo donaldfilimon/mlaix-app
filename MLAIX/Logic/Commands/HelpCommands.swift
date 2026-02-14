@@ -20,7 +20,7 @@ public class HelpCommands {
 				Text("Report an Issue")
 			}
 			Button {
-				NotificationCenter.default.post(name: Notifications.showKeyboardShortcuts.name, object: nil)
+				NavigationState.shared.showKeyboardShortcutsRequested = true
 			} label: {
 				Text("Keyboard Shortcuts")
 			}

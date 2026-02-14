@@ -6,11 +6,19 @@
 //
 
 import Foundation
-import os.log
+import Observation
+import OSLog
 import SwiftUI
 
 @MainActor
-public class SourcesManager: ObservableObject {
+@Observable
+public class SourcesManager {
+	
+	/// A `Logger` object for the ``SourcesManager`` object
+	private static let logger: Logger = .init(
+		subsystem: Bundle.main.logSubsystem,
+		category: String(describing: SourcesManager.self)
+	)
 	
 	init() {
 		self.patchFileIntegrity()
@@ -21,7 +29,7 @@ public class SourcesManager: ObservableObject {
 	static public let shared: SourcesManager = .init()
 	
 	/// Published property for all sources
-	@Published public var sources: [Sources] = [] {
+	public var sources: [Sources] = [] {
 		didSet {
 			self.save()
 		}
@@ -48,7 +56,7 @@ public class SourcesManager: ObservableObject {
 				options: .atomic
 			)
 		} catch {
-			os_log("error = %@", error.localizedDescription)
+			Self.logger.error("Failed to save sources: \(error.localizedDescription)")
 		}
 	}
 	

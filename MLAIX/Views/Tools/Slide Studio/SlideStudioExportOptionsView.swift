@@ -14,7 +14,7 @@ struct SlideStudioExportOptionsView: View {
 	
 	@State private var config: SlideStudioViewController.SlideExportConfiguration = .default
 	
-	@EnvironmentObject private var slideStudioViewController: SlideStudioViewController
+	@Environment(SlideStudioViewController.self) private var slideStudioViewController
 	
 	@State private var timer: Timer? = nil
 	@State private var isExporting: Bool = false

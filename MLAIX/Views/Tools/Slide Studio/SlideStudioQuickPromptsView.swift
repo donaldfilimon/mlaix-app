@@ -9,7 +9,7 @@ import SwiftUI
 
 struct SlideStudioQuickPromptsView: View {
 	
-	@EnvironmentObject private var slideStudioViewController: SlideStudioViewController
+	@Environment(SlideStudioViewController.self) private var slideStudioViewController
 	
 	let quickPrompts: [QuickPrompt] = [
 		QuickPrompt(
@@ -68,7 +68,8 @@ struct SlideStudioQuickPromptsView: View {
     }
 	
 	var prompts: some View {
-		HStack {
+		@Bindable var slideStudioViewController = slideStudioViewController
+		return HStack {
 			ForEach(self.quickPrompts) { prompt in
 				QuickPromptButton(
 					input: $slideStudioViewController.prompt,

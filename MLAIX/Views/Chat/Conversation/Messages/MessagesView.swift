@@ -12,9 +12,9 @@ struct MessagesView: View {
     
     @Environment(\.colorScheme) var colorScheme
     
-    @EnvironmentObject private var model: Model
-    @EnvironmentObject private var conversationManager: ConversationManager
-    @EnvironmentObject private var expertManager: ExpertManager
+    @Environment(Model.self) private var model
+    @Environment(ConversationManager.self) private var conversationManager
+    @Environment(ExpertManager.self) private var expertManager
     @Environment(ConversationState.self) private var conversationState
     
     @State private var scrollViewProxy: NSScrollView?

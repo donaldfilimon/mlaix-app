@@ -74,8 +74,6 @@ struct RetrievalSettingsView: View {
                     .font(.caption)
             }
             Spacer()
-                .frame(maxWidth: 50)
-                .border(Color.blue)
             Toggle("", isOn: $useMemory)
         }
     }

@@ -10,10 +10,11 @@ import UIKit
 #endif
 
 struct ContentView: View {
-    @EnvironmentObject private var chatState: iOSChatState
+    @Environment(iOSChatState.self) private var chatState
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @State private var showSettings = false
     @State private var hasAPI = SharedAPIConfig.shared.hasConfiguredAPI
+    @State private var showConversationList = false
     @AppStorage("appearanceMode") private var appearanceModeRaw: String = "system"
     @AppStorage("appearanceAccentHex") private var accentHex: String = ""
     @AppStorage("appearanceFontScale") private var fontScaleRaw: Double = 1.0
@@ -34,66 +35,10 @@ struct ContentView: View {
     var body: some View {
         Group {
             if hasAPI {
-                NavigationStack {
-                    ChatView()
-                        .toolbar {
-                            #if os(iOS)
-                            if horizontalSizeClass == .regular {
-                                ToolbarItem(placement: .topBarLeading) {
-                                    Button {
-                                        chatState.startNewConversation()
-                                    } label: {
-                                        Label("New Chat", systemImage: "plus.bubble")
-                                    }
-                                    .accessibilityLabel("New Chat")
-                                }
-                                ToolbarItem(placement: .primaryAction) {
-                                    Button {
-                                        showSettings = true
-                                    } label: {
-                                        Label("Settings", systemImage: "gearshape")
-                                    }
-                                    .accessibilityLabel("Settings")
-                                }
-                            } else {
-                                ToolbarItem(placement: .primaryAction) {
-                                    Menu {
-                                        Button {
-                                            chatState.startNewConversation()
-                                        } label: {
-                                            Label("New Chat", systemImage: "plus.bubble")
-                                        }
-                                        Button {
-                                            showSettings = true
-                                        } label: {
-                                            Label("Settings", systemImage: "gearshape")
-                                        }
-                                    } label: {
-                                        Image(systemName: "ellipsis.circle")
-                                    }
-                                    .accessibilityLabel("Menu")
-                                }
-                            }
-                            #else
-                            ToolbarItem(placement: .primaryAction) {
-                                Menu {
-                                    Button {
-                                        chatState.startNewConversation()
-                                    } label: {
-                                        Label("New Chat", systemImage: "plus.bubble")
-                                    }
-                                    Button {
-                                        showSettings = true
-                                    } label: {
-                                        Label("Settings", systemImage: "gearshape")
-                                    }
-                                } label: {
-                                    Image(systemName: "ellipsis.circle")
-                                }
-                                .accessibilityLabel("Menu")
-                            }
-                            #endif
-                        }
+                if horizontalSizeClass == .regular {
+                    iPadLayout
+                } else {
+                    iPhoneLayout
                 }
             } else {
                 SetupView(onDismiss: { hasAPI = SharedAPIConfig.shared.hasConfiguredAPI })
@@ -112,10 +57,166 @@ struct ContentView: View {
         .optionalTint(resolvedAccentColor)
         .scaleEffect((fontScaleRaw >= 0.8 && fontScaleRaw <= 1.3) ? fontScaleRaw : 1.0, anchor: .center)
     }
+
+    // MARK: - iPad Layout (NavigationSplitView)
+
+    private var iPadLayout: some View {
+        @Bindable var state = chatState
+        return NavigationSplitView {
+            ConversationListView()
+                .toolbar {
+                    ToolbarItem(placement: .navigation) {
+                        Button {
+                            chatState.startNewConversation()
+                        } label: {
+                            Label("New Chat", systemImage: "plus.bubble")
+                        }
+                        .accessibilityLabel("New Chat")
+                    }
+                    ToolbarItem(placement: .primaryAction) {
+                        Button {
+                            showSettings = true
+                        } label: {
+                            Label("Settings", systemImage: "gearshape")
+                        }
+                        .accessibilityLabel("Settings")
+                    }
+                }
+        } detail: {
+            NavigationStack {
+                ChatView()
+                    .navigationTitle(chatState.currentConversation?.title ?? "MLAIX")
+            }
+        }
+    }
+
+    // MARK: - iPhone Layout (NavigationStack + Sheet)
+
+    private var iPhoneLayout: some View {
+        NavigationStack {
+            ChatView()
+                .navigationTitle(chatState.currentConversation?.title ?? "MLAIX")
+                .toolbar {
+                    ToolbarItem(placement: .navigation) {
+                        Button {
+                            showConversationList = true
+                        } label: {
+                            Label("Conversations", systemImage: "list.bullet")
+                        }
+                        .accessibilityLabel("Conversations")
+                    }
+                    ToolbarItem(placement: .primaryAction) {
+                        Menu {
+                            Button {
+                                chatState.startNewConversation()
+                            } label: {
+                                Label("New Chat", systemImage: "plus.bubble")
+                            }
+                            Button {
+                                showSettings = true
+                            } label: {
+                                Label("Settings", systemImage: "gearshape")
+                            }
+                        } label: {
+                            Image(systemName: "ellipsis.circle")
+                        }
+                        .accessibilityLabel("Menu")
+                    }
+                }
+                .sheet(isPresented: $showConversationList) {
+                    NavigationStack {
+                        ConversationListView(onSelect: {
+                            showConversationList = false
+                        })
+                        .navigationTitle("Conversations")
+                        .toolbar {
+                            ToolbarItem(placement: .navigation) {
+                                Button {
+                                    chatState.startNewConversation()
+                                    showConversationList = false
+                                } label: {
+                                    Label("New Chat", systemImage: "plus.bubble")
+                                }
+                            }
+                            ToolbarItem(placement: .confirmationAction) {
+                                Button("Done") {
+                                    showConversationList = false
+                                }
+                            }
+                        }
+                    }
+                }
+        }
+    }
 }
 
+// MARK: - Conversation List View
+
+struct ConversationListView: View {
+    @Environment(iOSChatState.self) private var chatState
+    var onSelect: (() -> Void)?
+
+    var body: some View {
+        List(selection: Binding(
+            get: { chatState.selectedConversationId },
+            set: { id in
+                if let id { chatState.selectConversation(id) }
+            }
+        )) {
+            ForEach(chatState.conversations) { conversation in
+                Button {
+                    chatState.selectConversation(conversation.id)
+                    onSelect?()
+                } label: {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(conversation.title)
+                            .font(.headline)
+                            .lineLimit(1)
+                        HStack {
+                            Text("\(conversation.messages.count) messages")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                            Spacer()
+                            Text(conversation.lastUpdated, style: .relative)
+                                .font(.caption2)
+                                .foregroundStyle(.tertiary)
+                        }
+                    }
+                    .padding(.vertical, 4)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .listRowBackground(
+                    conversation.id == chatState.selectedConversationId
+                        ? Color.accentColor.opacity(0.12)
+                        : Color.clear
+                )
+                .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                    Button(role: .destructive) {
+                        chatState.deleteConversation(conversation.id)
+                    } label: {
+                        Label("Delete", systemImage: "trash")
+                    }
+                }
+            }
+        }
+        .listStyle(.plain)
+        .overlay {
+            if chatState.conversations.isEmpty {
+                ContentUnavailableView(
+                    "No Conversations",
+                    systemImage: "bubble.left.and.bubble.right",
+                    description: Text("Tap + to start a new chat.")
+                )
+            }
+        }
+    }
+}
+
+// MARK: - Chat View
+
 struct ChatView: View {
-    @EnvironmentObject private var chatState: iOSChatState
+    @Environment(iOSChatState.self) private var chatState
     @State private var showErrorAlert = false
 
     var body: some View {
@@ -123,7 +224,6 @@ struct ChatView: View {
             MessagesList()
             InputBar()
         }
-        .navigationTitle("MLAIX")
         .onChange(of: chatState.errorMessage) { _, newValue in
             showErrorAlert = newValue != nil
         }
@@ -148,8 +248,10 @@ struct ChatView: View {
     }
 }
 
+// MARK: - Messages List
+
 struct MessagesList: View {
-    @EnvironmentObject private var chatState: iOSChatState
+    @Environment(iOSChatState.self) private var chatState
 
     var body: some View {
         ScrollViewReader { proxy in
@@ -164,30 +266,48 @@ struct MessagesList: View {
                     }
                     if chatState.isGenerating {
                         SharedLoadingIndicator()
+                            .id("loading-indicator")
                     }
                 }
                 .padding()
             }
             .onChange(of: chatState.messages.count) { _, _ in
-                if let last = chatState.messages.last {
-                    withAnimation(.easeOut(duration: 0.2)) { proxy.scrollTo(last.id, anchor: .bottom) }
-                }
+                scrollToBottom(proxy: proxy)
+            }
+            .onChange(of: chatState.messages.last?.text) { _, _ in
+                // Scroll as streaming tokens arrive
+                scrollToBottom(proxy: proxy)
             }
             .onChange(of: chatState.isGenerating) { _, isGen in
-                if isGen, let last = chatState.messages.last {
-                    withAnimation { proxy.scrollTo(last.id, anchor: .bottom) }
+                if isGen {
+                    scrollToBottom(proxy: proxy)
                 }
+            }
+        }
+    }
+
+    private func scrollToBottom(proxy: ScrollViewProxy) {
+        if chatState.isGenerating {
+            withAnimation(.easeOut(duration: 0.15)) {
+                proxy.scrollTo("loading-indicator", anchor: .bottom)
+            }
+        } else if let last = chatState.messages.last {
+            withAnimation(.easeOut(duration: 0.2)) {
+                proxy.scrollTo(last.id, anchor: .bottom)
             }
         }
     }
 }
 
+// MARK: - Input Bar
+
 struct InputBar: View {
-    @EnvironmentObject private var chatState: iOSChatState
+    @Environment(iOSChatState.self) private var chatState
 
     var body: some View {
+        @Bindable var state = chatState
         HStack(alignment: .bottom, spacing: 12) {
-            TextField("Message…", text: $chatState.inputText, axis: .vertical)
+            TextField("Message...", text: $state.inputText, axis: .vertical)
                 .textFieldStyle(.plain)
                 .accessibilityLabel("Message input")
                 .accessibilityHint("Type your message and tap send")
@@ -213,6 +333,8 @@ struct InputBar: View {
         .background(.bar)
     }
 }
+
+// MARK: - Setup View
 
 struct SetupView: View {
     let onDismiss: () -> Void
@@ -280,6 +402,8 @@ struct SetupView: View {
         }
     }
 }
+
+// MARK: - Settings View
 
 struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
@@ -389,5 +513,5 @@ struct SettingsView: View {
 
 #Preview {
     ContentView()
-        .environmentObject(iOSChatState())
+        .environment(iOSChatState())
 }

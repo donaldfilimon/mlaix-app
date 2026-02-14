@@ -100,8 +100,14 @@ extension LlamaServer {
         let start = CFAbsoluteTimeGetCurrent()
         let response: MLXRunner.Response
         do {
-            response = try await MLXRunner.generate(request: request)
+            response = try await MLXRunner.generate(
+                request: request,
+                progressHandler: progressHandler
+            )
         } catch let error as MLXRunner.MLXError {
+            if case .cancelled = error {
+                throw LlamaServerError.cancelled
+            }
             Self.mlxLogger.error("MLX inference failed: \(error.localizedDescription, privacy: .public)")
             throw LlamaServerError.errorResponse(error.localizedDescription)
         } catch {
@@ -114,19 +120,6 @@ extension LlamaServer {
         }
 
         let outputText = response.text ?? ""
-        if let progressHandler, !outputText.isEmpty {
-            let chunkSize = 128
-            var index = outputText.startIndex
-            while index < outputText.endIndex {
-                if Task.isCancelled {
-                    throw LlamaServerError.cancelled
-                }
-                let nextIndex = outputText.index(index, offsetBy: chunkSize, limitedBy: outputText.endIndex) ?? outputText.endIndex
-                let chunk = String(outputText[index..<nextIndex])
-                progressHandler(chunk)
-                index = nextIndex
-            }
-        }
 
         let inputTokens = response.promptTokens ?? promptTokenEstimate
         let outputTokens = response.completionTokens ?? max(1, outputText.estimatedTokenCount)

@@ -11,9 +11,9 @@ import WebViewKit
 
 struct CanvasPreviewEditor: View {
 	
-	@EnvironmentObject private var canvasController: CanvasController
+	@Environment(CanvasController.self) private var canvasController
 	@Environment(ConversationState.self) private var conversationState
-	@EnvironmentObject private var conversationManager: ConversationManager
+	@Environment(ConversationManager.self) private var conversationManager
 	
 	var selectedConversation: Conversation? {
 		guard let selectedConversationId = conversationState.selectedConversationId else {
@@ -55,6 +55,7 @@ struct CanvasPreviewEditor: View {
 				switch selectedSnapshot.type {
 					case .text:
 						SnapshotTextEditor()
+							.frame(maxWidth: .infinity, maxHeight: .infinity)
 					case .site:
 						WebView(url: selectedSnapshot.site!.url)
 				}

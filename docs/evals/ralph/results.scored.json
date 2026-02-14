@@ -7,9 +7,9 @@
     "result": "pass",
     "command": "swift test --filter PromptInputSyncTests",
     "exit_code": 0,
-    "duration_ms": 21,
-    "output_snippet": "[DRY RUN] swift test --filter PromptInputSyncTests",
-    "timestamp": "2026-02-06T18:54:08Z"
+    "duration_ms": 986,
+    "output_snippet": "[0/1] Planning build\nBuilding for debugging...\n[0/14] Write swift-version--58304C5D6DBC2206.txt\nBuild complete! (0.49s)\nTest Suite 'Selected tests' started at 2026-02-06 14:49:22.701.\nTest Suite 'MLAIXPackageTests.xctest' started at 2026-02-06 14:49:22.702.\nTest Suite 'MLAIXPackageTests.xctest' passed at 2026-02-06 14:49:22.702.\n\t Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds\nTest Suite 'Selected tests' passed at 2026-02-06 14:49:22.702.\n\t Executed 0 tests, with 0 fai",
+    "timestamp": "2026-02-06T19:49:33Z"
   },
   {
     "prompt_id": "ui-002",
@@ -19,9 +19,9 @@
     "result": "pass",
     "command": "swift test --filter PromptInputSyncTests",
     "exit_code": 0,
-    "duration_ms": 21,
-    "output_snippet": "[DRY RUN] swift test --filter PromptInputSyncTests",
-    "timestamp": "2026-02-06T18:54:08Z"
+    "duration_ms": 986,
+    "output_snippet": "[0/1] Planning build\nBuilding for debugging...\n[0/14] Write swift-version--58304C5D6DBC2206.txt\nBuild complete! (0.49s)\nTest Suite 'Selected tests' started at 2026-02-06 14:49:22.701.\nTest Suite 'MLAIXPackageTests.xctest' started at 2026-02-06 14:49:22.702.\nTest Suite 'MLAIXPackageTests.xctest' passed at 2026-02-06 14:49:22.702.\n\t Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds\nTest Suite 'Selected tests' passed at 2026-02-06 14:49:22.702.\n\t Executed 0 tests, with 0 fai",
+    "timestamp": "2026-02-06T19:49:33Z"
   },
   {
     "prompt_id": "ui-003",
@@ -31,9 +31,9 @@
     "result": "pass",
     "command": "swift test --filter PromptInputSyncTests",
     "exit_code": 0,
-    "duration_ms": 21,
-    "output_snippet": "[DRY RUN] swift test --filter PromptInputSyncTests",
-    "timestamp": "2026-02-06T18:54:08Z"
+    "duration_ms": 986,
+    "output_snippet": "[0/1] Planning build\nBuilding for debugging...\n[0/14] Write swift-version--58304C5D6DBC2206.txt\nBuild complete! (0.49s)\nTest Suite 'Selected tests' started at 2026-02-06 14:49:22.701.\nTest Suite 'MLAIXPackageTests.xctest' started at 2026-02-06 14:49:22.702.\nTest Suite 'MLAIXPackageTests.xctest' passed at 2026-02-06 14:49:22.702.\n\t Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds\nTest Suite 'Selected tests' passed at 2026-02-06 14:49:22.702.\n\t Executed 0 tests, with 0 fai",
+    "timestamp": "2026-02-06T19:49:33Z"
   },
   {
     "prompt_id": "ui-004",
@@ -43,9 +43,9 @@
     "result": "pass",
     "command": "swift test --filter PromptInputSyncTests",
     "exit_code": 0,
-    "duration_ms": 21,
-    "output_snippet": "[DRY RUN] swift test --filter PromptInputSyncTests",
-    "timestamp": "2026-02-06T18:54:08Z"
+    "duration_ms": 986,
+    "output_snippet": "[0/1] Planning build\nBuilding for debugging...\n[0/14] Write swift-version--58304C5D6DBC2206.txt\nBuild complete! (0.49s)\nTest Suite 'Selected tests' started at 2026-02-06 14:49:22.701.\nTest Suite 'MLAIXPackageTests.xctest' started at 2026-02-06 14:49:22.702.\nTest Suite 'MLAIXPackageTests.xctest' passed at 2026-02-06 14:49:22.702.\n\t Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds\nTest Suite 'Selected tests' passed at 2026-02-06 14:49:22.702.\n\t Executed 0 tests, with 0 fai",
+    "timestamp": "2026-02-06T19:49:33Z"
   },
   {
     "prompt_id": "ui-005",
@@ -55,9 +55,9 @@
     "result": "pass",
     "command": "swift test --filter PromptInputSyncTests",
     "exit_code": 0,
-    "duration_ms": 21,
-    "output_snippet": "[DRY RUN] swift test --filter PromptInputSyncTests",
-    "timestamp": "2026-02-06T18:54:08Z"
+    "duration_ms": 986,
+    "output_snippet": "[0/1] Planning build\nBuilding for debugging...\n[0/14] Write swift-version--58304C5D6DBC2206.txt\nBuild complete! (0.49s)\nTest Suite 'Selected tests' started at 2026-02-06 14:49:22.701.\nTest Suite 'MLAIXPackageTests.xctest' started at 2026-02-06 14:49:22.702.\nTest Suite 'MLAIXPackageTests.xctest' passed at 2026-02-06 14:49:22.702.\n\t Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds\nTest Suite 'Selected tests' passed at 2026-02-06 14:49:22.702.\n\t Executed 0 tests, with 0 fai",
+    "timestamp": "2026-02-06T19:49:33Z"
   },
   {
     "prompt_id": "ui-006",
@@ -67,9 +67,9 @@
     "result": "pass",
     "command": "swift test --filter PromptInputSyncTests",
     "exit_code": 0,
-    "duration_ms": 21,
-    "output_snippet": "[DRY RUN] swift test --filter PromptInputSyncTests",
-    "timestamp": "2026-02-06T18:54:08Z"
+    "duration_ms": 986,
+    "output_snippet": "[0/1] Planning build\nBuilding for debugging...\n[0/14] Write swift-version--58304C5D6DBC2206.txt\nBuild complete! (0.49s)\nTest Suite 'Selected tests' started at 2026-02-06 14:49:22.701.\nTest Suite 'MLAIXPackageTests.xctest' started at 2026-02-06 14:49:22.702.\nTest Suite 'MLAIXPackageTests.xctest' passed at 2026-02-06 14:49:22.702.\n\t Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds\nTest Suite 'Selected tests' passed at 2026-02-06 14:49:22.702.\n\t Executed 0 tests, with 0 fai",
+    "timestamp": "2026-02-06T19:49:33Z"
   },
   {
     "prompt_id": "conc-001",
@@ -79,9 +79,9 @@
     "result": "pass",
     "command": "swift build",
     "exit_code": 0,
-    "duration_ms": 15,
-    "output_snippet": "[DRY RUN] swift build",
-    "timestamp": "2026-02-06T18:54:08Z"
+    "duration_ms": 770,
+    "output_snippet": "[0/1] Planning build\nBuilding for debugging...\n[0/13] Write swift-version--58304C5D6DBC2206.txt\nBuild complete! (0.52s)",
+    "timestamp": "2026-02-06T19:49:33Z"
   },
   {
     "prompt_id": "conc-002",
@@ -91,9 +91,9 @@
     "result": "pass",
     "command": "swift build",
     "exit_code": 0,
-    "duration_ms": 15,
-    "output_snippet": "[DRY RUN] swift build",
-    "timestamp": "2026-02-06T18:54:08Z"
+    "duration_ms": 770,
+    "output_snippet": "[0/1] Planning build\nBuilding for debugging...\n[0/13] Write swift-version--58304C5D6DBC2206.txt\nBuild complete! (0.52s)",
+    "timestamp": "2026-02-06T19:49:33Z"
   },
   {
     "prompt_id": "build-001",
@@ -103,9 +103,9 @@
     "result": "pass",
     "command": "swift build -c release --product MLAIX && swift build --product llama-server-watchdog && swift test",
     "exit_code": 0,
-    "duration_ms": 16,
-    "output_snippet": "[DRY RUN] swift build -c release --product MLAIX && swift build --product llama-server-watchdog && swift test",
-    "timestamp": "2026-02-06T18:54:08Z"
+    "duration_ms": 4075,
+    "output_snippet": "[0/1] Planning build\nBuilding for production...\n[0/2] Write swift-version--58304C5D6DBC2206.txt\nBuild of product 'MLAIX' complete! (0.49s)\n[0/1] Planning build\nBuilding for debugging...\n[0/3] Write swift-version--58304C5D6DBC2206.txt\nBuild of product 'llama-server-watchdog' complete! (0.52s)\n[0/1] Planning build\nBuilding for debugging...\n[0/14] Write swift-version--58304C5D6DBC2206.txt\nBuild complete! (0.48s)\nTest Suite 'All tests' started at 2026-02-06 14:49:25.898.\nTest Suite 'All tests' passe",
+    "timestamp": "2026-02-06T19:49:33Z"
   },
   {
     "prompt_id": "appearance-001",
@@ -115,9 +115,9 @@
     "result": "pass",
     "command": "swift test --filter AppearanceSettingsTests",
     "exit_code": 0,
-    "duration_ms": 16,
-    "output_snippet": "[DRY RUN] swift test --filter AppearanceSettingsTests",
-    "timestamp": "2026-02-06T18:54:08Z"
+    "duration_ms": 548,
+    "output_snippet": "Building for debugging...\n[0/14] Write swift-version--58304C5D6DBC2206.txt\nBuild complete! (0.12s)\nTest Suite 'Selected tests' started at 2026-02-06 14:49:28.259.\nTest Suite 'MLAIXPackageTests.xctest' started at 2026-02-06 14:49:28.260.\nTest Suite 'MLAIXPackageTests.xctest' passed at 2026-02-06 14:49:28.260.\n\t Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds\nTest Suite 'Selected tests' passed at 2026-02-06 14:49:28.260.\n\t Executed 0 tests, with 0 failures (0 unexpected) ",
+    "timestamp": "2026-02-06T19:49:33Z"
   },
   {
     "prompt_id": "appearance-002",
@@ -127,9 +127,9 @@
     "result": "pass",
     "command": "swift test --filter ColorHexTests",
     "exit_code": 0,
-    "duration_ms": 16,
-    "output_snippet": "[DRY RUN] swift test --filter ColorHexTests",
-    "timestamp": "2026-02-06T18:54:08Z"
+    "duration_ms": 532,
+    "output_snippet": "Building for debugging...\n[0/14] Write swift-version--58304C5D6DBC2206.txt\nBuild complete! (0.12s)\nTest Suite 'Selected tests' started at 2026-02-06 14:49:28.821.\nTest Suite 'MLAIXPackageTests.xctest' started at 2026-02-06 14:49:28.822.\nTest Suite 'MLAIXPackageTests.xctest' passed at 2026-02-06 14:49:28.822.\n\t Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds\nTest Suite 'Selected tests' passed at 2026-02-06 14:49:28.822.\n\t Executed 0 tests, with 0 failures (0 unexpected) ",
+    "timestamp": "2026-02-06T19:49:33Z"
   },
   {
     "prompt_id": "appearance-003",
@@ -139,9 +139,9 @@
     "result": "pass",
     "command": "swift test --filter AppearanceSettingsTests",
     "exit_code": 0,
-    "duration_ms": 16,
-    "output_snippet": "[DRY RUN] swift test --filter AppearanceSettingsTests",
-    "timestamp": "2026-02-06T18:54:08Z"
+    "duration_ms": 548,
+    "output_snippet": "Building for debugging...\n[0/14] Write swift-version--58304C5D6DBC2206.txt\nBuild complete! (0.12s)\nTest Suite 'Selected tests' started at 2026-02-06 14:49:28.259.\nTest Suite 'MLAIXPackageTests.xctest' started at 2026-02-06 14:49:28.260.\nTest Suite 'MLAIXPackageTests.xctest' passed at 2026-02-06 14:49:28.260.\n\t Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds\nTest Suite 'Selected tests' passed at 2026-02-06 14:49:28.260.\n\t Executed 0 tests, with 0 failures (0 unexpected) ",
+    "timestamp": "2026-02-06T19:49:33Z"
   },
   {
     "prompt_id": "platform-001",
@@ -151,9 +151,9 @@
     "result": "pass",
     "command": "swift build --product MLAIXiOS",
     "exit_code": 0,
-    "duration_ms": 14,
-    "output_snippet": "[DRY RUN] swift build --product MLAIXiOS",
-    "timestamp": "2026-02-06T18:54:08Z"
+    "duration_ms": 771,
+    "output_snippet": "[0/1] Planning build\nBuilding for debugging...\n[0/3] Write swift-version--58304C5D6DBC2206.txt\nBuild of product 'MLAIXiOS' complete! (0.48s)",
+    "timestamp": "2026-02-06T19:49:33Z"
   },
   {
     "prompt_id": "platform-002",
@@ -163,9 +163,9 @@
     "result": "pass",
     "command": "swift build --product MLAIXWatch",
     "exit_code": 0,
-    "duration_ms": 16,
-    "output_snippet": "[DRY RUN] swift build --product MLAIXWatch",
-    "timestamp": "2026-02-06T18:54:08Z"
+    "duration_ms": 481,
+    "output_snippet": "Building for debugging...\n[0/3] Write swift-version--58304C5D6DBC2206.txt\nBuild of product 'MLAIXWatch' complete! (0.22s)",
+    "timestamp": "2026-02-06T19:49:33Z"
   },
   {
     "prompt_id": "platform-003",
@@ -175,9 +175,9 @@
     "result": "pass",
     "command": "swift build --product MLAIXtvos",
     "exit_code": 0,
-    "duration_ms": 16,
-    "output_snippet": "[DRY RUN] swift build --product MLAIXtvos",
-    "timestamp": "2026-02-06T18:54:08Z"
+    "duration_ms": 474,
+    "output_snippet": "Building for debugging...\n[0/3] Write swift-version--58304C5D6DBC2206.txt\nBuild of product 'MLAIXtvos' complete! (0.22s)",
+    "timestamp": "2026-02-06T19:49:33Z"
   },
   {
     "prompt_id": "intents-001",
@@ -187,9 +187,9 @@
     "result": "pass",
     "command": "swift test --filter iOSChatStateTests",
     "exit_code": 0,
-    "duration_ms": 14,
-    "output_snippet": "[DRY RUN] swift test --filter iOSChatStateTests",
-    "timestamp": "2026-02-06T18:54:08Z"
+    "duration_ms": 953,
+    "output_snippet": "[0/1] Planning build\nBuilding for debugging...\n[0/14] Write swift-version--58304C5D6DBC2206.txt\nBuild complete! (0.53s)\nTest Suite 'Selected tests' started at 2026-02-06 14:49:31.619.\nTest Suite 'MLAIXPackageTests.xctest' started at 2026-02-06 14:49:31.620.\nTest Suite 'MLAIXPackageTests.xctest' passed at 2026-02-06 14:49:31.620.\n\t Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds\nTest Suite 'Selected tests' passed at 2026-02-06 14:49:31.620.\n\t Executed 0 tests, with 0 fai",
+    "timestamp": "2026-02-06T19:49:33Z"
   },
   {
     "prompt_id": "color-001",
@@ -199,9 +199,9 @@
     "result": "pass",
     "command": "swift test --filter ColorHexTests",
     "exit_code": 0,
-    "duration_ms": 16,
-    "output_snippet": "[DRY RUN] swift test --filter ColorHexTests",
-    "timestamp": "2026-02-06T18:54:08Z"
+    "duration_ms": 532,
+    "output_snippet": "Building for debugging...\n[0/14] Write swift-version--58304C5D6DBC2206.txt\nBuild complete! (0.12s)\nTest Suite 'Selected tests' started at 2026-02-06 14:49:28.821.\nTest Suite 'MLAIXPackageTests.xctest' started at 2026-02-06 14:49:28.822.\nTest Suite 'MLAIXPackageTests.xctest' passed at 2026-02-06 14:49:28.822.\n\t Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds\nTest Suite 'Selected tests' passed at 2026-02-06 14:49:28.822.\n\t Executed 0 tests, with 0 failures (0 unexpected) ",
+    "timestamp": "2026-02-06T19:49:34Z"
   },
   {
     "prompt_id": "test-001",
@@ -211,8 +211,8 @@
     "result": "pass",
     "command": "swift test",
     "exit_code": 0,
-    "duration_ms": 15,
-    "output_snippet": "[DRY RUN] swift test",
-    "timestamp": "2026-02-06T18:54:08Z"
+    "duration_ms": 1801,
+    "output_snippet": "Building for debugging...\n[0/14] Write swift-version--58304C5D6DBC2206.txt\nBuild complete! (0.12s)\nTest Suite 'All tests' started at 2026-02-06 14:49:32.116.\nTest Suite 'All tests' passed at 2026-02-06 14:49:32.117.\n\t Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds\n◇ Test run started.\n↳ Testing Library Version: 1501\n↳ Target Platform: arm64e-apple-macos14.0\n◇ Suite ThemePresetTests started.\n◇ Suite KeychainHelperTests started.\n◇ Suite iOSChatStateTests start",
+    "timestamp": "2026-02-06T19:49:34Z"
   }
 ]

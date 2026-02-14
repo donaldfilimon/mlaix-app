@@ -10,10 +10,9 @@ import SwiftUI
 
 struct ContentView: View {
 
-	@Environment(\.openWindow) private var openWindow
-	@EnvironmentObject private var downloadManager: DownloadManager
-	@EnvironmentObject private var expertManager: ExpertManager
-	@EnvironmentObject private var conversationManager: ConversationManager
+	@Environment(DownloadManager.self) private var downloadManager
+	@Environment(ExpertManager.self) private var expertManager
+	@Environment(ConversationManager.self) private var conversationManager
 
 	@State private var conversationState = ConversationState()
 	
@@ -41,22 +40,15 @@ struct ContentView: View {
 				conversationState.newConversation()
 			}
 		}
-		.onReceive(NotificationCenter.default.publisher(for: Notifications.showKeyboardShortcuts.name)) { _ in
-			openWindow(id: "keyboardShortcuts")
-		}
-		#if DEBUG
-		.onReceive(NotificationCenter.default.publisher(for: Notifications.showScriptTesting.name)) { _ in
-			openWindow(id: "scriptTesting")
-		}
-		#endif
+		.observeWindowCommands()
     }
 }
 
 #Preview {
     ContentView()
-        .environmentObject(AppState.shared)
-        .environmentObject(DownloadManager.shared)
-        .environmentObject(ExpertManager.shared)
-        .environmentObject(ConversationManager.shared)
-        .environmentObject(Model.shared)
+        .environment(AppState.shared)
+        .environment(DownloadManager.shared)
+        .environment(ExpertManager.shared)
+        .environment(ConversationManager.shared)
+		.environment(Model.shared)
 }

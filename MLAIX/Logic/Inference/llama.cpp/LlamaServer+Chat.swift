@@ -807,6 +807,8 @@ extension LlamaServer {
         
     }
     
+    // @unchecked Sendable: Contains [(any DecodableFunctionCall)]? which cannot conform to Sendable.
+    // All stored properties are value types; the struct is safe to share across isolation boundaries.
     public struct CompleteResponse: @unchecked Sendable {
 
         var text: String

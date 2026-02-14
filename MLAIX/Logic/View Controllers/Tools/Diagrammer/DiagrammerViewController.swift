@@ -7,12 +7,13 @@
 
 import Foundation
 import FSKit_macOS
+import Observation
 import OSLog
 import SwiftUI
 import WebViewKit
 
 @MainActor
-public class DiagrammerViewController: ObservableObject {
+@Observable public class DiagrammerViewController {
 	
 	/// A `Logger` object for the `DiagrammerViewController` object
 	private static let logger: Logger = .init(
@@ -21,10 +22,10 @@ public class DiagrammerViewController: ObservableObject {
 	)
 	
 	/// The current step in the diagram generation process, of type `DiagrammerStep`
-	@Published public var currentStep: DiagrammerStep = .prompt
+	public var currentStep: DiagrammerStep = .prompt
 	
 	/// The prompt entered, of type `String`
-	@Published public var prompt: String = ""
+	public var prompt: String = ""
 	
 	/// The full prompt used to generate mermaid diagram code, of type `String`
 	var fullPrompt: String {
@@ -53,10 +54,10 @@ Cheatsheet:
 	}
 	
 	/// The mermaid code, of type `String`
-	@Published public var mermaidCode: String = ""
+	public var mermaidCode: String = ""
     
     /// The preview's ID
-    @Published private var previewId: UUID = UUID()
+    private var previewId: UUID = UUID()
     
 	/// A preview of the diagram
 	public var preview: some View {

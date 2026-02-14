@@ -67,7 +67,7 @@ public class JavaScriptRunner {
 		return JavaScriptExecutionResult(result: finalResult, consoleOutput: logEntries)
 	}
 
-	/// Function to execute JavaScript and return the result
+	/// Function to execute JavaScript and return the result (JavaScriptCore).
 	/// - Parameter code: The JavaScript code to be run
 	/// - Returns: The result produced from the JavaScript code
 	public static func executeJavaScript(
@@ -76,14 +76,75 @@ public class JavaScriptRunner {
 		try executeWithConsoleOutput(code).result
 	}
 
+	/// Allowed character set for safe expression evaluation (arithmetic only).
+	private static let expressionAllowedCharacterSet = CharacterSet(charactersIn: "0123456789.+-*/%() \t\n")
+
+	/// Evaluates a single arithmetic expression via JavaScriptCore and returns the result.
+	/// Only numbers and operators (+, -, *, /, %, parentheses, spaces) are allowed for safety.
+	/// For full JavaScript use `run_javascript` / `executeJavaScript` instead.
+	public static func evaluateExpression(_ expression: String) throws -> String {
+		let trimmed = expression.trimmingCharacters(in: .whitespacesAndNewlines)
+		guard !trimmed.isEmpty else {
+			throw JSError.exception(error: "Empty expression")
+		}
+		guard trimmed.unicodeScalars.allSatisfy({ expressionAllowedCharacterSet.contains($0) }) else {
+			throw JSError.exception(error: "Expression may only contain numbers and + - * / % ( )")
+		}
+		guard let context = JSContext() else {
+			throw JSError.failedToInitContext
+		}
+		var exceptionMsg: String?
+		context.exceptionHandler = { _, exception in
+			exceptionMsg = exception?.toString()
+		}
+		// Wrap in parentheses so the parser treats it as an expression
+		let wrapped = "(\(trimmed))"
+		guard let result = context.evaluateScript(wrapped) else {
+			throw JSError.executionFailed
+		}
+		if let msg = exceptionMsg {
+			throw JSError.exception(error: msg)
+		}
+		if result.isUndefined {
+			throw JSError.couldNotObtainResult
+		}
+		return result.toString() ?? "\(result)"
+	}
+
+	/// Executes JavaScript with a timeout to prevent infinite loops from hanging the app.
+	/// - Parameters:
+	///   - code: The JavaScript code to run
+	///   - timeout: Maximum execution time in seconds (default: 5)
+	/// - Returns: The execution result with console output
+	public static func executeWithTimeout(
+		_ code: String,
+		timeout: TimeInterval = 5.0
+	) async throws -> JavaScriptExecutionResult {
+		try await withThrowingTaskGroup(of: JavaScriptExecutionResult.self) { group in
+			group.addTask {
+				try executeWithConsoleOutput(code)
+			}
+			group.addTask {
+				try await Task.sleep(for: .seconds(timeout))
+				throw JSError.timeout(seconds: timeout)
+			}
+			guard let result = try await group.next() else {
+				throw JSError.executionFailed
+			}
+			group.cancelAll()
+			return result
+		}
+	}
+
 	/// Enum for possible errors during JavaScript execution
     public enum JSError: LocalizedError {
-        
+
 		case failedToInitContext
 		case exception(error: String)
 		case executionFailed
 		case couldNotObtainResult
-        
+		case timeout(seconds: TimeInterval)
+
         public var errorDescription: String? {
             switch self {
                 case .failedToInitContext:
@@ -94,8 +155,10 @@ public class JavaScriptRunner {
                     return "JavaScript execution failed"
                 case .couldNotObtainResult:
                     return "JavaScript execution did not return a result"
+				case .timeout(let seconds):
+					return "JavaScript execution timed out after \(Int(seconds)) seconds"
             }
         }
 	}
-	
+
 }

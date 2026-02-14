@@ -5,10 +5,12 @@
 //  Created by Bean John on 10/4/24.
 //
 
+import AppKit
 import OSLog
-import SwiftUI
 import QuickLook
 import QuickLookThumbnailing
+import QuickLookUI
+import SwiftUI
 
 public struct ThumbnailView: View {
 	
@@ -69,7 +71,7 @@ public struct ThumbnailView: View {
 						.if(resizable) {
 							$0.resizable()
 						}
-						.quickLookPreview($previewItem)
+						.modifier(QuickLookPreviewModifier(item: $previewItem))
 				}
 				.allowsHitTesting(tapToPreview)
 				.onTapGesture {
@@ -121,6 +123,34 @@ extension ThumbnailView {
 		self.tapToPreview = tapToPreview
 		self.resizable = resizable
 	}
+}
+
+/// Presents a Quick Look preview when `item` is non-nil (macOS-compatible replacement for SwiftUI's quickLookPreview).
+private struct QuickLookPreviewModifier: ViewModifier {
+	@Binding var item: URL?
+	@State private var coordinator = QuickLookPreviewCoordinator()
+	func body(content: Content) -> some View {
+		content
+			.onChange(of: item) { _, newValue in
+				guard let url = newValue, let panel = QLPreviewPanel.shared() else { return }
+				coordinator.previewURL = url
+				coordinator.clearItem = { item = nil }
+				panel.dataSource = coordinator
+				panel.reloadData()
+				panel.makeKeyAndOrderFront(nil)
+			}
+			.onDisappear {
+				coordinator.previewURL = nil
+				coordinator.clearItem = nil
+			}
+	}
+}
+
+private final class QuickLookPreviewCoordinator: NSObject, QLPreviewPanelDataSource {
+	var previewURL: URL?
+	var clearItem: (() -> Void)?
+	func numberOfPreviewItems(in panel: QLPreviewPanel!) -> Int { previewURL == nil ? 0 : 1 }
+	func previewPanel(_ panel: QLPreviewPanel!, previewItemAt index: Int) -> QLPreviewItem! { previewURL as QLPreviewItem? }
 }
 
 extension QLThumbnailGenerator {

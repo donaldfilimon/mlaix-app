@@ -9,9 +9,10 @@ import SwiftUI
 
 struct DetectorInputView: View {
 	
-	@EnvironmentObject private var detectorViewController: DetectorViewController
+	@Environment(DetectorViewController.self) private var detectorViewController
 	
     var body: some View {
+		@Bindable var detectorViewController = detectorViewController
 		ScrollView {
 			TextEditor(
 				text: $detectorViewController.text

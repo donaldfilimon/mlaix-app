@@ -6,14 +6,16 @@
 //
 
 import Foundation
+import Observation
 import SwiftUI
 
 @MainActor
-public class AppState: ObservableObject {
+@Observable
+public class AppState {
 	
 	static let shared: AppState = AppState()
 	
-	@Published var commandSelectedExpertId: UUID? = nil
+	var commandSelectedExpertId: UUID? = nil
 	
 	static func setCommandSelectedExpertId(_ id: UUID) {
 		Self.shared.commandSelectedExpertId = id

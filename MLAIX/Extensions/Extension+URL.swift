@@ -169,7 +169,9 @@ public extension URL {
                     try await Task.sleep(nanoseconds: UInt64(timeout * 1_000_000_000))
                     throw URLError(.timedOut)
                 }
-                let result = try await group.next()!
+                guard let result = try await group.next() else {
+                    throw URLError(.timedOut)
+                }
                 group.cancelAll()
                 return result
             }

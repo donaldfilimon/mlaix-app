@@ -17,20 +17,48 @@ public enum BackendAutoConfig {
         category: String(describing: BackendAutoConfig.self)
     )
 
+    /// Well-known local server endpoints (OpenAI-compatible). Probed in order when no backend is configured; llama.cpp is last fallback.
+    private static let localServerCandidates: [(name: String, baseURL: String)] = [
+        ("Ollama", "http://localhost:11434/v1"),
+        ("LM Studio", "http://localhost:1234/v1"),
+        ("MLX CLI", "http://localhost:8080/v1"),
+        ("Llama.cpp server", "http://localhost:4579/v1"),
+    ]
+
     /// Availability status for each backend type.
     public struct BackendAvailability: Sendable {
         public let local: Bool
         public let remote: Bool
         public let foundationModels: Bool
+        public let mlx: Bool
         public let recommendedBackend: RecommendedBackend
         public let canAutoConnect: Bool
+        /// When set, caller should use this endpoint for remote (e.g. auto-detected Ollama/LM Studio/MLX CLI).
+        public let suggestedRemoteEndpoint: String?
 
         public enum RecommendedBackend: String, Sendable {
             case local
             case remote
             case foundationModels
+            case mlx
             case none
         }
+    }
+
+    /// Probes well-known local servers (Ollama, LM Studio, MLX CLI, Llama.cpp). Returns first reachable endpoint.
+    private static func probeLocalServers(timeout: TimeInterval = 1.5) async -> (name: String, endpoint: String)? {
+        for candidate in localServerCandidates {
+            let base = candidate.baseURL.replacingSuffix("/", with: "")
+            for path in ["models", "chat/completions"] {
+                let urlString = "\(base)/\(path)"
+                guard let url = URL(string: urlString) else { continue }
+                if await url.isAPIEndpointReachable(timeout: timeout) {
+                    Self.logger.info("Local server '\(candidate.name)' reachable at \(candidate.baseURL)")
+                    return (candidate.name, candidate.baseURL)
+                }
+            }
+        }
+        return nil
     }
 
     /// Probes remote endpoint directly (does not require useServer to be true).
@@ -50,11 +78,22 @@ public enum BackendAutoConfig {
     }
 
     /// Probes all backends and returns availability. Does not modify settings.
+    /// When current endpoint is empty or default and unreachable, probes Ollama / LM Studio / MLX CLI; if one is reachable, sets suggestedRemoteEndpoint.
     public static func probeAvailability() async -> BackendAvailability {
         let foundationAvailable = FoundationModelsSupport.isAvailable
         let localAvailable = (Settings.modelUrl?.path).map { FileManager.default.fileExists(atPath: $0) } ?? false
-        let remoteReachable = await probeRemoteEndpoint()
+        var remoteReachable = await probeRemoteEndpoint()
+        var suggestedRemoteEndpoint: String? = nil
+        let currentEndpoint = InferenceSettings.endpoint.trimmingCharacters(in: .whitespacesAndNewlines)
+        let isDefaultOrEmpty = currentEndpoint.isEmpty || currentEndpoint == InferenceSettings.defaultEndpoint
+        if !remoteReachable, isDefaultOrEmpty, let local = await probeLocalServers() {
+            suggestedRemoteEndpoint = local.endpoint
+            remoteReachable = true
+        }
+        let mlxAvailability = await MLXRunner.checkAvailability()
+        let mlxAvailable = mlxAvailability.mlxAvailable
 
+        // Priority cascade: Foundation Models → Remote → Local llama.cpp → MLX
         let recommended: BackendAvailability.RecommendedBackend
         let canAutoConnect: Bool
 
@@ -67,11 +106,8 @@ public enum BackendAutoConfig {
         } else if localAvailable {
             recommended = .local
             canAutoConnect = true
-        } else if foundationAvailable {
-            recommended = .foundationModels
-            canAutoConnect = true
-        } else if remoteReachable {
-            recommended = .remote
+        } else if mlxAvailable {
+            recommended = .mlx
             canAutoConnect = true
         } else {
             recommended = .none
@@ -79,15 +115,17 @@ public enum BackendAutoConfig {
         }
 
         Self.logger.info(
-            "Backend probe: local=\(localAvailable) remote=\(remoteReachable) foundation=\(foundationAvailable) recommended=\(recommended.rawValue)"
+            "Backend probe: local=\(localAvailable) remote=\(remoteReachable) foundation=\(foundationAvailable) mlx=\(mlxAvailable) recommended=\(recommended.rawValue)"
         )
 
         return BackendAvailability(
             local: localAvailable,
             remote: remoteReachable,
             foundationModels: foundationAvailable,
+            mlx: mlxAvailable,
             recommendedBackend: recommended,
-            canAutoConnect: canAutoConnect
+            canAutoConnect: canAutoConnect,
+            suggestedRemoteEndpoint: suggestedRemoteEndpoint
         )
     }
 
@@ -112,6 +150,9 @@ public enum BackendAutoConfig {
             Self.logger.notice("Auto-configured: Apple Foundation Models")
             return true
         case .remote:
+            if let suggested = availability.suggestedRemoteEndpoint {
+                InferenceSettings.endpoint = suggested
+            }
             InferenceSettings.useServer = true
             InferenceSettings.useFoundationModels = false
             Self.logger.notice("Auto-configured: Remote API at \(InferenceSettings.endpoint, privacy: .public)")
@@ -120,6 +161,11 @@ public enum BackendAutoConfig {
             InferenceSettings.useServer = false
             InferenceSettings.useFoundationModels = false
             Self.logger.notice("Auto-configured: Local model")
+            return true
+        case .mlx:
+            InferenceSettings.useServer = false
+            InferenceSettings.useFoundationModels = false
+            Self.logger.notice("Auto-configured: MLX backend")
             return true
         case .none:
             return false

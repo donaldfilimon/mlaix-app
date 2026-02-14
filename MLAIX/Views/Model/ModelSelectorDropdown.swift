@@ -11,7 +11,7 @@ struct ModelSelectorDropdown: View {
     
     @Environment(\.colorScheme) private var colorScheme
     
-    @EnvironmentObject private var expertManager: ExpertManager
+    @Environment(ExpertManager.self) private var expertManager
     @Environment(ConversationState.self) private var conversationState
     
     @AppStorage("endpoint") private var serverEndpoint: String = InferenceSettings.endpoint
@@ -26,8 +26,8 @@ struct ModelSelectorDropdown: View {
     @State private var localModelsListId: UUID = UUID()
     @State private var remoteServerReachable: Bool = false
     
-    @EnvironmentObject private var modelManager: ModelManager
-    @EnvironmentObject private var model: Model
+    @Environment(ModelManager.self) private var modelManager
+    @Environment(Model.self) private var model
     
     // Scroll to active model
     @State private var scrollToLocal: Bool = false
@@ -144,11 +144,7 @@ struct ModelSelectorDropdown: View {
                 }
             }
         }
-        .onReceive(
-            NotificationCenter.default.publisher(
-                for: Notifications.changedInferenceConfig.name
-            )
-        ) { output in
+        .onChange(of: NavigationState.shared.inferenceConfigChanged) { _, _ in
             self.localModelsListId = UUID()
             Task { @MainActor in
                 if InferenceSettings.useServer {
@@ -297,10 +293,7 @@ struct ModelSelectorDropdown: View {
                 
                 Button {
                     InferenceSettings.useServer.toggle()
-                    NotificationCenter.default.post(
-                        name: Notifications.changedInferenceConfig.name,
-                        object: nil
-                    )
+                    NavigationState.shared.inferenceConfigChanged = true
                 } label: {
                     Text(InferenceSettings.useServer ? "Disable Remote" : "Enable Remote")
                         .font(.caption)
@@ -332,10 +325,7 @@ struct ModelSelectorDropdown: View {
     
     private func selectLocalModel(_ modelFile: ModelManager.ModelFile) {
         Settings.modelUrl = modelFile.url
-        NotificationCenter.default.post(
-            name: Notifications.changedInferenceConfig.name,
-            object: nil
-        )
+        NavigationState.shared.inferenceConfigChanged = true
         showingDropdown = false
     }
     
@@ -345,10 +335,7 @@ struct ModelSelectorDropdown: View {
         if !InferenceSettings.useServer {
             InferenceSettings.useServer = true
         }
-        NotificationCenter.default.post(
-            name: Notifications.changedInferenceConfig.name,
-            object: nil
-        )
+        NavigationState.shared.inferenceConfigChanged = true
         showingDropdown = false
     }
     

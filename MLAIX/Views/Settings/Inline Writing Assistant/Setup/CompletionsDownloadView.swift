@@ -9,9 +9,9 @@ import SwiftUI
 
 struct CompletionsDownloadView: View {
 
-	@EnvironmentObject private var downloadManager: DownloadManager
+	@Environment(DownloadManager.self) private var downloadManager
 	
-	@EnvironmentObject private var completionsSetupViewModel: CompletionsSetupViewModel
+	@Environment(CompletionsSetupViewModel.self) private var completionsSetupViewModel
 	
     var body: some View {
 		VStack {

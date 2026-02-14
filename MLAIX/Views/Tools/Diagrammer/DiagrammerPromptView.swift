@@ -12,7 +12,7 @@ struct DiagrammerPromptView: View {
 	@FocusState private var isFocused: Bool
 	@State private var didFinishTyping: Bool = false
 	
-	@EnvironmentObject private var diagrammerViewController: DiagrammerViewController
+	@Environment(DiagrammerViewController.self) private var diagrammerViewController
 	
     var body: some View {
 		VStack(
@@ -46,7 +46,8 @@ struct DiagrammerPromptView: View {
 	}
 	
 	var field: some View {
-		TextField(
+		@Bindable var diagrammerViewController = diagrammerViewController
+		return TextField(
 			"e.g. Draw a diagram of the eutrophication cycle and how it forms a positive feedback loop.",
 			text: $diagrammerViewController.prompt.animation(
 				.linear

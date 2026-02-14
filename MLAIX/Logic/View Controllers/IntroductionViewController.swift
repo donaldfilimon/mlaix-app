@@ -6,12 +6,13 @@
 //
 
 import Foundation
+import Observation
 import SwiftUI
 
 @MainActor
-public class IntroductionViewController: ObservableObject {
+@Observable public class IntroductionViewController {
 	
-	@Published var page: IntroductionPage = IntroductionPage.allCases.first!
+	var page: IntroductionPage = IntroductionPage.allCases.first!
 	
 	public var progress: some View {
 		HStack {

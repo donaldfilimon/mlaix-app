@@ -7,15 +7,16 @@
 
 @preconcurrency import DefaultModels
 import Foundation
+import Observation
 
 @MainActor
-public class ModelExplorerViewController: ObservableObject {
+@Observable public class ModelExplorerViewController {
 	
 	/// An array of model families, of type ``ModelFamily``
-	@Published public var modelFamilies: [ModelFamily] = []
+	public var modelFamilies: [ModelFamily] = []
 	
 	/// The current selected model family, of type `ModelFamily`
-	@Published public var selectedFamily: ModelFamily? = nil
+	public var selectedFamily: ModelFamily? = nil
 	
 	/// A list of models from the selected family, of type `[HuggingFaceModel]`
 	var selectedFamilyModels: [HuggingFaceModel] {
@@ -42,9 +43,10 @@ public class ModelExplorerViewController: ObservableObject {
 				.filter { model in
 					return model.modelFamily == family
 				}
+			guard let first = modelsInFamily.first else { continue }
 			let newModelFamily: ModelFamily = ModelFamily(
 				name: family.rawValue,
-				family: modelsInFamily.first!.modelFamily,
+				family: first.modelFamily,
 				models: modelsInFamily
 			)
 			newModelFamilies.append(newModelFamily)

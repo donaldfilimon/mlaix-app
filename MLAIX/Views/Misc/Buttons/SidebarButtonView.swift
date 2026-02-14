@@ -31,7 +31,7 @@ struct SidebarButtonView: View {
 			.foregroundStyle(.secondary)
 			.font(.headline)
 			.fontWeight(.regular)
-            .frame(maxWidth: .infinity, alignment: .leading)
+			.frame(maxWidth: .infinity, alignment: .leading)
 			.padding(.horizontal, 8)
 			.padding(.vertical, 7)
 			.background(
@@ -42,6 +42,8 @@ struct SidebarButtonView: View {
 			)
 		}
 		.buttonStyle(.plain)
+		.accessibilityLabel(title)
+		.accessibilityHint(String(localized: "Double-click to activate"))
 		.onHover { hovering in
 			withAnimation(
 				.linear(duration: 0.3)

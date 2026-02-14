@@ -7,13 +7,15 @@
 
 import Foundation
 import FSKit_macOS
+import Observation
 import OSLog
 import SimilaritySearchKit
 import SwiftUI
 
 /// An object which abstracts LLM inference
 @MainActor
-public class Model: ObservableObject {
+@Observable
+public class Model {
     
     // MARK: - Logging
     
@@ -30,10 +32,10 @@ public class Model: ObservableObject {
     
     // MARK: - Published State
     
-    @Published public var wasRemoteServerAccessible: Bool = false
-    @Published var pendingMessage: Message? = nil
-    @Published var status: Status = .cold
-    @Published var sentConversationId: UUID? = nil
+    public var wasRemoteServerAccessible: Bool = false
+    var pendingMessage: Message? = nil
+    var status: Status = .cold
+    var sentConversationId: UUID? = nil
     
     // MARK: - Model Servers
     
@@ -67,8 +69,8 @@ public class Model: ObservableObject {
         // Probe remote connectivity without blocking the main actor
         Task.detached(priority: .userInitiated) { [weak self] in
             guard let self else { return }
-            let signpost = StartupMetrics.begin("Model.remoteProbe")
-            defer { StartupMetrics.end("Model.remoteProbe", signpost) }
+            let signpost = StartupMetrics.beginInterval("Model.remoteProbe")
+            defer { StartupMetrics.endInterval("Model.remoteProbe", signpost) }
             let _ = await self.remoteServerIsReachable()
         }
     }

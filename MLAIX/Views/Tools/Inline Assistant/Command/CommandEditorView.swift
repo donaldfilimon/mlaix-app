@@ -9,7 +9,7 @@ import SwiftUI
 
 struct CommandEditorView: View {
 	
-	@EnvironmentObject private var commandManager: CommandManager
+	@Environment(CommandManager.self) private var commandManager
 	
 	@Binding var command: Command
 	@Binding var isEditingCommand: Bool

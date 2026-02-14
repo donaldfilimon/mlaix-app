@@ -9,7 +9,7 @@ import SwiftUI
 
 struct DetectorEvaluationResultView: View {
 	
-	@EnvironmentObject private var detectorViewController: DetectorViewController
+	@Environment(DetectorViewController.self) private var detectorViewController
 	
 	var chunks: [EvaluationDetails.Chunk] {
 		return self.detectorViewController.evaluationDetails?.chunks ?? [

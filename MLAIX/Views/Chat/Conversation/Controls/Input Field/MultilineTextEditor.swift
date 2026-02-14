@@ -17,6 +17,7 @@ struct MultilineTextField: NSViewRepresentable {
     var shouldFocus: Bool = false
     let prompt: String
     var onImageDrop: ((URL) -> Void)?
+    var onFocusChange: ((Bool) -> Void)?
 
     private func clampedCursor(_ cursor: Int, in value: String) -> Int {
         max(0, min(cursor, value.utf16.count))
@@ -59,6 +60,7 @@ struct MultilineTextField: NSViewRepresentable {
         let safeInsertionPoint = clampedCursor(insertionPoint, in: initialText)
         textView.setSelectedRange(NSRange(location: safeInsertionPoint, length: 0))
         textView.onImageDrop = context.coordinator.onImageDrop
+        textView.onFocusChange = context.coordinator.onFocusChange
         // Register for drag types
         textView.registerForDraggedTypes([
             .fileURL,
@@ -107,8 +109,9 @@ struct MultilineTextField: NSViewRepresentable {
         // Save current scroll position
         let currentScrollPosition = nsView.contentView.bounds.origin
         
-        // Update the callback
+        // Update the callbacks
         textView.onImageDrop = context.coordinator.onImageDrop
+        textView.onFocusChange = context.coordinator.onFocusChange
         
         // Enable scroll position preservation during programmatic updates
         textView.shouldPreserveScrollPosition = true
@@ -134,7 +137,11 @@ struct MultilineTextField: NSViewRepresentable {
         if shouldFocus &&
             textView.window?.firstResponder !== textView &&
             textView.acceptsFirstResponder {
-            textView.window?.makeFirstResponder(textView)
+            // Defer so the view is in the window hierarchy (fixes initial focus not working)
+            DispatchQueue.main.async {
+                guard textView.window != nil, textView.acceptsFirstResponder else { return }
+                textView.window?.makeFirstResponder(textView)
+            }
         }
         textView.setPrompt(prompt)
         textView.invalidateIntrinsicContentSize()
@@ -163,7 +170,10 @@ struct MultilineTextField: NSViewRepresentable {
         }
         
         var onImageDrop: ((URL) -> Void)? {
-            return parent.onImageDrop
+            parent.onImageDrop
+        }
+        var onFocusChange: ((Bool) -> Void)? {
+            parent.onFocusChange
         }
         
         func textDidChange(
@@ -231,6 +241,7 @@ class PromptingTextView: NSTextView {
     
     private var prompt: String = ""
     var onImageDrop: ((URL) -> Void)?
+    var onFocusChange: ((Bool) -> Void)?
     var shouldPreserveScrollPosition: Bool = false
     
     private static let logger: Logger = .init(
@@ -282,6 +293,18 @@ class PromptingTextView: NSTextView {
             self.prompt = prompt
             needsDisplay = true
         }
+    }
+    
+    override func becomeFirstResponder() -> Bool {
+        let result = super.becomeFirstResponder()
+        if result { onFocusChange?(true) }
+        return result
+    }
+    
+    override func resignFirstResponder() -> Bool {
+        let result = super.resignFirstResponder()
+        if result { onFocusChange?(false) }
+        return result
     }
     
     /// Function to force pasting as plain text
@@ -463,11 +486,12 @@ extension MultilineTextField {
 
 struct ChatPromptEditor: View {
 
-    @EnvironmentObject private var promptController: PromptController
+    @Environment(PromptController.self) private var promptController
 
     @AppStorage("useCommandReturn") private var useCommandReturn: Bool = Settings.useCommandReturn
     var sendDescription: String {
-        return String(localized: "Enter a message. Press ") + Settings.SendShortcut(self.useCommandReturn).rawValue + String(localized: " to send.")
+        let shortcut = Settings.SendShortcut(self.useCommandReturn)
+        return String(localized: "Enter a message. Press ") + shortcut.promptDescription + String(localized: " to send.")
     }
 
     var isFocused: FocusState<Bool>.Binding
@@ -495,15 +519,16 @@ struct ChatPromptEditor: View {
 
     var body: some View {
         MultilineTextField(
-            text: self.$promptController.prompt,
-            insertionPoint: self.$promptController.insertionPoint,
+            text: Bindable(promptController).prompt,
+            insertionPoint: Bindable(promptController).insertionPoint,
             shouldFocus: self.isFocused.wrappedValue,
             prompt: sendDescription,
             onImageDrop: { url in
                 Task {
                     await self.promptController.addFile(url)
                 }
-            }
+            },
+            onFocusChange: { self.isFocused.wrappedValue = $0 }
         )
         .textFieldStyle(.plain)
         .frame(maxWidth: .infinity)

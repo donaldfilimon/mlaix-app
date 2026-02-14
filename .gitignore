@@ -1,4 +1,17 @@
-Sidekick/Logic/View Controllers/Tools/Slide Studio/Resources/bin/marp
-.DS_Store
+MLAIX/Logic/View Controllers/Tools/Slide Studio/Resources/bin/marp
+**/.DS_Store
 .build/
 .claude/
+
+# Build artifacts
+*.profraw
+bin/
+*.o
+*.d
+*.swp
+*~
+
+# Xcode
+xcuserdata/
+*.xcscmblueprint
+DerivedData/

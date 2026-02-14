@@ -6,13 +6,12 @@
 //
 
 import SwiftUI
-import Combine
 
 struct IntroductionView: View {
     
     @Environment(ConversationState.self) private var conversationState
     
-    @StateObject private var introductionViewController: IntroductionViewController = .init()
+    @State private var introductionViewController: IntroductionViewController = .init()
     
     @Binding var showSetup: Bool
     
@@ -33,7 +32,7 @@ struct IntroductionView: View {
             }
         }
         .frame(maxHeight: 600)
-        .environmentObject(introductionViewController)
+        .environment(introductionViewController)
     }
     
     var page: some View {
@@ -41,10 +40,12 @@ struct IntroductionView: View {
             HStack {
                 introductionViewController.prevPage
                 VStack {
-                    IntroductionPageView(
-                        content: introductionViewController.page.content!
-                    )
-                    .padding()
+			if let content = introductionViewController.page.content {
+				IntroductionPageView(
+					content: content
+				)
+				.padding()
+			}
                     // Progress indicator
                     if introductionViewController.page.hasNext {
                         introductionViewController.progress

@@ -5,16 +5,16 @@
 //  Created by John Bean on 2/23/25.
 //
 
-import Accelerate
 import Foundation
 import FSKit_macOS
+import Observation
 import SwiftUI
 
 @MainActor
-public class DetectorViewController: ObservableObject {
+@Observable public class DetectorViewController {
 	
 	/// The state of the detector, of type ``DetectorState``
-	@Published public var state: DetectorState = .input {
+	public var state: DetectorState = .input {
 		didSet {
 			// Toggle inspector state
 			switch self.state {
@@ -27,10 +27,10 @@ public class DetectorViewController: ObservableObject {
 	}
 	
 	/// The text being evaluated, of type `String`
-	@Published public var text: String = ""
+	public var text: String = ""
 	
 	/// A `Bool` representing whether the inspector is shown
-	@Published public var showInspector: Bool = false
+	public var showInspector: Bool = false
 	
 	/// The evaluation details of the text
 	public var evaluationDetails: EvaluationDetails?

@@ -9,9 +9,9 @@ import SwiftUI
 
 struct CanvasVersionSelector: View {
 	
-	@EnvironmentObject private var canvasController: CanvasController
+	@Environment(CanvasController.self) private var canvasController
 	@Environment(ConversationState.self) private var conversationState
-	@EnvironmentObject private var conversationManager: ConversationManager
+	@Environment(ConversationManager.self) private var conversationManager
 	
 	var selectedConversation: Conversation? {
 		guard let selectedConversationId = conversationState.selectedConversationId else {
@@ -51,7 +51,7 @@ struct CanvasVersionSelector: View {
 	var body: some View {
 		Picker(
 			"",
-			selection: self.$canvasController.selectedMessageId.animation(.linear)
+			selection: Bindable(canvasController).selectedMessageId.animation(.linear)
 		) {
 			ForEach(versions) { version in
 				Text(version.title)

@@ -93,8 +93,12 @@ You are a Swift 6 specialist embedded in the MLAIX project. Your job is to write
 | Component | Type | Location |
 |-----------|------|----------|
 | `LlamaServer` | `actor` | `Logic/Inference/llama.cpp/` |
+| `LlamaServer+MLX` / `MLXRunner` | extension / enum | `Logic/Inference/MLX/` (native MLX) |
+| `FoundationModelsSupport` / `FoundationModelsClient` | enum / class | `Logic/Inference/FoundationModels/` (macOS 26+) |
 | `Model` | `@MainActor class` | `Logic/Inference/Model.swift` |
-| `ConversationManager` | `@MainActor class` | `Logic/Data Models/` |
+| `ConversationManager` | `@MainActor class` | `Logic/Data Models/` (JSON) |
+| `CommandManager`, `InferenceRecords`, `ServerArgumentsManager` | `@MainActor class` | `Logic/Data Models/` (SwiftData when migrated) |
+| `SwiftDataStore` / `DataMigrationService` | enum / struct | `Logic/Utilities/` |
 | `ExpertManager` | `@MainActor class` | `Logic/Data Models/` |
 | `DecodableFunctionCall` | `protocol` | `Types/Conversation/Functions/` |
 | `Agent` | `protocol` | `Types/Agent/` |

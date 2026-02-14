@@ -6,13 +6,14 @@
 //
 
 import Foundation
+import Observation
 
 @MainActor
-public class LengthyTasksController: ObservableObject {
+@Observable public class LengthyTasksController {
 	
 	static let shared: LengthyTasksController = .init()
 	
-	@Published var tasks: [LengthyTask] = []
+	var tasks: [LengthyTask] = []
 	
 	/// Computed property that returns whether there are tasks
 	public var hasTasks: Bool {

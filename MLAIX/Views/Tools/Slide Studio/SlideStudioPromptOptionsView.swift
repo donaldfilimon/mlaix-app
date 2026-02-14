@@ -9,11 +9,12 @@ import SwiftUI
 
 struct SlideStudioPromptOptionsView: View {
 	
-	@EnvironmentObject private var slideStudioViewController: SlideStudioViewController
+	@Environment(SlideStudioViewController.self) private var slideStudioViewController
 	
 	@State private var slideCount: Float = 10.0
 	
     var body: some View {
+		@Bindable var slideStudioViewController = slideStudioViewController
 		HStack {
 			ToggleSearchButton(
 				useWebSearch: $slideStudioViewController.useWebSearch

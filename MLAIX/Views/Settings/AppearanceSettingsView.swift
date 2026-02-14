@@ -139,9 +139,20 @@ struct AppearanceSettingsView: View {
     private var liquidGlassSection: some View {
         Section {
             Toggle("Enable Liquid Glass", isOn: $liquidGlassEnabled.animation(.linear))
+            liquidGlassPreview
+            Picker("Color Preset", selection: liquidGlassPresetBinding) {
+                Text("Custom").tag(nil as LiquidGlassStyle.ColorPreset?)
+                ForEach(LiquidGlassStyle.ColorPreset.allCases) { preset in
+                    HStack(spacing: 8) {
+                        liquidGlassPresetSwatch(preset: preset)
+                        Text(preset.displayName)
+                    }
+                    .tag(preset as LiquidGlassStyle.ColorPreset?)
+                }
+            }
             Picker("Material", selection: $glassMaterialRaw) {
                 ForEach(LiquidGlassStyle.MaterialStyle.allCases) { style in
-                    Text(style.rawValue.capitalized).tag(style.rawValue)
+                    Text(style.displayName).tag(style.rawValue)
                 }
             }
             ColorPicker("Tint", selection: tintBinding, supportsOpacity: true)
@@ -158,11 +169,76 @@ struct AppearanceSettingsView: View {
                 Slider(value: $glassCornerRadius, in: 0...30)
                     .frame(maxWidth: 200)
             }
+            Button("Reset Liquid Glass to Default") {
+                liquidGlassEnabled = LiquidGlassStyle.default.isEnabled
+                glassMaterialRaw = LiquidGlassStyle.default.materialStyle.rawValue
+                tintHex = LiquidGlassStyle.default.tintHex
+                highlightHex = LiquidGlassStyle.default.highlightHex
+                glassOpacity = LiquidGlassStyle.default.opacity
+                glassCornerRadius = LiquidGlassStyle.default.cornerRadius
+            }
+            .buttonStyle(.borderless)
         } header: {
             Text("Liquid Glass")
         } footer: {
-            Text("macOS 26 window and panel styling.")
+            Text("Tint and highlight set the glass gradient. Presets apply both; use Custom and the color pickers to fine-tune.")
         }
+    }
+
+    private var liquidGlassPreview: some View {
+        HStack(spacing: 12) {
+            Text("Preview")
+                .foregroundStyle(.secondary)
+            RoundedRectangle(cornerRadius: min(glassCornerRadius, 12), style: .continuous)
+                .fill(
+                    LinearGradient(
+                        colors: [
+                            Color(hex: tintHex).opacity(glassOpacity),
+                            Color(hex: highlightHex).opacity(glassOpacity * 0.8)
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: min(glassCornerRadius, 12), style: .continuous)
+                        .stroke(Color(hex: highlightHex).opacity(0.3), lineWidth: 0.6)
+                )
+                .frame(width: 60, height: 36)
+            Spacer()
+        }
+        .padding(.vertical, 4)
+    }
+
+    private func liquidGlassPresetSwatch(preset: LiquidGlassStyle.ColorPreset) -> some View {
+        RoundedRectangle(cornerRadius: 4, style: .continuous)
+            .fill(
+                LinearGradient(
+                    colors: [
+                        Color(hex: preset.tintHex).opacity(0.9),
+                        Color(hex: preset.highlightHex).opacity(0.7)
+                    ],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+            )
+            .frame(width: 20, height: 14)
+    }
+
+    private var liquidGlassPresetBinding: Binding<LiquidGlassStyle.ColorPreset?> {
+        Binding(
+            get: {
+                LiquidGlassStyle.ColorPreset.allCases.first { preset in
+                    preset.tintHex == tintHex && preset.highlightHex == highlightHex
+                }
+            },
+            set: { newValue in
+                if let preset = newValue {
+                    tintHex = preset.tintHex
+                    highlightHex = preset.highlightHex
+                }
+            }
+        )
     }
 }
 

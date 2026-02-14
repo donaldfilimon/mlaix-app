@@ -13,15 +13,15 @@ struct MarkdownDataView: View {
 	
 	init(configuration: BlockConfiguration) {
 		self.configuration = configuration
-		self._controller = StateObject(
-			wrappedValue: MarkdownDataViewController(
+		self._controller = State(
+			initialValue: MarkdownDataViewController(
 				configuration: configuration
 			)
 		)
 	}
 	
 	var configuration: BlockConfiguration
-	@StateObject private var controller: MarkdownDataViewController
+	@State private var controller: MarkdownDataViewController
 	
 	var showPicker: Bool {
 		return controller.visualizationTypes.count > 1 && controller.canVisualize
@@ -30,7 +30,7 @@ struct MarkdownDataView: View {
 	/// An image of the chart
 	var image: Image? {
 		return exportDisplay
-			.environmentObject(controller)
+			.environment(controller)
 			.generateImage()
 	}
 	
@@ -69,7 +69,7 @@ struct MarkdownDataView: View {
 			// canDrag is true only when image != nil
 			view.draggable(image!)
 		}
-		.environmentObject(controller)
+		.environment(controller)
 	}
 	
 	var display: some View {
@@ -141,7 +141,7 @@ struct MarkdownDataView: View {
 	var visualizationPicker: some View {
 		Picker(
 			"",
-			selection: $controller.selectedVisualization.animation(
+			selection: Bindable(controller).selectedVisualization.animation(
 				.linear
 			)
 		) {

@@ -9,8 +9,8 @@ import SwiftUI
 
 struct UseFunctionsButton: View {
     
-    @EnvironmentObject private var promptController: PromptController
-    @ObservedObject var functionSelectionManager = FunctionSelectionManager.shared
+    @Environment(PromptController.self) private var promptController
+    var functionSelectionManager = FunctionSelectionManager.shared
     
     var activatedFillColor: Color
     

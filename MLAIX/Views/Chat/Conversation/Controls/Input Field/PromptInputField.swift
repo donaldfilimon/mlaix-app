@@ -27,12 +27,12 @@ struct PromptInputField: View {
         .italic()
     }
     
-    @EnvironmentObject private var model: Model
-    @EnvironmentObject private var conversationManager: ConversationManager
-    @EnvironmentObject private var expertManager: ExpertManager
+    @Environment(Model.self) private var model
+    @Environment(ConversationManager.self) private var conversationManager
+    @Environment(ExpertManager.self) private var expertManager
     @Environment(ConversationState.self) private var conversationState
-    @EnvironmentObject private var promptController: PromptController
-    @EnvironmentObject private var canvasController: CanvasController
+    @Environment(PromptController.self) private var promptController
+    @Environment(CanvasController.self) private var canvasController
     
     @FocusState var isFocused: Bool
     
@@ -95,30 +95,42 @@ struct PromptInputField: View {
                     }
                 }
             }
-            .onReceive(
-                NotificationCenter.default.publisher(
-                    for: Notifications.changedInferenceConfig.name
-                )
-            ) { output in
+            .onChange(of: NavigationState.shared.inferenceConfigChanged) { _, newValue in
+                guard newValue else { return }
                 withAnimation(.linear) {
                     // Handle model change
                     self.handleModelChange()
                 }
             }
-            .onReceive(NotificationCenter.default.publisher(for: Notifications.sendMessage.name)) { _ in
+            .onChange(of: NavigationState.shared.sendMessageRequested) { _, newValue in
+                guard newValue else { return }
                 self.onSubmit()
+                NavigationState.shared.sendMessageRequested = false
             }
-            .onReceive(NotificationCenter.default.publisher(for: Notifications.toggleFunctions.name)) { _ in
+            .onChange(of: NavigationState.shared.toggleFunctionsRequested) { _, newValue in
+                guard newValue else { return }
                 guard Settings.useFunctions else { return }
                 self.promptController.useFunctions.toggle()
+                NavigationState.shared.toggleFunctionsRequested = false
             }
-            .onReceive(NotificationCenter.default.publisher(for: Notifications.toggleWebSearch.name)) { _ in
+            .onChange(of: NavigationState.shared.toggleWebSearchRequested) { _, newValue in
+                guard newValue else { return }
                 guard RetrievalSettings.canUseWebSearch else { return }
                 self.promptController.useWebSearch.toggle()
+                NavigationState.shared.toggleWebSearchRequested = false
             }
             .onAppear {
                 self.isFocused = true
                 self.setupKeyEventMonitor()
+                // Retry focus after layout so the NSView is in the window hierarchy (fixes keyboard not working)
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+                    self.isFocused = true
+                }
+            }
+            .onReceive(NotificationCenter.default.publisher(for: NSWindow.didBecomeKeyNotification)) { notification in
+                guard let window = notification.object as? NSWindow, window.isMainWindow else { return }
+                // Restore focus to prompt when main window becomes key so keyboard works
+                self.isFocused = true
             }
             .onDisappear {
                 self.removeKeyEventMonitor()
@@ -139,7 +151,7 @@ struct PromptInputField: View {
         ) {
             ChatPromptEditor(
                 isFocused: self.$isFocused,
-                isRecording: self.$promptController.isRecording,
+                isRecording: Bindable(promptController).isRecording,
                 useAttachments: true,
                 bottomOptions: false,
                 cornerRadius: 22
@@ -175,12 +187,12 @@ struct PromptInputField: View {
         ) {
             SearchMenuToggleButton(
                 activatedFillColor: self.buttonFillColor,
-                useWebSearch: self.$promptController.useWebSearch,
-                selectedSearchState: self.$promptController.selectedSearchState
+                useWebSearch: Bindable(promptController).useWebSearch,
+                selectedSearchState: Bindable(promptController).selectedSearchState
             )
             UseFunctionsButton(
                 activatedFillColor: self.buttonFillColor,
-                useFunctions: self.$promptController.useFunctions
+                useFunctions: Bindable(promptController).useFunctions
             )
             Spacer(minLength: 0)
         }
@@ -240,10 +252,12 @@ struct PromptInputField: View {
         self.isFocused && event.window?.isMainWindow == true
     }
 
+    /// Return (36) and Numpad Enter (76) both send or insert newline depending on Settings.useCommandReturn.
     private func isReturnKey(_ event: NSEvent) -> Bool {
         (event.keyCode == 36) || (event.keyCode == 76) // 36 = Return, 76 = Numpad Enter
     }
 
+    /// When useCommandReturn is false: Return/Enter sends, Shift+Return inserts newline. When true: Command+Return sends, Return inserts newline.
     private func returnKeyAction(for event: NSEvent) -> ReturnKeyAction {
         let isCommandKeyDown = event.modifierFlags.contains(.command)
         let isShiftKeyDown = event.modifierFlags.contains(.shift)

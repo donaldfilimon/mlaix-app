@@ -6,12 +6,14 @@
 //
 
 import Foundation
+import Observation
 import OSLog
 import SimilaritySearchKit
 import SwiftUI
 
 @MainActor
-public class Memories: ObservableObject {
+@Observable
+public class Memories {
     
     /// A `Logger` object for the ``Memories`` object
     private static let logger: Logger = .init(
@@ -20,10 +22,10 @@ public class Memories: ObservableObject {
     )
     
     init() {
-        let signpost = StartupMetrics.begin("Memories.init")
+        let signpost = StartupMetrics.beginInterval("Memories.init")
         self.patchFileIntegrity()
         self.loadAsync()
-        StartupMetrics.end("Memories.init", signpost)
+        StartupMetrics.endInterval("Memories.init", signpost)
     }
     
     /// Static constant for the global ``Memories`` object
@@ -52,9 +54,9 @@ public class Memories: ObservableObject {
     private static let maxMemories: Int = 1000
 
     /// All memories
-    @Published public var memories: [Memory] = []
+    public var memories: [Memory] = []
     /// Whether the datastore has been loaded
-    @Published private(set) var isLoaded: Bool = false
+    private(set) var isLoaded: Bool = false
     /// Task handling asynchronous datastore loading
     private var loadTask: Task<Void, Never>?
     /// The memories similarity index
@@ -67,12 +69,12 @@ public class Memories: ObservableObject {
         guard RetrievalSettings.useMemory else {
             return
         }
-        let signpost = StartupMetrics.begin("Memories.initSimilarityIndex")
+        let signpost = StartupMetrics.beginInterval("Memories.initSimilarityIndex")
         self.similarityIndex = await SimilarityIndex(
             model: NativeEmbeddings(),
             metric: CosineSimilarity()
         )
-        StartupMetrics.end("Memories.initSimilarityIndex", signpost)
+        StartupMetrics.endInterval("Memories.initSimilarityIndex", signpost)
     }
     
     /// Function to make new datastore
@@ -93,21 +95,33 @@ public class Memories: ObservableObject {
         let targetUrl: URL = Self.datastoreUrl
         self.loadTask = Task(priority: .userInitiated) { [weak self] in
             guard let self else { return }
-            let signpost = StartupMetrics.begin("Memories.loadDatastore")
-            defer { StartupMetrics.end("Memories.loadDatastore", signpost) }
-            let rawData: Data
+            let signpost = StartupMetrics.beginInterval("Memories.loadDatastore")
+            defer { StartupMetrics.endInterval("Memories.loadDatastore", signpost) }
+            var rawData: Data
             do {
                 rawData = try await Task.detached {
                     try Data(contentsOf: targetUrl)
                 }.value
             } catch {
-                self.newDatastore()
-                self.loadTask = nil
-                return
+                // After SwiftData migration the main file is archived; try backup so we don't lose data
+                if DataMigrationService.didMigrateToSwiftData {
+                    let backupUrl = targetUrl.appendingPathExtension("migrated")
+                    do {
+                        rawData = try await Task.detached { try Data(contentsOf: backupUrl) }.value
+                    } catch {
+                        self.newDatastore()
+                        self.loadTask = nil
+                        return
+                    }
+                } else {
+                    self.newDatastore()
+                    self.loadTask = nil
+                    return
+                }
             }
-            let decoder: JSONDecoder = JSONDecoder()
-            let memories = (try? decoder.decode([Memory].self, from: rawData)) ?? []
-            self.memories = memories
+            let decoder = JSONDecoder()
+            let decoded = (try? decoder.decode([Memory].self, from: rawData)) ?? []
+            self.memories = decoded
             self.isLoaded = true
             self.loadTask = nil
         }
@@ -128,17 +142,23 @@ public class Memories: ObservableObject {
         }
     }
     
-    /// Function to load memories
+    /// Function to load memories (with fallback to .migrated backup after SwiftData migration).
     private func load() {
         do {
-            let rawData: Data = try Data(contentsOf: Self.datastoreUrl)
-            let decoder: JSONDecoder = JSONDecoder()
-            self.memories = try decoder.decode(
-                [Memory].self,
-                from: rawData
-            )
+            let rawData = try Data(contentsOf: Self.datastoreUrl)
+            let decoder = JSONDecoder()
+            self.memories = try decoder.decode([Memory].self, from: rawData)
             self.isLoaded = true
         } catch {
+            if DataMigrationService.didMigrateToSwiftData {
+                let backupUrl = Self.datastoreUrl.appendingPathExtension("migrated")
+                do {
+                    let rawData = try Data(contentsOf: backupUrl)
+                    self.memories = (try? JSONDecoder().decode([Memory].self, from: rawData)) ?? []
+                    self.isLoaded = true
+                    return
+                } catch { /* fall through to newDatastore */ }
+            }
             Self.logger.error("Failed to load memories: \(error.localizedDescription, privacy: .public)")
             self.newDatastore()
         }
@@ -156,7 +176,7 @@ public class Memories: ObservableObject {
                 options: .atomic
             )
         } catch {
-            os_log("error = %@", error.localizedDescription)
+            Self.logger.error("Failed to save memories: \(error.localizedDescription)")
         }
     }
     

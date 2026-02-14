@@ -16,8 +16,8 @@ struct ResourceSectionView: View {
     @State private var isAddingWebsite: Bool = false
     @State private var isAddingEmail: Bool = false
     
-    @EnvironmentObject private var expertManager: ExpertManager
-    @EnvironmentObject private var lengthyTasksController: LengthyTasksController
+    @Environment(ExpertManager.self) private var expertManager
+    @Environment(LengthyTasksController.self) private var lengthyTasksController
     
     var isTutorial: Bool = false
     var fileUrl: URL? = nil

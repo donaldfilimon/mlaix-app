@@ -13,7 +13,7 @@ struct CompletionsSetupView: View {
 	@AppStorage("didSetUpCompletions") private var didSetUpCompletions: Bool = false
 	
 	@Binding var isPresented: Bool
-	@StateObject private var completionsSetupViewModel: CompletionsSetupViewModel = .init()
+	@State private var completionsSetupViewModel: CompletionsSetupViewModel = .init()
 	
     var body: some View {
 		Group {
@@ -37,7 +37,7 @@ struct CompletionsSetupView: View {
 			}
 		}
 		.padding(7)
-		.environmentObject(completionsSetupViewModel)
+		.environment(completionsSetupViewModel)
     }
 	
 	

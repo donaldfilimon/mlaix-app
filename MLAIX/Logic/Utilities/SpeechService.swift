@@ -9,67 +9,80 @@ import AVFoundation
 import Foundation
 import OSLog
 import SwiftUI
+import Synchronization
 
+/// Thread-safe delegate for AVSpeechSynthesizer callbacks.
+/// Closures are protected by Mutex to prevent data races between @MainActor
+/// setter calls and AVFoundation's arbitrary-thread delegate callbacks.
 class SpeechSynthesizerDelegate: NSObject, AVSpeechSynthesizerDelegate, @unchecked Sendable {
 	private static let logger = Logger(subsystem: Bundle.main.logSubsystem, category: "SpeechSynthesizerDelegate")
-	
-	var onSpeechFinished: (() -> Void)?
-	var onSpeechStart: (() -> Void)?
-	
+
+	private let _onSpeechFinished = Mutex<(@Sendable () -> Void)?>(nil)
+	private let _onSpeechStart = Mutex<(@Sendable () -> Void)?>(nil)
+
+	var onSpeechFinished: (@Sendable () -> Void)? {
+		get { _onSpeechFinished.withLock { $0 } }
+		set { _onSpeechFinished.withLock { $0 = newValue } }
+	}
+
+	var onSpeechStart: (@Sendable () -> Void)? {
+		get { _onSpeechStart.withLock { $0 } }
+		set { _onSpeechStart.withLock { $0 = newValue } }
+	}
+
 	func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didFinish utterance: AVSpeechUtterance) {
 		onSpeechFinished?()
 	}
-	
+
 	func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didStart utterance: AVSpeechUtterance) {
 		onSpeechStart?()
 	}
-	
+
 	func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didReceiveError error: Error, for utterance: AVSpeechUtterance, at characterIndex: UInt) {
 		Self.logger.error("Speech synthesis error: \(error.localizedDescription, privacy: .public)")
 	}
 }
 
-@MainActor
-final class SpeechSynthesizer: NSObject, ObservableObject {
-	
+@MainActor @Observable
+final class SpeechSynthesizer {
+
 	/// A `Logger` object for the ``SpeechSynthesizer`` object
 	private static let logger: Logger = .init(
 		subsystem: Bundle.main.logSubsystem,
 		category: String(describing: SpeechSynthesizer.self)
 	)
-	
+
 	/// Static global singleton instance of ``SpeechSynthesizer``
 	static let shared = SpeechSynthesizer()
 	/// The system speech synthesizer
 	private let synthesizer = AVSpeechSynthesizer()
 	/// The delegate to handle TTS requests
 	private let delegate = SpeechSynthesizerDelegate()
-	
-	@Published var isSpeaking = false
-	@Published var voices: [AVSpeechSynthesisVoice] = []
-	
-	override init() {
-		super.init()
+
+	var isSpeaking = false
+	var voices: [AVSpeechSynthesisVoice] = []
+
+	init() {
 		self.synthesizer.delegate = self.delegate
 		self.fetchVoices()
 	}
-	
+
 	/// Function to get the ID of the currently selected voice
 	private func getVoiceIdentifier() -> String? {
 		let voiceIdentifier = UserDefaults.standard.string(forKey: "voiceId")
 		if let voice = voices.first(where: {$0.identifier == voiceIdentifier}) {
 			return voice.identifier
 		}
-		
+
 		return voices.first?.identifier
 	}
-	
-	var lastCancelation: (() -> Void)? = {}
-	
+
+	var lastCancelation: (@Sendable () -> Void)? = {}
+
 	/// Function to perform TTS on a `String`
 	public func speak(
 		text: String,
-		onFinished: @escaping () -> Void = {}
+		onFinished: @escaping @Sendable () -> Void = {}
 	) async {
 		// Get voice
 		guard let voiceIdentifier: String = getVoiceIdentifier() else {
@@ -77,15 +90,19 @@ final class SpeechSynthesizer: NSObject, ObservableObject {
 			return
 		}
 		lastCancelation = onFinished
-		delegate.onSpeechFinished = { [weak self] in
-			withAnimation {
-				self?.isSpeaking = false
+		delegate.onSpeechFinished = { @Sendable [weak self] in
+			Task { @MainActor in
+				withAnimation {
+					self?.isSpeaking = false
+				}
+				onFinished()
 			}
-			onFinished()
 		}
-		delegate.onSpeechStart = { [weak self] in
-			withAnimation(.linear) {
-				self?.isSpeaking = true
+		delegate.onSpeechStart = { @Sendable [weak self] in
+			Task { @MainActor in
+				withAnimation(.linear) {
+					self?.isSpeaking = true
+				}
 			}
 		}
 		let utterance = AVSpeechUtterance(string: text)
@@ -93,7 +110,7 @@ final class SpeechSynthesizer: NSObject, ObservableObject {
 		utterance.rate = 0.52 // Slightly faster than medium speed
 		synthesizer.speak(utterance)
 	}
-	
+
 	/// Function to stop current TTS task
 	public func stopSpeaking() async {
 		withAnimation(.linear) {
@@ -102,7 +119,7 @@ final class SpeechSynthesizer: NSObject, ObservableObject {
 		lastCancelation?()
 		synthesizer.stopSpeaking(at: .immediate)
 	}
-	
+
 	/// Function to fetch list of all available voices
 	public func fetchVoices() {
 		let voices = AVSpeechSynthesisVoice.speechVoices().sorted { (firstVoice: AVSpeechSynthesisVoice, secondVoice: AVSpeechSynthesisVoice) -> Bool in
@@ -117,5 +134,5 @@ final class SpeechSynthesizer: NSObject, ObservableObject {
 			self.voices = voices
 		}
 	}
-	
+
 }

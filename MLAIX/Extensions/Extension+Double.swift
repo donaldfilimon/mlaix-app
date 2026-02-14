@@ -11,7 +11,7 @@ public extension Double {
 	
 	/// The normalized sigmoid value of the `Double` value
 	var sigmoid: Double {
-		return 1 / (1 + exp(-self))
+		return 1 / (1 + Darwin.exp(-self))
 	}
 	
 }

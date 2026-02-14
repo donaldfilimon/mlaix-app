@@ -9,7 +9,7 @@ import SwiftUI
 
 struct ConversationNameEditor: View {
 	
-	@EnvironmentObject private var conversationManager: ConversationManager
+	@Environment(ConversationManager.self) private var conversationManager
 	@Environment(ConversationState.self) private var conversationState
 	
 	@State private var isEditing: Bool = false

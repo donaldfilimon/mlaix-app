@@ -7,14 +7,15 @@
 
 import Foundation
 import SwiftUI
+import Synchronization
 
 struct InlineAssistantView: View {
 	
 	var selectedText: String
 	
-	@EnvironmentObject private var model: Model
-	@EnvironmentObject private var commandManager: CommandManager
-	@EnvironmentObject private var inlineAssistantController: InlineAssistantController
+	@Environment(Model.self) private var model
+	@Environment(CommandManager.self) private var commandManager
+	@Environment(InlineAssistantController.self) private var inlineAssistantController
 	
 	@State private var didSelectCommand: Bool = false
 	@State private var isAddingCommand: Bool = false
@@ -57,12 +58,13 @@ struct InlineAssistantView: View {
 			NewCommandView(isAddingCommand: $isAddingCommand)
 				.frame(minWidth: 350, minHeight: 300)
 		}
-		.environmentObject(commandManager)
-		.environmentObject(model)
+		.environment(commandManager)
+		.environment(model)
 	}
 	
 	var commands: some View {
-		WrappingHStack(
+		@Bindable var commandManager = commandManager
+		return WrappingHStack(
 			alignment: .leading,
 			horizontalSpacing: 20
 		) {
@@ -177,20 +179,15 @@ private func handleResponseFinish(
 
 }
 
-private final class InlineAssistantExitFlag: @unchecked Sendable {
-	private let lock = NSLock()
-	private var exited: Bool = false
+private final class InlineAssistantExitFlag: Sendable {
+	private let storage = Mutex(false)
 
 	var isExited: Bool {
-		lock.lock()
-		defer { lock.unlock() }
-		return exited
+		storage.withLock { $0 }
 	}
 
 	func markExited() {
-		lock.lock()
-		defer { lock.unlock() }
-		exited = true
+		storage.withLock { $0 = true }
 	}
 }
 

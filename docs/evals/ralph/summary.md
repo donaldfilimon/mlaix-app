@@ -1,7 +1,7 @@
 # Ralph Loop Summary
 
-- Run folder: `docs/evals/ralph/runs/20260206T185407Z`
-- Timestamp: 20260206T185407Z
+- Run folder: `docs/evals/ralph/runs/20260206T194917Z`
+- Timestamp: 20260206T194917Z
 - Total prompts: 18
 - Passed: 18
 - Failed: 0
@@ -11,24 +11,24 @@
 
 | ID | Category | Severity | Result | Duration |
 |----|----------|----------|--------|----------|
-| ui-001 | ui | critical | pass | 21ms |
-| ui-002 | ui | critical | pass | 21ms |
-| ui-003 | ui | high | pass | 21ms |
-| ui-004 | ui | high | pass | 21ms |
-| ui-005 | ui | high | pass | 21ms |
-| ui-006 | ui | medium | pass | 21ms |
-| conc-001 | conc | critical | pass | 15ms |
-| conc-002 | conc | critical | pass | 15ms |
-| build-001 | build | critical | pass | 16ms |
-| appearance-001 | appearance | high | pass | 16ms |
-| appearance-002 | appearance | high | pass | 16ms |
-| appearance-003 | appearance | medium | pass | 16ms |
-| platform-001 | platform | high | pass | 14ms |
-| platform-002 | platform | medium | pass | 16ms |
-| platform-003 | platform | medium | pass | 16ms |
-| intents-001 | intents | high | pass | 14ms |
-| color-001 | color | medium | pass | 16ms |
-| test-001 | test | critical | pass | 15ms |
+| ui-001 | ui | critical | pass | 986ms |
+| ui-002 | ui | critical | pass | 986ms |
+| ui-003 | ui | high | pass | 986ms |
+| ui-004 | ui | high | pass | 986ms |
+| ui-005 | ui | high | pass | 986ms |
+| ui-006 | ui | medium | pass | 986ms |
+| conc-001 | conc | critical | pass | 770ms |
+| conc-002 | conc | critical | pass | 770ms |
+| build-001 | build | critical | pass | 4075ms |
+| appearance-001 | appearance | high | pass | 548ms |
+| appearance-002 | appearance | high | pass | 532ms |
+| appearance-003 | appearance | medium | pass | 548ms |
+| platform-001 | platform | high | pass | 771ms |
+| platform-002 | platform | medium | pass | 481ms |
+| platform-003 | platform | medium | pass | 474ms |
+| intents-001 | intents | high | pass | 953ms |
+| color-001 | color | medium | pass | 532ms |
+| test-001 | test | critical | pass | 1801ms |
 
 ## Failure Breakdown
 

@@ -6,31 +6,41 @@
 //
 
 import Foundation
-import os.log
+import MLAIXShared
+import Observation
+import OSLog
+import SwiftData
 import SwiftUI
 
 @MainActor
-public class CommandManager: ObservableObject {
+@Observable
+public class CommandManager {
+    
+    /// A `Logger` object for the ``CommandManager`` object
+    private static let logger: Logger = .init(
+        subsystem: Bundle.main.logSubsystem,
+        category: String(describing: CommandManager.self)
+    )
     
     init() {
-        let signpost = StartupMetrics.begin("CommandManager.init")
+        let signpost = StartupMetrics.beginInterval("CommandManager.init")
         self.patchFileIntegrity()
         self.loadAsync()
-        StartupMetrics.end("CommandManager.init", signpost)
+        StartupMetrics.endInterval("CommandManager.init", signpost)
     }
     
     /// Static constant for the global ``CommandManager`` object
     static public let shared: CommandManager = .init()
     
     /// Published property for all commands
-    @Published public var commands: [Command] = [] {
+    public var commands: [Command] = [] {
         didSet {
             self.save()
         }
     }
     
     /// Published state tracking whether the datastore has been loaded
-    @Published private(set) var isLoaded: Bool = false
+    private(set) var isLoaded: Bool = false
     
     /// Task handling asynchronous datastore loading
     private var loadTask: Task<Void, Never>?
@@ -66,31 +76,62 @@ public class CommandManager: ObservableObject {
         return self.commands.filter({ $0.id == commandId }).first
     }
     
-    /// Function to save commands to disk
+    /// Function to save commands to disk (SwiftData when migrated, otherwise JSON).
     public func save() {
+        if DataMigrationService.didMigrateToSwiftData, let context = SwiftDataStore.mainContext {
+            saveToSwiftData(context: context)
+            return
+        }
         do {
-            // Save data
-            let rawData: Data = try JSONEncoder().encode(
-                self.commands
-            )
-            try rawData.write(
-                to: self.datastoreUrl,
-                options: .atomic
-            )
+            let rawData: Data = try JSONEncoder().encode(self.commands)
+            try rawData.write(to: self.datastoreUrl, options: .atomic)
         } catch {
-            os_log("error = %@", error.localizedDescription)
+            Self.logger.error("Failed to save commands: \(error.localizedDescription)")
+        }
+    }
+
+    private func saveToSwiftData(context: ModelContext) {
+        do {
+            var descriptor = FetchDescriptor<CommandModel>(sortBy: [SortDescriptor(\.name)])
+            descriptor.fetchLimit = 0
+            let existing = try context.fetch(descriptor)
+            for model in existing {
+                context.delete(model)
+            }
+            for command in commands {
+                let model = CommandModel(
+                    id: command.id,
+                    name: command.name,
+                    prompt: command.prompt,
+                    symbolName: "text.bubble"
+                )
+                context.insert(model)
+            }
+            try context.save()
+        } catch {
+            Self.logger.error("Failed to save commands to SwiftData: \(error.localizedDescription)")
         }
     }
     
-    /// Loads commands in the background to avoid blocking startup
+    /// Loads commands in the background (from SwiftData when migrated, otherwise JSON).
     private func loadAsync() {
         if let loadTask = self.loadTask, !loadTask.isCancelled {
             return
         }
+        if DataMigrationService.didMigrateToSwiftData, let context = SwiftDataStore.mainContext {
+            loadTask = Task { @MainActor [weak self] in
+                guard let self else { return }
+                let signpost = StartupMetrics.beginInterval("CommandManager.loadDatastore")
+                defer { StartupMetrics.endInterval("CommandManager.loadDatastore", signpost) }
+                self.loadFromSwiftData(context: context)
+                self.loadTask = nil
+            }
+            return
+        }
         let targetUrl: URL = self.datastoreUrl
-        self.loadTask = Task.detached(priority: .userInitiated) {
-            let signpost = StartupMetrics.begin("CommandManager.loadDatastore")
-            defer { StartupMetrics.end("CommandManager.loadDatastore", signpost) }
+        loadTask = Task.detached(priority: .userInitiated) {
+            let signpost = StartupMetrics.beginInterval("CommandManager.loadDatastore")
+            defer { StartupMetrics.endInterval("CommandManager.loadDatastore", signpost) }
             let rawData: Data
             do {
                 rawData = try Data(contentsOf: targetUrl)
@@ -103,7 +144,7 @@ public class CommandManager: ObservableObject {
                 }
                 return
             }
-            let decoder: JSONDecoder = JSONDecoder()
+            let decoder = JSONDecoder()
             let commands = (try? decoder.decode([Command].self, from: rawData)) ?? []
             Task { @MainActor [weak self] in
                 guard let self else { return }
@@ -113,21 +154,33 @@ public class CommandManager: ObservableObject {
             }
         }
     }
-    
-    /// Function to load commands from disk
-    public func load() {
+
+    private func loadFromSwiftData(context: ModelContext) {
         do {
-            let rawData: Data = try Data(
-                contentsOf: self.datastoreUrl
-            )
-            let decoder: JSONDecoder = JSONDecoder()
-            self.commands = try decoder.decode(
-                [Command].self,
-                from: rawData
-            )
+            let descriptor = FetchDescriptor<CommandModel>(sortBy: [SortDescriptor(\.name)])
+            let models = try context.fetch(descriptor)
+            commands = models.map { Command(id: $0.id, name: $0.name, prompt: $0.prompt) }
+            isLoaded = true
+        } catch {
+            Self.logger.error("Failed to load commands from SwiftData: \(error.localizedDescription)")
+            newDatastore()
+            isLoaded = true
+        }
+    }
+    
+    /// Function to load commands from disk (SwiftData when migrated, otherwise JSON).
+    public func load() {
+        if DataMigrationService.didMigrateToSwiftData, let context = SwiftDataStore.mainContext {
+            loadFromSwiftData(context: context)
+            return
+        }
+        do {
+            let rawData = try Data(contentsOf: self.datastoreUrl)
+            let decoder = JSONDecoder()
+            self.commands = try decoder.decode([Command].self, from: rawData)
             self.isLoaded = true
         } catch {
-            Logger(subsystem: Bundle.main.logSubsystem, category: "CommandManager").error("Failed to load commands: \(error.localizedDescription, privacy: .public)")
+            Self.logger.error("Failed to load commands: \(error.localizedDescription, privacy: .public)")
             self.newDatastore()
         }
     }
@@ -196,14 +249,13 @@ public class CommandManager: ObservableObject {
     /// Function to reset datastore
     @MainActor
     public func resetDatastore() {
-        // Present confirmation modal
         let _ = Dialogs.showConfirmation(
             title: String(localized: "Delete All Commands"),
             message: String(localized: "Are you sure you want to delete all commands?")
         ) {
-            // If yes, delete datastore
-            FileManager.removeItem(at: self.datastoreUrl)
-            // Make new datastore
+            if !DataMigrationService.didMigrateToSwiftData {
+                FileManager.removeItem(at: self.datastoreUrl)
+            }
             self.newDatastore()
         }
     }

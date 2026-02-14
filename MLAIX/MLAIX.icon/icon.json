@@ -1,11 +1,9 @@
 {
+  "color-space-for-untagged-svg-colors" : "display-p3",
   "fill-specializations" : [
     {
       "value" : {
-        "linear-gradient" : [
-          "display-p3:0.41176,0.89020,0.75686,1.00000",
-          "display-p3:0.19187,0.41115,0.55649,1.00000"
-        ]
+        "automatic-gradient" : "display-p3:0.41176,0.89020,0.75686,1.00000"
       }
     },
     {
@@ -20,42 +18,34 @@
         {
           "blend-mode-specializations" : [
             {
-              "value" : "normal"
+              "value" : "screen"
             },
             {
               "appearance" : "dark",
-              "value" : "normal"
+              "value" : "darken"
             }
           ],
           "fill-specializations" : [
             {
-              "value" : {
-                "solid" : "srgb:1.00000,1.00000,1.00000,1.00000"
-              }
+              "value" : "automatic"
             },
             {
               "appearance" : "dark",
-              "value" : {
-                "linear-gradient" : [
-                  "display-p3:0.19177,0.41089,0.55762,1.00000",
-                  "display-p3:0.40894,0.87988,0.75195,1.00000"
-                ],
-                "orientation" : {
-                  "start" : {
-                    "x" : 0.8198181754971493,
-                    "y" : 0.6953206578489385
-                  },
-                  "stop" : {
-                    "x" : 0.5,
-                    "y" : 0.42290288896623746
-                  }
-                }
-              }
+              "value" : "none"
             }
           ],
           "glass" : true,
-          "image-name" : "bubble.left.and.text.bubble.right.fill@10x.png",
-          "name" : "bubble.left.and.text.bubble.right.fill@10x",
+          "hidden" : false,
+          "image-name-specializations" : [
+            {
+              "value" : "Subject.png"
+            },
+            {
+              "idiom" : "watchOS",
+              "value" : "Subject.png"
+            }
+          ],
+          "name" : "Subject",
           "opacity-specializations" : [
             {
               "value" : 0.85
@@ -65,13 +55,37 @@
               "value" : 0.9
             }
           ],
-          "position" : {
-            "scale" : 0.85,
-            "translation-in-points" : [
-              6.5,
-              6.5
-            ]
-          }
+          "position-specializations" : [
+            {
+              "value" : {
+                "scale" : 0.85,
+                "translation-in-points" : [
+                  6.5,
+                  6.5
+                ]
+              }
+            },
+            {
+              "appearance" : "light",
+              "value" : {
+                "scale" : 0.85,
+                "translation-in-points" : [
+                  6.5,
+                  6.5
+                ]
+              }
+            },
+            {
+              "idiom" : "watchOS",
+              "value" : {
+                "scale" : 0.85,
+                "translation-in-points" : [
+                  -5.360730825741257,
+                  -7.933743469331375
+                ]
+              }
+            }
+          ]
         }
       ],
       "lighting" : "individual",
@@ -86,7 +100,11 @@
     }
   ],
   "supported-platforms" : {
+    "circles" : [
+      "watchOS"
+    ],
     "squares" : [
+      "iOS",
       "macOS"
     ]
   }

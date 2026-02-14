@@ -12,7 +12,7 @@ struct SlideStudioPromptView: View {
 	@FocusState private var isFocused: Bool
 	@State private var didFinishTyping: Bool = false
 	
-	@EnvironmentObject private var slideStudioViewController: SlideStudioViewController
+	@Environment(SlideStudioViewController.self) private var slideStudioViewController
 	
     var body: some View {
 		VStack(
@@ -36,7 +36,8 @@ struct SlideStudioPromptView: View {
     }
 	
 	var field: some View {
-		TextField(
+		@Bindable var slideStudioViewController = slideStudioViewController
+		return TextField(
 			"e.g. Create a presentation explaining the Von Neumann architecture.",
 			text: $slideStudioViewController.prompt.animation(
 				.linear
@@ -96,8 +97,9 @@ struct SlideStudioPromptView: View {
 	}
 	
 	var resourceCarousel: some View {
-		TemporaryResourcesView(
-			tempResources: self.$slideStudioViewController.tempResources
+		@Bindable var slideStudioViewController = slideStudioViewController
+		return TemporaryResourcesView(
+			tempResources: $slideStudioViewController.tempResources
 		)
 		.transition(
 			.opacity

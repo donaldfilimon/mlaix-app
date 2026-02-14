@@ -8,12 +8,22 @@
 import Charts
 import Foundation
 import FSKit_macOS
-import os.log
+import MLAIXShared
+import Observation
+import OSLog
+import SwiftData
 import SwiftUI
 import UniformTypeIdentifiers
 
 @MainActor
-public class InferenceRecords: ObservableObject {
+@Observable
+public class InferenceRecords {
+    
+    /// A `Logger` object for the ``InferenceRecords`` object
+    private static let logger: Logger = .init(
+        subsystem: Bundle.main.logSubsystem,
+        category: String(describing: InferenceRecords.self)
+    )
     
     init() {
         self.patchFileIntegrity()
@@ -26,14 +36,14 @@ public class InferenceRecords: ObservableObject {
     /// Maximum number of records to retain to prevent unbounded memory growth
     private static let maxRecords: Int = 10000
 
-    @Published var records: [InferenceRecord] = [] {
+    var records: [InferenceRecord] = [] {
         didSet {
             self.save()
         }
     }
     
     /// The selected record type
-    @Published public var selectedType: InferenceRecord.UsageType = .chatCompletions
+    public var selectedType: InferenceRecord.UsageType = .chatCompletions
     /// All records belonging to the selected type
     var typeRecords: [InferenceRecord] {
         return records.filter { record in
@@ -42,7 +52,7 @@ public class InferenceRecords: ObservableObject {
     }
     
     // Table config
-    @Published public var selections = Set<InferenceRecord.ID>()
+    public var selections = Set<InferenceRecord.ID>()
     private var selectedRecords: [InferenceRecord] {
         return self.typeRecords.filter { record in
             return self.selections.contains(record.id)
@@ -85,9 +95,9 @@ public class InferenceRecords: ObservableObject {
     }
     
     /// The currently selected model
-    @Published public var selectedModel: String? = nil
+    public var selectedModel: String? = nil
     /// The currently selected timeframe
-    @Published public var selectedTimeframe: Timeframe = .today
+    public var selectedTimeframe: Timeframe = .today
     
     public var intervalUsage: [IntervalUse] {
         let calendar = Calendar.current
@@ -212,39 +222,83 @@ public class InferenceRecords: ObservableObject {
         return Set(self.typeRecords.map(\.name)).sorted()
     }
     
-    /// Function to save records to disk
+    /// Saves records to disk (SwiftData when migrated, otherwise JSON).
     public func save() {
+        if DataMigrationService.didMigrateToSwiftData, let context = SwiftDataStore.mainContext {
+            saveToSwiftData(context: context)
+            return
+        }
         do {
-            // Save data
-            let rawData: Data = try JSONEncoder().encode(
-                self.records
-            )
-            try rawData.write(
-                to: self.datastoreUrl,
-                options: .atomic
-            )
+            let rawData = try JSONEncoder().encode(self.records)
+            try rawData.write(to: self.datastoreUrl, options: .atomic)
         } catch {
-            os_log("error = %@", error.localizedDescription)
+            Self.logger.error("Failed to save records: \(error.localizedDescription)")
+        }
+    }
+
+    private func saveToSwiftData(context: ModelContext) {
+        do {
+            var descriptor = FetchDescriptor<InferenceRecordModel>(sortBy: [SortDescriptor(\.startTime, order: .reverse)])
+            descriptor.fetchLimit = 0
+            let existing = try context.fetch(descriptor)
+            for model in existing {
+                context.delete(model)
+            }
+            for record in records.prefix(Self.maxRecords) {
+                let model = InferenceRecordModel(
+                    id: record.id,
+                    name: record.name,
+                    type: record.type.rawValue,
+                    inputTokens: record.inputTokens,
+                    outputTokens: record.outputTokens,
+                    startTime: record.startTime,
+                    endTime: record.endTime,
+                    usedRemoteServer: record.endpoint != nil
+                )
+                context.insert(model)
+            }
+            try context.save()
+        } catch {
+            Self.logger.error("Failed to save inference records to SwiftData: \(error.localizedDescription)")
         }
     }
     
-    /// Function to load records from disk
+    /// Loads records from disk (SwiftData when migrated, otherwise JSON).
     public func load() {
+        if DataMigrationService.didMigrateToSwiftData, let context = SwiftDataStore.mainContext {
+            loadFromSwiftData(context: context)
+            return
+        }
         do {
-            // Load data
-            let rawData: Data = try Data(
-                contentsOf: self.datastoreUrl
-            )
-            let decoder: JSONDecoder = JSONDecoder()
-            self.records = try decoder.decode(
-                [InferenceRecord].self,
-                from: rawData
-            )
+            let rawData = try Data(contentsOf: self.datastoreUrl)
+            let decoder = JSONDecoder()
+            self.records = try decoder.decode([InferenceRecord].self, from: rawData)
         } catch {
-            // Indicate error
-            Logger(subsystem: Bundle.main.logSubsystem, category: "InferenceRecords").error("Failed to load records: \(error.localizedDescription, privacy: .public)")
-            // Make new datastore
+            Self.logger.error("Failed to load records: \(error.localizedDescription, privacy: .public)")
             self.newDatastore()
+        }
+    }
+
+    private func loadFromSwiftData(context: ModelContext) {
+        do {
+            let descriptor = FetchDescriptor<InferenceRecordModel>(sortBy: [SortDescriptor(\.startTime, order: .reverse)])
+            let models = try context.fetch(descriptor)
+            records = models.map { model in
+                InferenceRecord(
+                    id: model.id,
+                    name: model.name,
+                    startTime: model.startTime,
+                    endTime: model.endTime,
+                    type: InferenceRecord.UsageType(rawValue: model.type) ?? .chatCompletions,
+                    endpoint: model.usedRemoteServer ? URL(string: "https://remote") : nil,
+                    inputTokens: model.inputTokens,
+                    outputTokens: model.outputTokens,
+                    tokensPerSecond: model.tokensPerSecond
+                )
+            }
+        } catch {
+            Self.logger.error("Failed to load inference records from SwiftData: \(error.localizedDescription)")
+            newDatastore()
         }
     }
     

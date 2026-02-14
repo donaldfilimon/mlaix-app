@@ -10,11 +10,13 @@ import ApplicationServices
 import AXSwift
 import Carbon
 import Foundation
+import Observation
 import OSLog
 import SwiftUI
 
 @MainActor
-public class CompletionsController: ObservableObject {
+@Observable
+public class CompletionsController {
 	
 	/// A `Logger` object for the `Model` object
 	private static let logger: Logger = .init(
@@ -30,7 +32,7 @@ public class CompletionsController: ObservableObject {
 	private var keyEventTap: CFMachPort?
 	
 	/// A `String` for the completion content
-	@Published var completion: String? = nil
+	var completion: String? = nil
 	
 	/// A `Bool` representing if typing is in progress
 	private var isTyping: Bool = false
@@ -74,8 +76,8 @@ public class CompletionsController: ObservableObject {
 	
 	deinit {
 		// Stop server in background - deinit can't call MainActor methods directly
-		let server = self.server
-		Task {
+		let server = MainActor.assumeIsolated { self.server }
+		Task { @MainActor in
 			await server?.stopServer()
 		}
 	}
@@ -260,7 +262,7 @@ public class CompletionsController: ObservableObject {
 		if let focusedElementRef = ActiveApplicationInspector.getFocusedElement() {
 			let properties: [String: Any] = ActiveApplicationInspector.getAllProperties(for: focusedElementRef)
 			if let axFrame = properties["AXFrame"] {
-				let axFrameValue = axFrame as! AXValue
+				let axFrameValue = unsafeBitCast(axFrame as AnyObject, to: AXValue.self)
 				var rect = CGRect.zero
 				if AXValueGetValue(axFrameValue, .cgRect, &rect) {
 					return rect

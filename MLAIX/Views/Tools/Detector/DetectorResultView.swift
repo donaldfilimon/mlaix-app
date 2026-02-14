@@ -9,7 +9,7 @@ import SwiftUI
 
 struct DetectorResultView: View {
 	
-	@EnvironmentObject private var detectorViewController: DetectorViewController
+	@Environment(DetectorViewController.self) private var detectorViewController
 	
 	var percentage: Int {
 		return detectorViewController.aiScore ?? 0

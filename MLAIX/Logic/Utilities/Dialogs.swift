@@ -10,40 +10,46 @@ import Foundation
 
 @MainActor
 public class Dialogs {
-	
-	/// Function to show an alert
-	public static func showAlert(
+
+	/// Shows an alert with a single OK button.
+	public static func showOK(
 		title: String,
 		message: String? = nil
 	) {
-		let alert: NSAlert = NSAlert()
+		let alert = NSAlert()
 		alert.messageText = title
 		if let message = message {
 			alert.informativeText = message
 		}
+		alert.addButton(withTitle: String(localized: "OK"))
+		alert.alertStyle = .informational
 		alert.runModal()
 	}
+
+	/// Function to show an alert (same as showOK; kept for compatibility).
+	public static func showAlert(
+		title: String,
+		message: String? = nil
+	) {
+		showOK(title: title, message: message)
+	}
 	
-	/// Function to show a confirmation modal
+	/// Shows a confirmation modal with Yes/No. Returns true if user chose Yes.
 	public static func showConfirmation(
 		title: String,
 		message: String? = nil,
-        ifConfirmed: @escaping () -> Void = {}
+		ifConfirmed: @escaping () -> Void = {}
 	) -> Bool {
-		// Define alert
-		let alert: NSAlert = NSAlert()
+		let alert = NSAlert()
 		alert.messageText = title
 		if let message = message {
 			alert.informativeText = message
 		}
 		alert.addButton(withTitle: String(localized: "Yes"))
 		alert.addButton(withTitle: String(localized: "No"))
-		// Run modal
-		let result: Bool = alert.runModal() == .alertFirstButtonReturn
-		if result {
-			// If "yes"
-			ifConfirmed()
-		}
+		alert.alertStyle = .warning
+		let result = alert.runModal() == .alertFirstButtonReturn
+		if result { ifConfirmed() }
 		return result
 	}
 	

@@ -40,7 +40,9 @@ extension LlamaServer {
         }
         guard let url = URL(string: urlString) else {
             Self.logger.warning("Invalid inference URL '\(urlString, privacy: .public)'; falling back to localhost")
-            return (URL(string: "http://localhost:4579")!, !notUsingServer)
+            // Safe: this literal URL is always valid
+            let fallback = URL(string: "http://localhost:4579")!
+            return (fallback, !notUsingServer)
         }
         return (url, !notUsingServer)
     }
@@ -130,8 +132,10 @@ extension LlamaServer {
                 canReachRemoteServer: canReachRemoteServer
             )
         }
-        // Get url of endpoint
-        let rawUrl: URL = URL(string: "\(self.scheme)://\(self.host):\(self.port)/tokenize")!
+		// Get url of endpoint
+		guard let rawUrl = URL(string: "\(self.scheme)://\(self.host):\(self.port)/tokenize") else {
+			throw LlamaServerError.modelError
+		}
         // Formulate request
         var request = URLRequest(
             url: rawUrl

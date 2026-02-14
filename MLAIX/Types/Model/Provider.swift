@@ -61,6 +61,16 @@ public struct Provider: Identifiable, Sendable {
             supportsToolCalling: true
         ),
         Provider(
+            name: "MLX CLI (mlx_lm.server)",
+            endpointUrl: URL(string: "http://localhost:8080/v1")!,
+            supportsToolCalling: false
+        ),
+        Provider(
+            name: "Llama.cpp server",
+            endpointUrl: URL(string: "http://localhost:4579/v1")!,
+            supportsToolCalling: true
+        ),
+        Provider(
             name: "OpenAI",
             endpointUrl: URL(string: "https://api.openai.com/v1")!,
             supportsToolCalling: true

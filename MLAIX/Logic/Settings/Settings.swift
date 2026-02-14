@@ -175,13 +175,14 @@ public class Settings {
 		return hasLocalModel || hasServerModel || hasFoundationModel
 	}
 	
-	/// A `Bool` representing whether functions are enabled
+	/// A `Bool` representing whether functions are enabled.
+	/// Defaults to false so Apple Foundation Models are used for text generation by default;
+	/// enable to use remote/local models with tool calling.
 	static var useFunctions: Bool {
 		get {
-			// Set default
+			// Set default: false so Foundation Models handle text-first; user can enable functions for tools.
             if !UserDefaults.standard.exists(key: "useFunctions") {
-                // Default to true if using server
-                Self.useFunctions = InferenceSettings.useServer
+                Self.useFunctions = false
             }
 			return UserDefaults.standard.bool(
 				forKey: "useFunctions"
@@ -489,7 +490,7 @@ public class Settings {
             UserDefaults.standard.set(newValue, forKey: "useCommandReturn")
         }
     }
-    /// An enum for the selected send shortcut
+    /// An enum for the selected send shortcut (Return/Enter vs Command+Return to send).
     public enum SendShortcut: String, CaseIterable {
         
         public init(_ useCommandReturn: Bool) {
@@ -498,6 +499,14 @@ public class Settings {
         
         case `return` = "Return"
         case commandReturn = "Command + Return"
+        
+        /// Text for the chat input placeholder (e.g. "Return or Enter" so numpad users know both work).
+        public var promptDescription: String {
+            switch self {
+            case .return: return String(localized: "Return or Enter")
+            case .commandReturn: return String(localized: "Command + Return")
+            }
+        }
         
         var label: some View {
             Group {

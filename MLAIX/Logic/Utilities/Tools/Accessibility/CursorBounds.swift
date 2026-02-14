@@ -55,10 +55,3 @@ public class CursorBounds {
     }
 	
 }
-
-public class CursorBoundsConfig: @unchecked Sendable {
-    public static nonisolated(unsafe) var shared = CursorBoundsConfig()
-    public var logLevel: LogLevel = .info
-
-    private init() {} // Prevent external instantiation
-}

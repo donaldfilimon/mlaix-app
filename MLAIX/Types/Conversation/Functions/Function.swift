@@ -74,6 +74,8 @@ protocol FunctionProtocol: Identifiable {
 }
 
 // MARK: - Generic Function Implementation
+// @unchecked Sendable: All stored properties are immutable after init. The `run` closure is
+// @Sendable, and metatypes (paramsType, resultType) are inherently safe to share across threads.
 public struct Function<Parameter: FunctionParams, Result: Codable & Sendable>: FunctionProtocol, AnyFunctionBox, @unchecked Sendable {
 
     public var id: String { return name }

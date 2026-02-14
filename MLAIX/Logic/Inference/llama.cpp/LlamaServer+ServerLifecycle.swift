@@ -68,7 +68,12 @@ extension LlamaServer {
         let startTime: Date = Date.now
         process.executableURL = Bundle.main.resourceURL?.appendingPathComponent("llama-server")
         
-        let gpuLayers: Int = 99
+        let capturedModelUrl = self.modelUrl
+        let gpuLayers: Int = await MainActor.run {
+            guard let modelUrl = capturedModelUrl else { return 99 }
+            let modelSize = (try? FileManager.default.attributesOfItem(atPath: modelUrl.path)[.size] as? UInt64) ?? 0
+            return GPUMonitor.shared.recommendGPULayers(modelSizeBytes: modelSize)
+        }
         let processors: Int = ProcessInfo.processInfo.activeProcessorCount
         let threadsToUseIfGPU: Int = max(1, Int(ceil(Double(processors) / 3.0 * 2.0)))
         let threadsToUseIfCPU: Int = processors
@@ -150,7 +155,7 @@ extension LlamaServer {
             process.arguments = formattedArguments
         }
         
-        Self.logger.notice("Starting llama.cpp server \(self.process.arguments!.joined(separator: " "), privacy: .public)")
+        Self.logger.notice("Starting llama.cpp server \((self.process.arguments ?? []).joined(separator: " "), privacy: .public)")
         
         process.standardInput = FileHandle.nullDevice
         
