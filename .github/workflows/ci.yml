@@ -1,13 +1,65 @@
 name: CI
 
+# Trusted same-repo events (push to main, same-repo PRs) run on the macOS
+# arm64 self-hosted runner registered to this repository with the label
+# mlaix-app. Fork PRs stay on GitHub-hosted runners only: never schedule
+# untrusted code on the self-hosted machine. Until a runner with these labels
+# is online, the self-hosted job waits in the queue.
+# Runner setup and security model: docs/SelfHostedRunner.md
 on:
   push:
     branches: [main]
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+
 jobs:
   build-and-test:
+    if: >
+      github.repository == 'donaldfilimon/mlaix-app' &&
+      (github.event_name == 'push' ||
+       (github.event_name == 'pull_request' &&
+        github.event.pull_request.head.repo.full_name == github.repository))
+    runs-on: [self-hosted, macOS, ARM64, mlaix-app]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+          persist-credentials: false
+
+      # The hosted job below may switch toolchains with `sudo xcode-select`.
+      # On the self-hosted Mac that would prompt for a password and change the
+      # machine-wide developer directory for every other process, and
+      # Package.swift needs swift-tools-version 6.3, which a 6.2 toolchain
+      # cannot load anyway. So this job uses the Xcode the runner user already
+      # has selected (see docs/SelfHostedRunner.md) and only reports it.
+      - name: Show Swift toolchain
+        run: |
+          xcode-select -p
+          swift --version
+
+      - name: Build MLAIX (macOS)
+        run: swift build -c release --product MLAIX --no-static-swift-stdlib
+
+      - name: Build MLAIXiOS
+        run: swift build --product MLAIXiOS --no-static-swift-stdlib
+
+      - name: Build MLAIXtvos
+        run: swift build --product MLAIXtvos --no-static-swift-stdlib
+
+      - name: Build MLAIXWatch
+        run: swift build --product MLAIXWatch --no-static-swift-stdlib
+
+      - name: Test
+        run: swift test
+
+  build-and-test-hosted:
+    name: build-and-test (GitHub-hosted, fork PRs)
+    if: >
+      github.event_name == 'pull_request' &&
+      github.event.pull_request.head.repo.full_name != github.repository
     runs-on: macos-15
     steps:
       - uses: actions/checkout@v4
